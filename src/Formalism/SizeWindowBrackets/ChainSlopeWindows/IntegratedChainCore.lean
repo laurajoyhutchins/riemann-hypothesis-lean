@@ -114,6 +114,34 @@ theorem topExcess_of_integrated_sizeData
 
 #print axioms Formalism.LFunctionChainParameters.LChain.topExcess_of_integrated_sizeData
 
+
+/-- The improved arithmetic budget reaches the *same* original analytic
+power window with no additional hypotheses. This proves compatibility,
+not an improvement of the old power exponent: the logarithmic envelope
+is reintroduced only when we compare against the old error estimator. -/
+theorem topExcess_integrated_power_bound
+    {H : Type} [AddCommGroup H] [Fintype H] [DecidableEq H]
+    {W : H → Type} [∀ u0, Fintype (W u0)] [∀ u0, Nonempty (W u0)]
+    {Top : Type} [Fintype Top] {m f : ℕ}
+    (Dd : Data H W Top m f) (C : Consts) (Xpp eK K : ℝ)
+    (D : ArithData H) (N : ℕ) (ell : AddChar (E0 × H) ℂ → ℂ)
+    (TT : Finset H) (a : H → ℝ) (w : H → Fin m → E0 × H → ℝ)
+    (eT : Top ≃ TT) (eP : Fin f ≃ PhiSet (H := H))
+    (hId : Ident Dd D N ell TT a w eT eP)
+    (hSD : SizeData₂Integrated Dd C Xpp)
+    (hErr : ErrWindows Dd C Xpp eK K)
+    (hLarge : LargeX Dd.x Dd.ε K C.cHH eK) :
+    topExcess D N ell TT a w ≤ Dd.x ^ (CErr C * Dd.ε) * ErrText Dd := by
+  letI : Nonempty H := ⟨0⟩
+  obtain ⟨hSet, _, hE, hH, hCount, hSl, hSN, hLoss, _, _, _⟩ := hSD
+  have hU := UBar5_nonneg Dd C Xpp hSet hE hH hCount hSl hSN hLoss
+  have hCompare := errorTermWithIntegrated_le_errorTermWith Dd C Xpp hSet hU
+  have hBudget := error_sizes Dd C Xpp eK K hErr hLarge
+  exact (topExcess_of_integrated_sizeData Dd C Xpp D N ell TT a w eT eP hId hSD).trans
+    (hCompare.trans hBudget)
+
+#print axioms Formalism.LFunctionChainParameters.LChain.topExcess_integrated_power_bound
+
 end Formalism.LFunctionChainParameters.LChain
 
 namespace Formalism.LFunctionChainParameters.LChain2
