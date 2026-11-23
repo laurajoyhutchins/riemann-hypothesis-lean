@@ -150,6 +150,34 @@ theorem first_variant_reduction_integrated :
     hWin, ⟨le_refl _, le_refl _⟩,
     hx ▸ hε ▸ hRest, hx ▸ hCost, hx ▸ hε ▸ hSize⟩
 
+
+/-- The exact original Inputs2 arithmetic data imply a smaller upper
+bound on the first analytic character-sum quantity. Unlike an abstract
+error comparison, this theorem applies the source's own character-sum
+mean transfer to the verified harmonic mean error from the actual Fam. -/
+theorem topExcess_of_inputs2_integrated
+    {H : Type} [AddCommGroup H] [Fintype H] [DecidableEq H]
+    {W : H → Type} [∀ u0, Fintype (W u0)] [∀ u0, Nonempty (W u0)]
+    {m : ℕ}
+    (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ)
+    (G : Glob) (C : Consts) (cT : ℝ) (N : ℕ)
+    (TT T2 : Finset H) (a : H → ℝ)
+    (w : H → Fin m → E0 × H → ℝ) (Fm : ∀ u0, Fam (W u0) m)
+    (η θ eK K CL : ℝ)
+    (h : Inputs2 D ell G C cT N TT T2 a w Fm η θ eK K CL) :
+    topExcess D N ell TT a w ≤
+      errorTermWithIntegrated (mkData G C.cHH D ell N TT T2 a w Fm)
+        C (XppH H G) := by
+  have hMean := weighted_mean_of_inputs2_integrated D ell G C cT N TT T2 a w Fm
+    η θ eK K CL h
+  exact top_from_weighted_mean
+    (mkData G C.cHH D ell N TT T2 a w Fm)
+    D N ell TT a w (Equiv.refl _) ePhi
+    (errorTermWithIntegrated (mkData G C.cHH D ell N TT T2 a w Fm) C (XppH H G))
+    (fun _ => rfl) (fun _ _ _ => rfl) rfl rfl (fun _ => rfl) hMean
+
+#print axioms Formalism.LFunctionChainParameters.LChain2.topExcess_of_inputs2_integrated
+
 /-- Compatibility check: the strengthened source theorem implies exactly
 the previously exported source reduction, without revising its type. -/
 theorem original_first_variant_from_integrated :
