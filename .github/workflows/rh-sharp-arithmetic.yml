@@ -1,0 +1,60 @@
+name: Sharp arithmetic integrated slope interface
+
+on:
+  pull_request:
+    paths:
+      - 'src/Formalism/RankGapBounds/RankGapProofs/SharpLossBound.lean'
+      - 'src/Formalism/RankGapBounds/RankGapProofs/IntegratedSlopeError.lean'
+      - '.github/workflows/rh-sharp-arithmetic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-sharp-arithmetic-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mathlib-lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            lean-toolchain
+            lakefile.toml
+            lake-manifest.json
+            .github/workflows/rh-sharp-arithmetic.yml
+            src/Formalism/RankGapBounds/MeanBoundSecondForm.lean
+            src/Formalism/RankGapBounds/RankGapProofs/WeightedMeanData.lean
+            src/Formalism/RankGapBounds/RankGapProofs/SharpLossBound.lean
+            src/Formalism/RankGapBounds/RankGapProofs/IntegratedSlopeError.lean
+          sparse-checkout-cone-mode: false
+      - name: Set up pinned Lean and Mathlib dependencies
+        uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee # v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          mk_all-check: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Download official cache with bounded retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          for try in 1 2 3; do
+            if lake exe cache get; then exit 0; fi
+            echo "Cache retrieval failed, attempt $try" >&2
+            sleep $((try*8))
+          done
+          exit 1
+      - name: Kernel-check arithmetic interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build Formalism.RankGapBounds.RankGapProofs.IntegratedSlopeError
