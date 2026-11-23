@@ -37,7 +37,8 @@ def SizeData₂Integrated (Dd : Data U0 W Top m f) (C : Consts) (Xpp : ℝ) : Pr
 
 /-- A stronger chain input still discharges the unchanged original
 arithmetic interface. The direction of this implication is essential. -/
-theorem sizeData₂_of_integrated (Dd : Data U0 W Top m f) (C : Consts) (Xpp : ℝ)
+theorem sizeData₂_of_integrated [Nonempty U0]
+    (Dd : Data U0 W Top m f) (C : Consts) (Xpp : ℝ)
     (h : SizeData₂Integrated Dd C Xpp) : SizeData₂ Dd C Xpp := by
   obtain ⟨hSet, hDIV, hE, hH, hCount, hSl, hSN, hLoss, hSI, hHH, hFP⟩ := h
   exact ⟨hSet, hDIV, hE, hH, hCount, hSl, hSN, hLoss,
@@ -84,6 +85,7 @@ theorem chainCore_of_integrated {eD eL K cHH eK CL ε x : ℝ}
     ⟨H, i1, i2, i3, W, i4, i5, Top, i6, m, f, Dd, C, Xpp,
      D, ell, N, TT, T2, a, w, eT, eP, η, X', θ,
      hx, hε, heD, heL, hcHH, hHost, hIdent, hSD, hWin, hBN, hGrow, hCost, hSize⟩
+  letI : Nonempty H := ⟨0⟩
   exact ⟨H, i1, i2, i3, W, i4, i5, Top, i6, m, f, Dd, C, Xpp,
     D, ell, N, TT, T2, a, w, eT, eP, η, X', θ,
     hx, hε, heD, heL, hcHH, hHost, hIdent,
@@ -133,7 +135,8 @@ theorem topExcess_integrated_power_bound
     (hLarge : LargeX Dd.x Dd.ε K C.cHH eK) :
     topExcess D N ell TT a w ≤ Dd.x ^ (CErr C * Dd.ε) * ErrText Dd := by
   letI : Nonempty H := ⟨0⟩
-  obtain ⟨hSet, _, hE, hH, hCount, hSl, hSN, hLoss, _, _, _⟩ := hSD
+  have hSDcopy := hSD
+  obtain ⟨hSet, _, hE, hH, hCount, hSl, hSN, hLoss, _, _, _⟩ := hSDcopy
   have hU := UBar5_nonneg Dd C Xpp hSet hE hH hCount hSl hSN hLoss
   have hCompare := errorTermWithIntegrated_le_errorTermWith Dd C Xpp hSet hU
   have hBudget := error_sizes Dd C Xpp eK K hErr hLarge
