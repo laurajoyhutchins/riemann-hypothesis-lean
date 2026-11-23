@@ -27,9 +27,21 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
           submodules: false
+      - name: Detect already-integrated upstream source
+        id: source-state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test "$(git rev-parse HEAD:src)" = 84e5e9889142f86f47b3156b54009f65fc274f82; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "Full PR 221 source already integrated; not replaying patch." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Test census before touching proof source
         run: python3 tools/rh_pr221_census.py --test
       - name: Reproduce the complete two-tree patch, stage and measure
+        if: steps.source-state.outputs.already != 'true'
         shell: bash
         env:
           UPSTREAM_MERGE: 98cc3736f046abae883d8cda839c84f3004257a7
