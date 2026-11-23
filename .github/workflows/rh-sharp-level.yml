@@ -6,6 +6,7 @@ on:
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/LevelOfCongruenceIntegrated.lean'
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedLatticeArithmeticBridge.lean'
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedLatticeFamilyBridge.lean'
+      - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedFamSlope.lean'
       - '.github/workflows/rh-sharp-level.yml'
   workflow_dispatch:
 
@@ -50,3 +51,4 @@ jobs:
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.LevelOfCongruenceIntegrated
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedLatticeArithmeticBridge
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedLatticeFamilyBridge
+          lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedFamSlope
