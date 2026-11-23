@@ -139,14 +139,14 @@ theorem Ga_bound5_integrated
             (D.x ^ C.cHH * D.b)) := by
   have hsl := s_lower5 D C Xpp hS hDIV hE hCount hSl hSN u0
   have huF0 := D.uF_nonneg C hS u0
+  have hratio := sourceHarmonicLoss_le_uniform D C Xpp
+    hS hE hH hCount hSl hSN hLoss hHH u0
   obtain ⟨hx, hb, -, -, -, hv, hf, -, hw, -, -, -, -, hdelBar, hetaBar,
       heBar0, heBar⟩ := hS
   have hid := key_identity5 D C hv hf u0 (hw u0)
   obtain ⟨hdel0, hdelle, heta0, hetale, he0, hele⟩ := hFP u0
   obtain ⟨hHH1, hHH2, hHH3⟩ := hHH u0
   have hSI' := hSI u0 hdel0 (by linarith) heta0 he0 (by linarith) hHH1 hHH2
-  have hratio := sourceHarmonicLoss_le_uniform D C Xpp
-    hS hE hH hCount hSl hSN hLoss hHH u0
   have hratio0 :
       0 ≤ D.uF u0 * D.HH u0 / (D.uF u0 + D.HH u0) :=
     div_nonneg (mul_nonneg huF0 hHH2.le) (add_nonneg huF0 hHH2.le)
