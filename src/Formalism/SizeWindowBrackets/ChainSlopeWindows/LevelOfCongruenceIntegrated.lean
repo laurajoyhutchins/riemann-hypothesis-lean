@@ -120,6 +120,79 @@ theorem errorTermWithIntegrated_le_errorTermWith
   unfold errorTermWithIntegrated errorTermWith
   linarith
 
+
+/-- The actual level-of-congruence Ga bound with harmonic, rather than
+logarithmic, uniform error. The nonnegative spread cap and the upper
+height cap are proved from the same existing source assumptions. -/
+theorem Ga_bound5_integrated
+    (hS : D.HidaSetting C) (hDIV : D.DIV C) (hE : EComp5 D C)
+    (hH : D.HComp C) (hCount : Count5 D C)
+    (hSl : D.Slopes C) (hSN : QuotientSlopeBoundsWith D C Xpp)
+    (hLoss : LossBounds D C) (hSI : D.SlopeIneqIntegrated)
+    (hHH : D.HHBound C) (hFP : D.FParams) (u0 : U0) :
+    D.Ga u0 ≤ D.Main u0 + Real.log (Fintype.card (W u0) : ℝ)
+      + K0v5 D C + wmean (D.d u0) (Lo5 D C Xpp u0)
+      + (1 - D.delBar)⁻¹ *
+          (4 * (UBar5 D C Xpp * (D.x ^ C.cHH * D.b) /
+            (UBar5 D C Xpp + D.x ^ C.cHH * D.b))
+          + (D.etaBar + 4 * Real.sqrt D.eBar) *
+            (D.x ^ C.cHH * D.b)) := by
+  have hsl := s_lower5 D C Xpp hS hDIV hE hCount hSl hSN u0
+  have huF0 := D.uF_nonneg C hS u0
+  obtain ⟨hx, hb, -, -, -, hv, hf, -, hw, -, -, -, -, hdelBar, hetaBar,
+      heBar0, heBar⟩ := hS
+  have hid := key_identity5 D C hv hf u0 (hw u0)
+  obtain ⟨hdel0, hdelle, heta0, hetale, he0, hele⟩ := hFP u0
+  obtain ⟨hHH1, hHH2, hHH3⟩ := hHH u0
+  have hSI' := hSI u0 hdel0 (by linarith) heta0 he0 (by linarith) hHH1 hHH2
+  have hratio := sourceHarmonicLoss_le_uniform D C Xpp
+    hS hE hH hCount hSl hSN hLoss hHH u0
+  have hratio0 :
+      0 ≤ D.uF u0 * D.HH u0 / (D.uF u0 + D.HH u0) :=
+    div_nonneg (mul_nonneg huF0 hHH2.le) (add_nonneg huF0 hHH2.le)
+  have hsq : Real.sqrt (D.e u0) ≤ Real.sqrt D.eBar :=
+    Real.sqrt_le_sqrt hele
+  have hc0 : 0 ≤ D.η u0 + 4 * Real.sqrt (D.e u0) :=
+    add_nonneg heta0 (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  have hc1 : 0 ≤ D.etaBar + 4 * Real.sqrt D.eBar :=
+    add_nonneg hetaBar (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  have hB :
+      (D.η u0 + 4 * Real.sqrt (D.e u0)) * D.HH u0 ≤
+        (D.etaBar + 4 * Real.sqrt D.eBar) *
+          (D.x ^ C.cHH * D.b) :=
+    calc
+      _ ≤ (D.etaBar + 4 * Real.sqrt D.eBar) * D.HH u0 :=
+        mul_le_mul_of_nonneg_right (by linarith) hHH2.le
+      _ ≤ (D.etaBar + 4 * Real.sqrt D.eBar) *
+          (D.x ^ C.cHH * D.b) :=
+        mul_le_mul_of_nonneg_left hHH3 hc1
+  have hB0 :
+      0 ≤ (D.η u0 + 4 * Real.sqrt (D.e u0)) * D.HH u0 :=
+    mul_nonneg hc0 hHH2.le
+  have hinv : (1 - D.del u0)⁻¹ ≤ (1 - D.delBar)⁻¹ :=
+    inv_anti₀ (by linarith) (by linarith)
+  have hinv0 : 0 ≤ (1 - D.delBar)⁻¹ :=
+    inv_nonneg.mpr (by linarith)
+  have hPhi :
+      (1 - D.del u0)⁻¹ *
+        (4 * (D.uF u0 * D.HH u0 / (D.uF u0 + D.HH u0))
+          + (D.η u0 + 4 * Real.sqrt (D.e u0)) * D.HH u0) ≤
+      (1 - D.delBar)⁻¹ *
+        (4 * (UBar5 D C Xpp * (D.x ^ C.cHH * D.b) /
+          (UBar5 D C Xpp + D.x ^ C.cHH * D.b))
+          + (D.etaBar + 4 * Real.sqrt D.eBar) *
+            (D.x ^ C.cHH * D.b)) :=
+    calc
+      _ ≤ (1 - D.delBar)⁻¹ *
+          (4 * (D.uF u0 * D.HH u0 / (D.uF u0 + D.HH u0))
+            + (D.η u0 + 4 * Real.sqrt (D.e u0)) * D.HH u0) :=
+        mul_le_mul_of_nonneg_right hinv (by nlinarith [hratio0, hB0])
+      _ ≤ _ :=
+        mul_le_mul_of_nonneg_left (by nlinarith [hratio, hB]) hinv0
+  unfold K0v5
+  unfold K5v5 at hsl
+  linarith
+
 end
 
 end Formalism.LFunctionChainParameters.WeightedSlopeBounds
