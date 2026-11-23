@@ -39,7 +39,7 @@ jobs:
           submodules: false
       - name: Verify pinned Git submodule object
         env:
-          COMMUNITY_SHA: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          COMMUNITY_SHA: 98cc3736f046abae883d8cda839c84f3004257a7
         run: |
           set -euo pipefail
           gitlink="$(git ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')"
@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: leanprover-community/riemann-hypothesis
-          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          ref: 98cc3736f046abae883d8cda839c84f3004257a7
           path: community-harness
           sparse-checkout: |
             scripts
@@ -62,7 +62,7 @@ jobs:
       - name: Verify toolchain and dependency manifest remain identical
         run: |
           set -euo pipefail
-          test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          test "$(git -C community-harness rev-parse HEAD)" = '98cc3736f046abae883d8cda839c84f3004257a7'
           cmp lean-toolchain community-harness/lean-toolchain
           cmp lake-manifest.json community-harness/lake-manifest.json
       - name: Validate the fork-only identity adapter
@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: leanprover-community/riemann-hypothesis
-          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          ref: 98cc3736f046abae883d8cda839c84f3004257a7
           path: community-harness
           sparse-checkout: |
             scripts
@@ -105,8 +105,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
-          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          test "$(git -C community-harness rev-parse HEAD)" = '98cc3736f046abae883d8cda839c84f3004257a7'
+          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '98cc3736f046abae883d8cda839c84f3004257a7'
           cmp candidate/lake-manifest.json community-harness/lake-manifest.json
           cmp candidate/lean-toolchain community-harness/lean-toolchain
           command -v bwrap
