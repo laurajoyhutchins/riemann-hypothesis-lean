@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.FinalLevelsOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +62,7 @@ theorem pfMapFl_map_comm (f : V₁ →ₗ[LL] V₂) (g : B₁ →ₗ[Qp] B₂) (
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end General
 
@@ -69,7 +110,7 @@ theorem pfMapFl_act (g : G) (z : T₁.V ⊗[Qp] B) :
   | zero => simp
   | tmul x b => simp [actVB, F.equiv]
   | add x y hx hy =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     rw [hx, hy]
 
 theorem pfMapFl_dcris (z : T₁.V ⊗[Qp] B) (hz : z ∈ Dcris PD T₁.ρ) :
@@ -181,11 +222,13 @@ theorem cMap_holds (hD : MemD W F c) (kind : ℕ → Kind) (b : ℕ → ℕ) (η
   have hmap := pfMapFl_filD F hD s _ _ hw'
   have hsum : dmapOf hD (∑ k, algebraMap O LL (w k) • lam₁ k) =
       ∑ l, algebraMap O LL (P w l) • lam₂ l := by
+
     rw [map_sum]
     simp only [map_smul, hLamP, Finset.smul_sum, smul_smul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [← Finset.sum_smul, ← LinearMap.toMatrix'_mulVec P w]
+
     simp only [Matrix.mulVec, dotProduct, map_sum]
     refine congrArg (· • lam₂ l) (Finset.sum_congr rfl fun k _ => ?_)
     rw [map_mul]

@@ -1,7 +1,56 @@
-import Mathlib
-import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSSplit
-import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSData
+module
+
+public import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSLin
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Polynomial
 
@@ -27,7 +76,7 @@ private lemma map_aeval_eq_aeval_map' {α β : Type} (g : α → MvPolynomial β
   | C a =>
     simp only [MvPolynomial.aeval_C, MvPolynomial.map_C, MvPolynomial.algebraMap_eq]
   | add p q hp hq =>
-    simp only [map_add, hp, hq]
+    simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.map_X, hp, hg]
 
@@ -67,7 +116,7 @@ theorem hfs_map_mem_VV {F : Pol K σ n} (hF : F ∈ VV K lam) : MvPolynomial.map
       exact Finset.prod_congr rfl fun s _ => hfs_map_blockEmb ι s (G s)
   | zero => simp
   | add x y _ _ hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem _ hx hy
   | smul a x _ hx =>
     rw [MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C, ← MvPolynomial.smul_eq_C_mul]
@@ -95,10 +144,11 @@ theorem hfsJ_li (F : CoefFrame ι) : LinearIndependent L fun i => hfsJ ι lam (b
   have hK : ∀ k, ∑ j ∈ s, F.c (g j) k • ((bVV K lam j : VV K lam) : Pol K σ n) = 0 := by
     intro k
     ext d
-    have h1 := congrArg (MvPolynomial.coeff d) hpol
+    have h1 := congrArg (AddMonoidAlgebra.coeff · d) hpol
     simp only [MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, MvPolynomial.coeff_map, smul_eq_mul,
-      MvPolynomial.coeff_zero] at h1 ⊢
+      AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at h1 ⊢
     have h2 := congrArg (fun y => F.c y k) h1
+
     simp only [map_sum, map_zero, Finset.sum_apply, Pi.zero_apply] at h2
     rw [← h2]
     refine Finset.sum_congr rfl fun j _ => ?_
@@ -129,6 +179,7 @@ theorem hfs_map_trAct (g : σ → GL (Fin n) K) (F : Pol K σ n) :
     MvPolynomial.map ι (trAct g F) = trAct (fun τ => Formalism.UG.bc ι (g τ)) (MvPolynomial.map ι F) := by
   unfold trAct Formalism.GradedWeylDivisibility.blockAct
   refine map_aeval_eq_aeval_map' ι _ _ (fun v => ?_) F
+
   simp [map_sum, Formalism.UG.bc, Matrix.transpose_apply]
 
 theorem hfs_detPow_bc (g : GL (Fin n) K) (c : ℤ) : detPow L n (Formalism.UG.bc ι g) c = ι (detPow K n g c) := by

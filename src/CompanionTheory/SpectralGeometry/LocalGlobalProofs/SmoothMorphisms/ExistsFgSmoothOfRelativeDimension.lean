@@ -1,10 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CubeTheorem
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MorphismsSpreadOutToFgSubalgebra
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Mathlib.Order.CompletePartialOrder
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MorphismsSpreadOutToFgSubalgebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -37,24 +78,28 @@ theorem preimage_dimLocus_eq_top {X S T : Scheme.{0}} (p : X ⟶ S) [Smooth p] (
   obtain rfl : n = g := ReciprocityTheory.ChartRestriction.G.H1.dim_base (IsPullback.of_hasPullback p b) d h y hW
   exact TopologicalSpace.Opens.mem_iSup.2 ⟨⟨W, d⟩, hW⟩
 
-open GlobalTheory.Spread in
 
+open GlobalTheory.Spread in
 theorem exists_fg_smoothOfRelativeDimension : ∀ (k V : Type) [CommRing k] [IsNoetherianRing k]
     [CommRing V] [Algebra k V] (X : Scheme.{0}) (p : X ⟶ Sp k) (g : ℕ), Smooth p → QuasiCompact p →
     SmoothOfRelativeDimension g (pullback.snd p (spMap (algebraMap k V))) →
     ∃ R : Subalgebra k V, R.FG ∧ SmoothOfRelativeDimension g (pullback.snd p (spMap (algebraMap k R))) := by
   intro k V _ _ _ _ X p g hs hq h
   classical
+  have : QuasiCompact p := hq
   let s : (Finset V)ᵒᵖ := .op ∅
-  let π : (bcDiagram p V).obj s ⟶ X := pullback.fst p _
-  have hπ : (bcCone p V).π.app s ≫ π = pullback.fst p _ := bcMap_fst _ _
-  obtain ⟨j, f, hj⟩ := exists_map_eq_top (bcDiagram p V) (bcCone p V) (isLimitBcCone p V)
+  let π : (GlobalTheory.Spread.bcDiagram p V).obj s ⟶ X := pullback.fst p _
+  have hπ : (GlobalTheory.Spread.bcCone p V).π.app s ≫ π = pullback.fst p _ :=
+    GlobalTheory.Spread.bcMap_fst _ _
+  obtain ⟨j, f, hj⟩ := exists_map_eq_top (GlobalTheory.Spread.bcDiagram p V)
+    (GlobalTheory.Spread.bcCone p V) (GlobalTheory.Spread.isLimitBcCone p V)
     (π ⁻¹ᵁ dimLocus p g) (by
       rw [← Scheme.Hom.comp_preimage, hπ]
       exact preimage_dimLocus_eq_top p _ g h)
   refine ⟨Algebra.adjoin k (j.unop : Set V), Subalgebra.fg_adjoin_finset _,
     smoothOfRelativeDimension_snd p _ g ?_⟩
-  have e : (bcDiagram p V).map f ≫ π = pullback.fst p _ := bcMap_fst _ _
+  have e : (GlobalTheory.Spread.bcDiagram p V).map f ≫ π = pullback.fst p _ :=
+    GlobalTheory.Spread.bcMap_fst _ _
   rwa [← Scheme.Hom.comp_preimage, e] at hj
 
 end GlobalTheory.CompanionTheory.Ar.Approx

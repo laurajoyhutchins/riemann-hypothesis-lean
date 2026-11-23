@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBwdNA
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBwdNA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,9 +159,39 @@ theorem ext_top {W : Type*} [AddCommGroup W] [Module E W] [Module (𝓞 E) W] [I
 
 theorem dual_sum (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ) (hSD : SD S Λ) (U : Submodule E S.V)
     (v : S.V) (hv : ∀ m ∈ Λ, m ∈ U → IsIntegral ℤ (S.hT m v)) : ∃ w ∈ Λ, v - w ∈ orth S U := by
+  have hfull : ∀ u : S.V, ∃ d : 𝓞 E, d ≠ 0 ∧ d • u ∈ Λ := by
+    intro u
+    obtain ⟨s, hs⟩ := hΛ.fg
+    obtain ⟨a, ha⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors (𝓞 E)) s (fun x => S.hT x u)
+    let P : Submodule (𝓞 E) S.V := {
+      carrier := {x | IsIntegral ℤ (((a : 𝓞 E) : E) * S.hT x u)}
+      zero_mem' := by simpa using (isIntegral_zero : IsIntegral ℤ (0 : E))
+      add_mem' := by
+        intro x y hx hy
+        simpa [map_add, LinearMap.add_apply, mul_add] using hx.add hy
+      smul_mem' := by
+        intro c x hx
+        have hc : IsIntegral ℤ (star (c : E)) := isInt_star c.2
+        have := hc.mul hx
+        change IsIntegral ℤ (((a : 𝓞 E) : E) * S.hT (c • x) u)
+        rw [oSmul, hT_smulL]
+        convert this using 1 <;> ring }
+    have hsP : (s : Set S.V) ⊆ P := by
+      intro x hx
+      obtain ⟨b, hb⟩ := ha x hx
+      change IsIntegral ℤ (((a : 𝓞 E) : E) * S.hT x u)
+      rw [← show (b : E) = ((a : 𝓞 E) : E) * S.hT x u by simpa [Algebra.smul_def] using hb]
+      exact b.2
+    refine ⟨a, nonZeroDivisors.ne_zero a.2, ?_⟩
+    apply (hSD _).2
+    intro x hx
+    have hxP : x ∈ P := (hs ▸ Submodule.span_le.mpr hsP) hx
+    change IsIntegral ℤ (((a : 𝓞 E) : E) * S.hT x u) at hxP
+    rw [oSmul, map_smul, smul_eq_mul]
+    exact hxP
   obtain ⟨π, hπ, hπU⟩ := retract S Λ hΛ.fg U
   let g : Λ →ₗ[𝓞 E] E := ((S.hT v).restrictScalars (𝓞 E)) ∘ₗ π
-  obtain ⟨G, hG⟩ := ext_top S (W := E) Λ (fun u => PI.UnitaryGroupMassFormula.BetaLUniq.exists_smul_mem S Λ hΛ u) g
+  obtain ⟨G, hG⟩ := ext_top S (W := E) Λ (fun u => hfull u) g
   obtain ⟨w, hw⟩ := riesz S G
   have hgw : ∀ (m : S.V) (hm : m ∈ Λ), S.hT m w = star (S.hT v (π ⟨m, hm⟩)) := fun m hm => by
     rw [hsw S w m, hw, hG m hm]
@@ -126,7 +202,7 @@ theorem dual_sum (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ) 
   · have hm : ∀ m ∈ Λ, m ∈ U → S.hT m (v - w) = 0 := fun m hmΛ hmU => by
       rw [map_sub, hgw m hmΛ, hπU ⟨m, hmΛ⟩ hmU, hsw S m v, star_star]
       simp
-    obtain ⟨d, hd, hdu⟩ := PI.UnitaryGroupMassFormula.BetaLUniq.exists_smul_mem S Λ hΛ u
+    obtain ⟨d, hd, hdu⟩ := hfull u
     have h1 := hm _ hdu (by rw [oSmul]; exact U.smul_mem _ hu)
     rw [oSmul, hT_smulL] at h1
     have hd' : star ((d : E)) ≠ 0 := by

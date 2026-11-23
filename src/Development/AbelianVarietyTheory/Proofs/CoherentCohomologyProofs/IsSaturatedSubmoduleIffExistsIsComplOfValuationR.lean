@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.MemSaturatedOrderIsoSubspaceSpanSymmApply
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.MemSaturatedOrderIsoSubspaceSpanSymmApply
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.RingTheory.Valuation.ValuationRing
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open Module
 
@@ -29,44 +79,12 @@ theorem finite_of_isCompl [Module.Finite R M] {N N' : Submodule R M} (h : IsComp
     Module.Finite R N :=
   Module.Finite.equiv (Submodule.quotientEquivOfIsCompl N' N h.symm)
 
-theorem exists_disjoint_sup_eq_of_isCompl_submoduleOf {P N : Submodule R M} (hle : N ≤ P)
-    {Q : Submodule R P} (h : IsCompl (N.submoduleOf P) Q) :
-    ∃ N' : Submodule R M, Disjoint N N' ∧ N ⊔ N' = P := by
-  have hN : (N.submoduleOf P).map P.subtype = N := by
-    rw [Submodule.submoduleOf, Submodule.map_comap_subtype, inf_eq_right.2 hle]
-  refine ⟨Q.map P.subtype, ?_, ?_⟩
-  · rw [← hN, disjoint_iff, ← Submodule.map_inf _ P.injective_subtype, h.inf_eq_bot,
-      Submodule.map_bot]
-  · conv_lhs => rw [← hN]
-    rw [← Submodule.map_sup, h.sup_eq_top, Submodule.map_top, Submodule.range_subtype]
-
 end General
 
 section Dedekind
 
 variable {R : Type*} [CommRing R] [IsDedekindDomain R] {M : Type*} [AddCommGroup M] [Module R M]
 
-variable (R M) in
-
-theorem projective_of_finite_of_isTorsionFree [Module.Finite R M] [Module.IsTorsionFree R M] :
-    Module.Projective R M :=
-  haveI : Module.FinitePresentation R M := Module.finitePresentation_of_finite R M
-  Module.Flat.projective_of_finitePresentation
-
-theorem IsSaturatedSubmodule.projective_quotient [Module.Finite R M] {N : Submodule R M}
-    (h : IsSaturatedSubmodule N) : Module.Projective R (M ⧸ N) :=
-  haveI := h.isTorsionFree_quotient
-  projective_of_finite_of_isTorsionFree R (M ⧸ N)
-
-theorem IsSaturatedSubmodule.exists_isCompl [Module.Finite R M] {N : Submodule R M}
-    (h : IsSaturatedSubmodule N) : ∃ N' : Submodule R M, IsCompl N N' :=
-  haveI := h.projective_quotient
-  exists_isCompl_of_projective_quotient N
-
-theorem IsSaturatedIn.exists_disjoint_sup_eq {P N : Submodule R M} [Module.Finite R P]
-    (h : IsSaturatedIn P N) : ∃ N' : Submodule R M, Disjoint N N' ∧ N ⊔ N' = P := by
-  obtain ⟨Q, hQ⟩ := (isSaturatedIn_iff.1 h).2.exists_isCompl
-  exact exists_disjoint_sup_eq_of_isCompl_submoduleOf h.le hQ
 
 end Dedekind
 
@@ -82,8 +100,8 @@ section Valuation
 variable {R : Type*} [CommRing R] [IsDomain R] [ValuationRing R]
   {M : Type*} [AddCommGroup M] [Module R M]
 
-variable (R M) in
 
+variable (R M) in
 theorem free_of_finite_of_isTorsionFree_of_valuationRing [Module.Finite R M]
     [Module.IsTorsionFree R M] : Module.Free R M :=
   haveI : Module.Flat R M := Module.Flat.flat_iff_torsion_eq_bot_of_isBezout.2
@@ -93,7 +111,7 @@ theorem free_of_finite_of_isTorsionFree_of_valuationRing [Module.Finite R M]
 theorem IsSaturatedSubmodule.free_quotient_of_valuationRing [Module.Finite R M]
     {N : Submodule R M} (h : IsSaturatedSubmodule N) : Module.Free R (M ⧸ N) :=
   haveI := h.isTorsionFree_quotient
-  free_of_finite_of_isTorsionFree_of_valuationRing R (M ⧸ N)
+  free_of_finite_of_isTorsionFree_of_valuationRing (R := R) (M := M ⧸ N)
 
 theorem IsSaturatedSubmodule.exists_isCompl_of_valuationRing [Module.Finite R M]
     {N : Submodule R M} (h : IsSaturatedSubmodule N) : ∃ N' : Submodule R M, IsCompl N N' :=
@@ -108,18 +126,10 @@ theorem IsSaturatedSubmodule.finite_of_valuationRing [Module.Finite R M]
 theorem IsSaturatedSubmodule.free_of_valuationRing [Module.Finite R M] [Module.IsTorsionFree R M]
     {N : Submodule R M} (h : IsSaturatedSubmodule N) : Module.Free R N :=
   haveI := h.finite_of_valuationRing
-  free_of_finite_of_isTorsionFree_of_valuationRing R N
-
-theorem IsSaturatedIn.finite_of_valuationRing {P N : Submodule R M} [Module.Finite R P]
-    (h : IsSaturatedIn P N) : Module.Finite R N :=
-  haveI := (isSaturatedIn_iff.1 h).2.finite_of_valuationRing
-  Module.Finite.equiv (Submodule.submoduleOfEquivOfLe h.le)
+  free_of_finite_of_isTorsionFree_of_valuationRing (R := R) (M := N)
 
 end Valuation
 
 universe u
-
-example : ∃ N' : Submodule ℤ (ℤ × ℤ), IsCompl (Submodule.span ℤ {((1, 2) : ℤ × ℤ)}) N' :=
-  isSaturatedSubmodule_span_one_two.exists_isCompl
 
 end GlobalTheory

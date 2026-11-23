@@ -1,7 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CongruenceNumberRankThree
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdTransfer
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdTransfer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Compactness.Paracompact
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+public import GroundTheory.ProfiniteCohomology.RealPlaces.GSDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -99,8 +145,8 @@ variable (s : HidaSetting l L Ω)
 
 def S : Set (Plc (Lp L)) := {v | ((l : ℕ) : 𝓞 (Lp L)) ∈ v.asIdeal ∨ v ∈ s.St ∨ v = s.v0}
 
-variable (l L) in
 
+variable (l L) in
 abbrev _root_.UpperTheory.V.W.Vl : Type := {v : Plc (Lp L) // ((l : ℕ) : 𝓞 (Lp L)) ∈ v.asIdeal}
 
 structure Lev where
@@ -140,7 +186,7 @@ theorem continuous_resP : Continuous (resP L Ω) := Af.continuous_restrictScalar
 def HidaSetting.Lev.frame {s : HidaSetting l L Ω} (V : s.Lev) : GFrame l where
   Γ := GS Ω V.S'
   cpt := inferInstance
-  tdisc := totDisc_quot _ (isClosed_NS Ω V.S')
+  tdisc := by exact totDisc_quot _ (isClosed_NS Ω V.S')
   η := V.η
   η_open := V.η_open
   c := toGS Ω V.S' s.c
@@ -149,7 +195,8 @@ def HidaSetting.Lev.frame {s : HidaSetting l L Ω} (V : s.Lev) : GFrame l where
   ε := V.ε
   ε_cont := V.ε_cont
   Vl := Vl l L
-  finV := haveI : Finite (Vl l L) := (V.fin.subset fun v (hv : _ ∈ v.asIdeal) => V.sub (Or.inl hv)).to_subtype
+  finV := haveI : Finite (Vl l L) := (V.fin.subset (t := {v : Plc (Lp L) | ((l : ℕ) : 𝓞 (Lp L)) ∈ v.asIdeal})
+      (fun _ hv => V.sub (Or.inl hv))).to_subtype
     Fintype.ofFinite _
   Gv v := Dec (F := L) (s.A v)
   cv v := isCompact_iff_compactSpace.1 (isClosed_Dec (F := L) (s.A v)).isCompact

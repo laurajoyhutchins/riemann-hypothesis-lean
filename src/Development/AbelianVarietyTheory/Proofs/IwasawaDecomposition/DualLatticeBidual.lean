@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
-import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGlob
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGen
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGlob
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.L2.Forms Formalism.UG Formalism.L2.GlobalTheoryTheory.LocalLatticeBases NumberField IsDedekindDomain Matrix GlobalTheory.LevelHecke
 open scoped TensorProduct
@@ -49,12 +98,12 @@ theorem hform_smul_right (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E) (a : E)
   star_add := map_add σ
 
 theorem dual_lattice_bidual (σ : E →+* E) (hσ : ∀ x, σ (σ x) = x) (J : Matrix (Fin n) (Fin n) E)
-    (hJ : IsUnit J.det) (hH : cT σ J = J) (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsLattice E L) :
-    Submodule.IsLattice E (dualL σ J L) ∧ dualL σ J (dualL σ J L) = L := by
+    (hJ : IsUnit J.det) (hH : cT σ J = J) (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsFullLattice E L) :
+    Submodule.IsFullLattice E (dualL σ J L) ∧ dualL σ J (dualL σ J L) = L := by
   letI : StarRing E := starOf σ hσ
   let h : (Fin n → E) →ₗ⋆[E] (Fin n → E) →ₗ[E] E :=
     LinearMap.mk₂'ₛₗ (starRingEnd E) (RingHom.id E) (hform σ J)
-      (fun x x' y => by simp only [hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib])
+      (fun x x' y => by simp only [hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib])
       (fun a x y => hform_smul_left σ J a x y)
       (fun x y y' => by simp only [hform, Pi.add_apply, mul_add, Finset.sum_add_distrib])
       (fun a x y => hform_smul_right σ J a x y)
@@ -62,6 +111,7 @@ theorem dual_lattice_bidual (σ : E →+* E) (hσ : ∀ x, σ (σ x) = x) (J : M
   have hsym' : ∀ x y, σ (hform σ J x y) = hform σ J y x := by
     intro x y
     have e : ∀ i j, σ (J i j) = J j i := fun i j => congrFun (congrFun hH j) i
+
     simp only [hform, map_sum, map_mul, hσ, e]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -133,11 +183,17 @@ theorem mem_mulLat (γ : GL (Fin n) E) (L : Submodule (𝓞 E) (Fin n → E)) (y
     y ∈ mulLat γ.1 L ↔ (γ⁻¹).1 *ᵥ y ∈ L := by
   rw [← map_glE, Submodule.mem_map_equiv, glE_symm_apply]
 
-theorem mulLat_lattice (γ : GL (Fin n) E) (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsLattice E L) :
-    Submodule.IsLattice E (mulLat γ.1 L) := by
-  refine ⟨hL.fg.map _, ?_⟩
-  have e : (mulLat γ.1 L : Set (Fin n → E)) = (Matrix.mulVecLin γ.1) '' (L : Set (Fin n → E)) := rfl
-  rw [e, ← Submodule.map_span, hL.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
+theorem mulLat_lattice (γ : GL (Fin n) E) (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsFullLattice E L) :
+    Submodule.IsFullLattice E (mulLat γ.1 L) := by
+  letI : Submodule.IsLattice E (mulLat γ.1 L) := Submodule.IsLattice.of_fg E (hL.fg.map _)
+  constructor
+  change Submodule.span E ((L.map ((Matrix.mulVecLin γ.1).restrictScalars (𝓞 E)) :
+    Submodule (𝓞 E) (Fin n → E)) : Set (Fin n → E)) = ⊤
+  rw [show Submodule.span E ((L.map ((Matrix.mulVecLin γ.1).restrictScalars (𝓞 E)) :
+      Submodule (𝓞 E) (Fin n → E)) : Set (Fin n → E)) =
+      (Submodule.span E (L : Set (Fin n → E))).map (Matrix.mulVecLin γ.1) by
+        rw [Submodule.map_span]; rfl,
+    hL.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
   exact (glE γ).surjective
 
 theorem dualL_mulLat (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E) (γ : GL (Fin n) E) (hγ : γ ∈ UJ σ J)
@@ -154,7 +210,7 @@ theorem dualL_mulLat (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E) (γ : GL (F
     rw [← hform_unitary σ J γ.1 hγ, ey] at this
     exact this
 
-theorem dual_conj_primes : ∀ (E : Type) [Field E] [NumberField E] (σ : E →+* E) (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (P Q : Ideal (𝓞 E)) [P.IsPrime] [Q.IsPrime], (∀ x, σ (σ x) = x) → IsUnit J.det → cT σ J = J → (∀ a b : 𝓞 E, (b : E) = σ (a : E) → (a ∈ Q ↔ b ∈ P)) → ∀ M N : Submodule (𝓞 E) (Fin n → E), Submodule.IsLattice E M → Submodule.IsLattice E N → (Formalism.HermitianLatticesTheory.localization₂ P M = Formalism.HermitianLatticesTheory.localization₂ P N → Formalism.HermitianLatticesTheory.localization₂ Q (dualL σ J M) = Formalism.HermitianLatticesTheory.localization₂ Q (dualL σ J N)) ∧ (Formalism.HermitianLatticesTheory.localization₂ P (dualL σ J M) = Formalism.HermitianLatticesTheory.localization₂ P (dualL σ J N) → Formalism.HermitianLatticesTheory.localization₂ Q M = Formalism.HermitianLatticesTheory.localization₂ Q N) ∧ ∀ γ : GL (Fin n) E, γ ∈ UJ σ J → Submodule.IsLattice E (mulLat γ.1 M) ∧ dualL σ J (mulLat γ.1 M) = mulLat γ.1 (dualL σ J M) := by
+theorem dual_conj_primes : ∀ (E : Type) [Field E] [NumberField E] (σ : E →+* E) (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (P Q : Ideal (𝓞 E)) [P.IsPrime] [Q.IsPrime], (∀ x, σ (σ x) = x) → IsUnit J.det → cT σ J = J → (∀ a b : 𝓞 E, (b : E) = σ (a : E) → (a ∈ Q ↔ b ∈ P)) → ∀ M N : Submodule (𝓞 E) (Fin n → E), Submodule.IsFullLattice E M → Submodule.IsFullLattice E N → (Formalism.HermitianLatticesTheory.localization₂ P M = Formalism.HermitianLatticesTheory.localization₂ P N → Formalism.HermitianLatticesTheory.localization₂ Q (dualL σ J M) = Formalism.HermitianLatticesTheory.localization₂ Q (dualL σ J N)) ∧ (Formalism.HermitianLatticesTheory.localization₂ P (dualL σ J M) = Formalism.HermitianLatticesTheory.localization₂ P (dualL σ J N) → Formalism.HermitianLatticesTheory.localization₂ Q M = Formalism.HermitianLatticesTheory.localization₂ Q N) ∧ ∀ γ : GL (Fin n) E, γ ∈ UJ σ J → Submodule.IsFullLattice E (mulLat γ.1 M) ∧ dualL σ J (mulLat γ.1 M) = mulLat γ.1 (dualL σ J M) := by
   intro E _ _ σ n J P Q _ _ hσ hJ hH hPQ M N hM hN
   have hPQ' : ∀ a b : 𝓞 E, (a : E) = σ (b : E) → a ∈ Q → b ∈ P := fun a b hab =>
     (hPQ a b (by rw [hab, hσ])).1

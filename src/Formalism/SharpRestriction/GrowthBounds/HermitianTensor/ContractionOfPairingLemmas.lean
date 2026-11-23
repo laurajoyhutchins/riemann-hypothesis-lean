@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.NuOfLoZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.CoeffSumMonomialLinear
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FinrankTensor
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.OneMemDualWeyl
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.MemInvariantSectionsIffIntegral
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.MemInvariantSectionsTwoWeightIff
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.NuOfLoZero
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,13 +106,13 @@ theorem contraction_of_pairing_lemmas (hPh : QPh) (hSC : SubCoeffP) (hSM : SubMa
     have e2 : (mapAlgHom (Algebra.ofId R.O R.Kf)).toLinearMap t0 = map (algebraMap R.O R.Kf) t0 := rfl
     rw [hLC, e1, e2, hSM, hSM]
     have : (∑ y ∈ Finset.HasAntidiagonal.antidiagonal x,
-        L (blockEmb R.Kf true (coeff y.1 (map (map (algebraMap R.O R.Kf)) (subY R.O mm v0))) *
-          blockEmb R.Kf false (coeff y.2 (map (map (algebraMap R.O R.Kf)) (subY R.O mm t0))))) ∈
+        L (blockEmb R.Kf true (AddMonoidAlgebra.coeff (map (map (algebraMap R.O R.Kf)) (subY R.O mm v0)) y.1) *
+          blockEmb R.Kf false (AddMonoidAlgebra.coeff (map (map (algebraMap R.O R.Kf)) (subY R.O mm t0)) y.2))) ∈
         (algebraMap R.O R.Kf).range := by
       refine sum_mem fun y _ => ?_
       rw [coeff_map, coeff_map]
-      exact hInt _ ⟨coeff y.1 (subY R.O mm v0), hSC R.O mm _ v0 hv0 _, rfl⟩ _
-        ⟨coeff y.2 (subY R.O mm t0), hSC R.O mm _ t0 ht0 _, rfl⟩
+      exact hInt _ ⟨AddMonoidAlgebra.coeff (subY R.O mm v0) y.1, hSC R.O mm _ v0 hv0 _, rfl⟩ _
+        ⟨AddMonoidAlgebra.coeff (subY R.O mm t0) y.2, hSC R.O mm _ t0 ht0 _, rfl⟩
     exact this
   · have hβA : Antitone (fun j => nuOf (lam - wtPQ (mm + 1) P Q) (midI mm j)) :=
       fun i j hij => nuOf_anti _ hloA (midI_mono mm hij)

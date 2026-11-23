@@ -1,7 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.Proposition5Gram
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.ValuationBoundDetPowerFactor
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.MulLaurentSup
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.DerivativeValuationBounds
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.PlaneCoeff
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.DerivativeValuationBounds
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.ValuationBoundDetPowerFactor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.MulLaurentSup
+import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.DvdOfAdd
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,7 +117,7 @@ theorem sumFilt_add {σ R M : Type*} [CommSemiring R] [AddCommMonoid M] (P : (σ
     sumFilt_sub P g F (F.support ∪ G.support) Finset.subset_union_left,
     sumFilt_sub P g G (F.support ∪ G.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun mo _ => ?_
-  rw [MvPolynomial.coeff_add, map_add]
+  rw [MvPolynomial.coeff_add, map_add (f := _)]
 
 theorem sumFilt_smul {σ R S M : Type*} [CommSemiring R] [Semiring S] [Module S R] [AddCommMonoid M] [Module S M]
     (P : (σ →₀ ℕ) → Prop) [DecidablePred P] (g : (σ →₀ ℕ) → R →ₗ[S] M) (c : S) (F : MvPolynomial σ R) :
@@ -108,7 +152,7 @@ theorem sumSupp_add {σ R M : Type*} [CommSemiring R] [AddCommMonoid M] (g : (σ
   rw [key _ MvPolynomial.support_add, key F Finset.subset_union_left, key G Finset.subset_union_right,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun mo _ => ?_
-  rw [MvPolynomial.coeff_add, map_add]
+  rw [MvPolynomial.coeff_add, map_add (f := _)]
 
 theorem sumSupp_smul {σ R S M : Type*} [CommSemiring R] [Semiring S] [Module S R] [AddCommMonoid M] [Module S M]
     (g : (σ →₀ ℕ) → R →ₗ[S] M) (c : S) (F : MvPolynomial σ R) :
@@ -121,23 +165,23 @@ theorem sumSupp_smul {σ R S M : Type*} [CommSemiring R] [Semiring S] [Module S 
 
 def mono2 {σ τ : Type} (a : σ →₀ ℕ) (b : τ →₀ ℕ) : Kf →ₗ[Kf] MvPolynomial σ (MvPolynomial τ Kf) where
   toFun x := monomial a (monomial b x)
-  map_add' x y := by simp only [map_add]
+  map_add' x y := by simp only [map_add (f := _)]
   map_smul' c x := by simp only [MvPolynomial.smul_monomial, RingHom.id_apply]
 
 def monoE {σ τ : Type} (e : Module.End Kf (MvPolynomial τ Kf)) (a : σ →₀ ℕ) :
     MvPolynomial τ Kf →ₗ[Kf] MvPolynomial σ (MvPolynomial τ Kf) where
   toFun q := monomial a (e q)
-  map_add' x y := by simp only [map_add]
+  map_add' x y := by simp only [map_add (f := _)]
   map_smul' c x := by simp only [map_smul, MvPolynomial.smul_monomial, RingHom.id_apply]
 
 def monoC {σ τ : Type} (nu : τ →₀ ℕ) (a : σ →₀ ℕ) : MvPolynomial τ Kf →ₗ[Kf] MvPolynomial σ Kf where
   toFun q := monomial a (q.coeff nu)
-  map_add' x y := by simp only [MvPolynomial.coeff_add, map_add]
+  map_add' x y := by simp only [MvPolynomial.coeff_add, map_add (f := _)]
   map_smul' c x := by simp only [MvPolynomial.coeff_smul, MvPolynomial.smul_monomial, RingHom.id_apply]
 
 def cMul {σ : Type} (Q : MvPolynomial σ Kf) : Kf →ₗ[Kf] MvPolynomial σ Kf where
   toFun x := C x * Q
-  map_add' x y := by simp only [map_add, add_mul]
+  map_add' x y := by simp only [map_add (f := _), add_mul]
   map_smul' c x := by simp only [MvPolynomial.smul_eq_C_mul, smul_eq_mul, C_mul, mul_assoc, RingHom.id_apply]
 
 theorem oneT_add {σ τ : Type} (e : Module.End Kf (MvPolynomial τ Kf)) (A B : MvPolynomial σ (MvPolynomial τ Kf)) :

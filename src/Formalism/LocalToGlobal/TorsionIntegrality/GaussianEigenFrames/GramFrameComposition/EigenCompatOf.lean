@@ -1,5 +1,55 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementF
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementF
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
 import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.MatrixFormDiagBlocksBlockEmbed
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -75,6 +125,7 @@ lemma lin_apply {n m : Type} [Fintype n] [DecidableEq n] (T : (n → ℂ) →ₗ
   conv_lhs => rw [show y = ∑ i', y i' • Pi.single i' (1 : ℂ) by
     ext j
     simp [Finset.sum_apply, Pi.single_apply]]
+
   rw [map_sum, Finset.sum_apply]
   simp only [map_smul, Pi.smul_apply, smul_eq_mul]
   exact Finset.sum_congr rfl fun _ _ => mul_comm _ _
@@ -84,6 +135,7 @@ lemma gamma_inj {K : Type} [Field K] (ι : ℂ ≃+* K) {Wt : Type} [Fintype Wt]
     (h : ∀ w', ∑ w, ι (g.symm (Pi.single w 1) w') * u w = 0) (w : Wt) : u w = 0 := by
   have h' : ∀ w', ∑ w, g.symm (Pi.single w 1) w' * ι.symm (u w) = 0 := fun w' => by
     have h1 := congrArg ι.symm (h w')
+
     simpa [map_sum, map_mul] using h1
   have hz : g.symm (fun w => ι.symm (u w)) = 0 := by
     ext w'
@@ -103,6 +155,7 @@ lemma iota_hOK {K : Type} [Field K] (ι : ℂ ≃+* K) (L : PeriodPair) {n : Typ
       ∑ i, x i * (((Formalism.L2.Th1.F.area L : ℝ) : ℂ) * ∑ i', h i i' * conj (y i')) := by
     simp only [matH, LinearMap.mk₂'ₛₗ_apply, Finset.mul_sum]
     exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
+
   rw [e, map_sum]
   simp only [map_mul]
 
@@ -117,6 +170,7 @@ lemma mapVec_comb {K : Type} [Field K] (ι : ℂ ≃+* K) {n : Type} [Fintype n]
     (T : (n → ℂ) →ₗ[ℂ] (n → ℂ)) {J : Type} [Fintype J] (v : J → n → ℂ) (X : J → K) (i : n) :
     mapVec (ι : ℂ →+* K) T (fun i' => ∑ j, ι (v j i') * X j) i = ∑ j, ι (T (v j) i) * X j := by
   have hv : ∀ j, ι (T (v j) i) = ∑ i', ι (T (Pi.single i' 1) i) * ι (v j i') := fun j => by
+
     rw [lin_apply T (v j) i, map_sum]
     simp only [map_mul]
   unfold mapVec

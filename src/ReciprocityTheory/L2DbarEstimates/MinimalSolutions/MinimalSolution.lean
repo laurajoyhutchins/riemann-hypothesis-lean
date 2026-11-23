@@ -1,4 +1,55 @@
-import ReciprocityTheory.L2DbarEstimates.MinimalSolutions.MinimalSolutionStatement
+module
+
+public import ReciprocityTheory.L2DbarEstimates.MinimalSolutions.MinimalSolutionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Dual
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates
 
@@ -54,35 +105,5 @@ theorem rieszOnRange (E H : Type*) [AddCommGroup E] [Module ℂ E]
     have hmem : θ e ∈ K := R.le_topologicalClosure (LinearMap.mem_range_self θ e)
     rw [K.inner_starProjection_left_eq_right, Submodule.starProjection_eq_self_iff.mpr hmem]
     exact hvin e
-
-theorem minimalSolution (E H : Type*) [AddCommGroup E] [Module ℂ E]
-    [NormedAddCommGroup H] [InnerProductSpace ℂ H] : MinimalSolutionStatement E H := by
-  intro θ ℓ u u' hu h h'
-  set R := LinearMap.range θ with hR
-  have hw : u' - u ∈ Rᗮ := by
-    rw [Submodule.mem_orthogonal]
-    rintro y ⟨e, rfl⟩
-    rw [inner_sub_right, ← inner_conj_symm, h', ← inner_conj_symm, h, sub_self]
-  have hcl : R.topologicalClosure ≤ Rᗮᗮ :=
-    R.topologicalClosure_minimal R.le_orthogonal_orthogonal Rᗮ.isClosed_orthogonal
-  have hperp : ∀ z ∈ R.topologicalClosure, ⟪u' - u, z⟫_ℂ = 0 := by
-    intro z hz
-    exact (Submodule.mem_orthogonal _ _).mp (hcl hz) _ hw
-  refine ⟨hw, ?_, ?_⟩
-  · have h0 : ⟪u, u' - u⟫_ℂ = 0 := by
-      rw [← inner_conj_symm, hperp u hu, map_zero]
-    have hsq : ‖u'‖ ^ 2 = ‖u‖ ^ 2 + ‖u' - u‖ ^ 2 := by
-      have := @norm_add_sq ℂ H _ _ _ u (u' - u)
-      rw [add_sub_cancel] at this
-      rw [this, h0]
-      simp
-    have : ‖u‖ ^ 2 ≤ ‖u'‖ ^ 2 := by
-      rw [hsq]; nlinarith [sq_nonneg ‖u' - u‖]
-    exact (pow_le_pow_iff_left₀ (norm_nonneg _) (norm_nonneg _) two_ne_zero).mp this
-  · intro hu'
-    have hz : u' - u ∈ R.topologicalClosure := Submodule.sub_mem _ hu' hu
-    have := hperp _ hz
-    rw [inner_self_eq_zero, sub_eq_zero] at this
-    exact this
 
 end ReciprocityTheory.L2DbarEstimates

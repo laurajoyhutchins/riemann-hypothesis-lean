@@ -1,6 +1,57 @@
-import Formalism.SatakeDualWeyl.Statement
-import Mathlib
-import Formalism.GL3MeanSquares.HookFormulaTorsion.InvariantKernelTraceVanishes
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +64,7 @@ section Sesq
 variable {E : Type} [Field E] {n : ℕ} (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E)
 
 theorem hform_add_left (x x' y : Fin n → E) : hform σ J (x + x') y = hform σ J x y + hform σ J x' y := by
-  simp only [Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hform_add_right (x y y' : Fin n → E) : hform σ J x (y + y') = hform σ J x y + hform σ J x y' := by
   simp only [Formalism.UG.hform, Pi.add_apply, mul_add, Finset.sum_add_distrib]
@@ -59,7 +110,7 @@ theorem length_inverse_bound (σ : E →+* E) (hσ : ∀ (φ : E →+* ℂ) (x :
     intro φ
     obtain ⟨r, hr0, hr, -⟩ := hdef φ x
     have hk := congrArg φ key
-    rw [map_add, map_mul, map_mul, hσ, map_natCast, map_one, hr, Complex.conj_mul'] at hk
+    rw [map_add (f := _), map_mul, map_mul, hσ, map_natCast, map_one, hr, Complex.conj_mul'] at hk
     have hk' : (T : ℝ) * r + ‖φ (algebraMap (𝓞 E) E a)‖ ^ 2 = 1 := by exact_mod_cast hk
     have hc : ‖φ (c0 : E)‖ = r := by
       rw [hc0, hr, Complex.norm_real, Real.norm_of_nonneg hr0]
@@ -112,6 +163,7 @@ theorem root_eq_one (P : Ideal (𝓞 E)) (T k : ℕ) (b : 𝓞 E) (hT : T.Prime)
   have hqP : (q : 𝓞 E) ∈ P := by
     rw [← Ideal.Quotient.eq_zero_iff_mem]
     have h0 := congrArg (Ideal.Quotient.mk P) (hη.geom_sum_eq_zero hq.one_lt)
+
     simpa [map_sum, map_pow, hbP] using h0
   have hTq : T = q := by
     by_contra hne'

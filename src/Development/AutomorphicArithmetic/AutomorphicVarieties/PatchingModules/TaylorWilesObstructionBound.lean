@@ -1,8 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchedSupportCompletions
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ContinuousResP
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.Inertia
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNormalised
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchedSupportCompletions
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ContinuousResP
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.Inertia
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNormalised
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,8 +112,6 @@ def globOf (V : s.Lev) : Glob l (locOf r) where
   φu u := V.pr.comp (Dec (F := L) (s.A (Subtype.val u))).subtype
   φu_cont _ := (V.pr_cont continuous_resP).comp continuous_subtype_val
 
-example : (globOf r V0).frame = reIu V0.frame (globOf r V0).frame.Iu := rfl
-
 def residOf : Resid (globOf r V0).frame O n :=
   ⟨r.chib, r.chib_open, r.chib_inj, r.polar, r.psib, r.psib_open, r.th, r.th_comm⟩
 
@@ -79,8 +119,8 @@ theorem residOf_Ip_le (u : V0.frame.St) : (residOf r).Ip u ≤ r.Ip u := by
   rintro g ⟨⟨γ, ⟨h1, -⟩, rfl⟩, h2⟩
   exact ⟨⟨Subtype.val γ, h1, rfl⟩, h2⟩
 
-variable {r} in
 
+variable {r} in
 def pairOf {B : Type} [CommRing B] [Algebra O B] [IsCO O B] (u : Pair r B) : Pair (residOf r) B :=
   ⟨u.D, u.ψ, u.cont, u.red, fun v i => ⟨(u.psi v i).cont, (u.psi v i).red, (u.psi v i).mu⟩, u.P, u.Ord,
     fun w g hg => u.I w g (residOf_Ip_le r w hg)⟩
@@ -110,8 +150,8 @@ structure TWPl (T : TWGrp (globOf r V0)) where
   H_eq : ∀ g : (globOf r V0).Γ, g ∈ T.H ↔ ∃ h : V0.η g = 1, (∀ i, r.chib i ⟨g, h⟩ = 1) ∧
     PadicInt.toZMod ((V0.ε g : ℤ_[l]ˣ) : ℤ_[l]) = 1
 
-variable (s) in
 
+variable (s) in
 def LocCFT : Prop :=
   ∃ d : Vl l L → ℕ, ∑ᶠ v, d v = Module.finrank ℚ (Lp L) ∧ ∀ v : Vl l L,
     Nonempty (LocAb l (Dec (F := L) (s.A v)) ((Ine (F := L) (s.A v)).subgroupOf (Dec (F := L) (s.A v))) (d v))
@@ -142,8 +182,8 @@ def TaylorWilesObstructionBound : Prop :=
     (∀ g : V0.frame.G₀, (g : V0.frame.Γ) ∈ PL l T.H.toSubgroup → x.ρ g = 1) →
     T.Eig x al → T.B2 k
 
-variable {r} in
 
+variable {r} in
 def HasAut (B : UniversalOrdinaryDeterminantRing r) (J : Ideal B.B) : Prop :=
   ∀ T : TWGrp (globOf r V0), TWPl r T → Nonempty (TWAut (pairOf B.u) J Empty (n * Module.finrank ℚ (Lp L)) T)
 

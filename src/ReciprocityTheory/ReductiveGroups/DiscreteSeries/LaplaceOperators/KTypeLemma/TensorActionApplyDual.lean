@@ -1,4 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.MemEigenTensorSpaceIff
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.QuotientHighestWeightTensorStandard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,13 +121,14 @@ theorem sT_sES (E : Fin n → Fin n → Module.End ℂ M) (V : Submodule ℂ M) 
     sT E V (sES V x) = eeV E (sT E V x) := by
   induction x using Finsupp.induction_linear with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | single p v =>
     obtain ⟨w, c⟩ := p
     funext d'
     rw [sT_single, tensorAction_apply]
+
     simp only [sES, Finsupp.lsum_single, LinearMap.sum_apply, Finset.sum_apply, Finsupp.lsingle_apply,
-      map_sum, sT_single, wordAction_cons]
+    map_sum, sT_single, wordAction_cons]
     rw [Finset.sum_eq_single d', Finset.sum_eq_single c]
     · simp
     · intro c' _ hc'; simp [Pi.single_apply, hc']
@@ -96,13 +140,14 @@ theorem sθ_sES (V : Submodule ℂ M) (EM : Fin n → Fin n → Module.End ℂ M
     (x : KS (n := n) V) : sθ V EM φ ℓ (sES V x) = eeV EM (sθ V EM φ ℓ x) := by
   induction x using Finsupp.induction_linear with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | single p v =>
     obtain ⟨w, c⟩ := p
     funext d'
     rw [sθ_single, tensorAction_apply_dual]
+
     simp only [sES, Finsupp.lsum_single, LinearMap.sum_apply, Finset.sum_apply, Finsupp.lsingle_apply,
-      map_sum, sθ_single, wordAction_cons_dual]
+    map_sum, sθ_single, wordAction_cons_dual]
     rw [Finset.sum_eq_single d', Finset.sum_eq_single c]
     · simp
     · intro c' _ hc'; simp [Pi.single_apply, hc']
@@ -116,7 +161,7 @@ theorem tensorWord_prepend (E : Fin n → Fin n → Module.End ℂ M) (V : Submo
       E a b (sT E V x c') := by
   induction x using Finsupp.induction_linear with
   | zero => simp
-  | add x y hx hy => simp only [Finsupp.mapDomain_add, map_add, Pi.add_apply, hx, hy]
+  | add x y hx hy => simp only [Finsupp.mapDomain_add, map_add (f := _), Pi.add_apply, hx, hy]
   | single p v =>
     obtain ⟨w, c⟩ := p
     rw [Finsupp.mapDomain_single, sT_single, sT_single, wordAction_cons]

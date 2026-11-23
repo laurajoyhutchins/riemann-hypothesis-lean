@@ -1,4 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RearrSymm
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SupportPhiZeroSubset
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormFlagVector
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormRankZeroApply
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MatExtMulVec
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableCoordinateMap
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbJConvCpt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RearrSymm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SubMulRight
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCharacterOneOfProduct
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ZhatSectionExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsHaarStabilizer
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.StabilizerDisintegration.FK
 
@@ -98,7 +154,7 @@ theorem fibre_integral_cells : PBI.FibIntCells := by
     have hex : ∃ θ, D.IsNormCut S γ0 (D.muR S γ0 w) θ ∧
         Integrable (fun q => θ q • D.orbIntegrand S γ0 F q) S.μSS := ⟨θ1, hθ1, hint1⟩
     unfold D.orbJ
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     obtain ⟨hθ, hint⟩ := hex.choose_spec
     obtain ⟨hI, hEq⟩ := OG.orb_int S hγe hd0 hZw hpos hrel e hemp he hμ0 hμ0' hc1 hc2 hN1 hN2 F _ hθ hint
     rw [hEq, OJ.cell_int S γ0 w hμ0 hμ0' F hI, RCLike.real_smul_eq_coe_smul (K := ℂ), ← integral_smul]
@@ -123,7 +179,7 @@ theorem fibre_integral_cells : PBI.FibIntCells := by
     symm
     exact FB.fib_indep S p.ν' p.m₀ p.hF a ha hG hE hμ0 hμ0' F hv hu hsG (hsZ.trans hZ1.symm) hsD
   · have h0 : D.vecV S p.ν' p.m₀ F a = 0 := by
-      unfold D.vecV; rw [dif_neg (fun h => hG h.2)]
+      unfold D.vecV; rw [dite_eq_right (fun h => hG h.2)]
     rw [h0]
     symm
     refine integral_eq_zero_of_ae (Filter.Eventually.of_forall fun Y => ?_)

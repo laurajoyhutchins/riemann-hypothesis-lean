@@ -1,8 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspFree
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.JetRangeLevelFactor
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MinorsDisjointColumnsHarmonic
+module
+
+import Development.WeilBound.CoreStatements.PlurisubharmonicCones.Rt0ConjNegNeZero
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.JetRangeLevelFactor
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MinorsDisjointColumnsHarmonic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.ProjectiveLattices.JFDFree
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -200,23 +249,7 @@ end Minors
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 
 theorem rt0_conj_neg_ne_zero (H : Host E) : starRingEnd ℂ H.rt0 = -H.rt0 ∧ H.rt0 ≠ 0 := by
-  have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-  have h := H.sqrt_neg_disc_sq
-  have hre := congrArg Complex.re h
-  have him := congrArg Complex.im h
-  simp only [sq, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.natCast_re,
-    Complex.natCast_im, neg_zero] at hre him
-  have h0 : H.rt0.re = 0 := by
-    by_contra h0
-    have : H.rt0.im = 0 := by
-      have : H.rt0.re * H.rt0.im = 0 := by linarith
-      exact (mul_eq_zero.1 this).resolve_left h0
-    rw [this] at hre
-    nlinarith [mul_self_nonneg H.rt0.re]
-  refine ⟨Complex.ext (by simp [h0]) (by simp), fun e => ?_⟩
-  rw [e] at hre
-  simp only [Complex.zero_re, Complex.zero_im] at hre
-  linarith
+  apply LevelTowerAlt.rt0_conj_neg_ne_zero <;> assumption
 
 theorem not_inPsi_conjugate {τ : E →+* ℂ} (h : InPsi H τ) : ¬ InPsi H (ComplexEmbedding.conjugate τ) := by
   intro h'
@@ -284,20 +317,6 @@ theorem exists_harmA_ne_zero {a : (E →+* ℂ) × ℕ → ℕ} {n : ℕ} (ha : 
       minorMonomial_rowDegree _ _ _ _ _ (antitone_trunc ha) fun τ => if_neg (lt_irrefl _)⟩,
       minorMonomial_coeff_mem _ _ _ _ _ _⟩, minorMonomial_ne_zero _ _ _ _ hinj _⟩
 
-def LastPosAt (Dw : Datum H) (a : (E →+* ℂ) × ℕ → ℕ) (τ : E →+* ℂ) : Prop :=
-  0 < Dw.p ∧ 0 < a (τ, Dw.p - 1)
-
-def RowsOnly (Cusp : ((E →+* ℂ) × ℕ → ℕ) → ℕ → Submodule c.F (Rul Xo c)) : Prop :=
-  ∀ a a' n, (∀ τ (i : Fin (Dw.mult τ)), a (τ, i) = a' (τ, i)) → Cusp a n = Cusp a' n
-
-def ShapeOK {r : ℕ} (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) : Prop :=
-  ∀ σ, GoodEmb c σ → r = Dw.p + Dw.q ∧
-    ∀ k, ((U σ).X k).p0 = Dw.q ∧ ∀ τ : E →+* ℂ, τ ∈ ((U σ).X k).Ψ ↔ InPsi H τ
-
 variable {Xo c}
-
-def SomeGeneratorNeZeroEven (Xo : Moduli Dw l) (c : Coeff l) (nab : NabV Xo c) : Prop :=
-  ∀ (a : (E →+* ℂ) × ℕ → ℕ) (n : ℕ) (al : 𝓞 E) (q : ℕ), Even n → 0 < n → InJetRange Dw l a n al q →
-    ∃ f ∈ thGen Xo c nab a n, f ≠ 0
 
 end GlobalTheory.ThetaClaimsCompare

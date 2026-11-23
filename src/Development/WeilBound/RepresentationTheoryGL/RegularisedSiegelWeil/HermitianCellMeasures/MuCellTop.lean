@@ -1,16 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.MuCellOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousDivRp
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousSmulQuot
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NullCOfInvM
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CellFormulaOfInvM
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArtinianFields
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousOnTau
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PtMulComplSelf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteBadScalar
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RingHomMulSubEqZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixEqBlockDecomposition
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NpowHalfAddHalf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsClosedHermSMx
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArtinianFields
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CellFormulaOfInvM
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousDivRp
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousOnTau
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousSmulQuot
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteBadScalar
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsClosedHermSMx
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixEqBlockDecomposition
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NpowHalfAddHalf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NullCOfInvM
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PtMulComplSelf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RingHomMulSubEqZero
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.MuCellOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace PositivityTheory.Rg.Rsw.Cell
 

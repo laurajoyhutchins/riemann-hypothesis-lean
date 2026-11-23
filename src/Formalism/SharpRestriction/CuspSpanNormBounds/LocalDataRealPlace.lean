@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,8 +140,6 @@ section Kernels
 def PSDK {α : Type*} (K : α → α → ℂ) : Prop :=
   ∀ (X : Finset α) (a : α → ℂ), 0 ≤ ∑ p ∈ X, ∑ q ∈ X, star (a p) * K p q * a q
 
-def KLE {α : Type*} (K L : α → α → ℂ) : Prop := PSDK (fun p q => L p q - K p q)
-
 end Kernels
 
 section S1bData
@@ -135,25 +179,6 @@ def LatAx (δ : D.host.E) (L : LatticeDataWithDual D) : Prop :=
 def IsFrameScale (L : LatticeDataWithDual D) (ϱ : ℝ) : Prop :=
   0 < ϱ ∧ ∀ i s, IsBlockSL2Embedding D i s → L.ρ i s = ϱ ^ (-((((2 * D.R.rS + 3 : ℕ) : ℤ) - 2 * (i : ℤ) - (s : ℤ))))
 
-def ArithAx (L : LatticeDataWithDual D) (Kd : KernelData D) : Prop :=
-  (∀ p q, Kd.K 0 p q = 1) ∧
-  (∀ i, i ≤ D.R.rS + 1 → PSDK (Kd.K i)) ∧
-  (∀ i, 1 ≤ i → i ≤ D.R.rS + 1 → 0 ≤ Kd.e i ∧ Kd.e i ≤ 1) ∧
-
-  (∀ (j s : ℕ) (hs : 1 ≤ s), j + s ≤ D.R.rS + 1 → ∀ (h h' : Point D.host.E j) (t t' : D.host.E)
-      (ht : t ≠ 0) (ht' : t' ≠ 0),
-      Kd.K (j + s) (ptSnoc D h t ht s hs) (ptSnoc D h' t' ht' s hs) ≠ 0 →
-        (if j + s = D.R.rS + 1 ∧ s = 1 then t = t' else t⁻¹ - t'⁻¹ ∈ L.La' (j + 1) s)) ∧
-
-  (∀ (j s : ℕ) (hs : 1 ≤ s), j + s ≤ D.R.rS + 1 →
-    (∀ (t : D.host.E) (ht : t ≠ 0),
-      KLE (fun h h' : Point D.host.E j => Kd.K (j + s) (ptSnoc D h t ht s hs) (ptSnoc D h' t ht s hs))
-        (Kd.Th j s t)) ∧
-    (∀ t, ∀ l ∈ L.La (j + 1) s, Kd.Th j s (t + l) = Kd.Th j s t) ∧
-    (∀ t, PSDK (Kd.Th j s t)) ∧
-    (∀ X : Finset D.host.E, (∀ t ∈ X, ∀ t' ∈ X, t - t' ∈ L.La (j + 1) s → t = t') →
-      KLE (fun h h' => ∑ t ∈ X, Kd.Th j s t h h') (fun h h' => (1 + (Kd.e (j + s) : ℂ)) * Kd.K j h h')))
-
 end S1bData
 
 section Sizes
@@ -189,27 +214,9 @@ def ThInvF (C1 C2 N T T' : ℝ) (δ : D.host.E) (x : D.what₂.Tau → LocalData
 def ThS (C1 C2 N T T' : ℝ) (δ : D.host.E) (x : D.what₂.Tau → LocalDataRealPlace D) (L : LatticeDataWithDual D) : ℝ :=
   ThInvF D C1 C2 N T T' δ x L ^ (-(1 / (D.R.f : ℝ)))
 
-def minFac (x y : ℝ) (K : ℕ) : ℝ := if y = 0 then 1 else min 1 ((x / y) ^ K)
-
 end Sizes
 
 section Rows
-
-def SRowForm {ι P Tau : Type*} [Fintype Tau] (HSv : Tau → Type*) (ip : ∀ v, HSv v → HSv v → ℂ)
-    (n : P → ℝ) (c : ι → P → ℂ) (V : ∀ v, P → HSv v) : ENNReal :=
-  ∑' ρ, ENNReal.ofReal (∑' q : P × P,
-    (c ρ q.1 * star (c ρ q.2) * ((Real.sqrt (n q.1) * Real.sqrt (n q.2) : ℝ) : ℂ) *
-      ∏ v, ip v (V v q.1) (V v q.2))).re
-
-def RowsAx {ι P Tau : Type*} [Fintype Tau] (HSv : Tau → Type*) (ip : ∀ v, HSv v → HSv v → ℂ)
-    (K : P → P → ℂ) (n : P → ℝ) (c : ι → P → ℂ) (V : ∀ v, P → HSv v) : Prop :=
-  (∀ R : Finset ι, KLE (fun h h' => ∑ ρ ∈ R, c ρ h * star (c ρ h')) K) ∧
-  ∀ ρ, Summable (fun h => ‖c ρ h‖ * Real.sqrt (n h) * ∏ v, Real.sqrt (ip v (V v h) (V v h)).re)
-
-def jNorm2One {Tau : Type*} [Fintype Tau] (HSv : Tau → Type*) (nsq : ∀ v, HSv v → ℝ)
-    (k r : ℕ) (T T' κ : ℝ) (jv : ∀ v, (Fin r → ℂ) × ℂ → HSv v) : ENNReal :=
-  (∏ v, ∫⁻ p : (Fin r → ℂ) × ℂ, ENNReal.ofReal (Formalism.QuantumDeterminants.bcWeight k r T T' p * nsq v (jv v p))) /
-    ENNReal.ofReal κ ^ (r + 1)
 
 end Rows
 

@@ -1,13 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TrivFlagMod
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.FlagMinor
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.PluckerCoord
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SameGenericSymm
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeFiniteProjectiveBaseChange
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XMinorGraded
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XBundleOfFamily
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XPullLine
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.PluckerCoord
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InstFintypeSumElim
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XBundleOfFamily
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XMinorGraded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial GlobalTheory.CompanionTheory.Ar.Num GroundTheory.Heights₂.Heights.NumbersDVR
 open ReciprocityTheory.ChartRestriction.G.Geo (ChartBundle chartRing)
@@ -103,8 +147,9 @@ private theorem exists_pow_mul_basis_repr_mem {o Ω : Type} [CommRing o] [Field 
         (f l' ^ (Finset.univ.sup (n₁ l') - n₁ l' q') *
           (f l ^ m l * (B l).repr (f l' ^ n₁ l' q' • b l' q') q)) := by
     rw [he']
-    simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul,
-      Pi.smul_apply, smul_eq_mul]
+
+    simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.coe_smul,
+    Pi.smul_apply, smul_eq_mul]
     rw [Finset.mul_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun q' _ => ?_
     have e1 := pow_sub_mul_pow (f l') (Finset.le_sup (f := n₃) (Finset.mem_univ q'))
@@ -132,7 +177,7 @@ theorem genDual_span {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (R₀ 
       rw [map_zero]
       exact R.zero_mem
     | add x y _ _ hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact R.add_mem hx hy
     | neg x _ hx =>
       rw [map_neg]
@@ -173,6 +218,7 @@ theorem genDual_span {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (R₀ 
       have hv := B.sum_repr v
       simp only [LinearMap.smul_apply, LinearMap.sum_apply, smul_eq_mul, Finset.sum_mul]
       conv_lhs => rw [← hv]
+
       rw [map_sum]
       simp only [map_smul, smul_eq_mul, hB]
       rw [Finset.sum_comm, Finset.mul_sum]

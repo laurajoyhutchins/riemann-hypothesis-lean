@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Mathlib.MeasureTheory.Group.ModularCharacter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.ProperAction.Basic
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory MeasureTheory.Measure Topology
 open scoped ENNReal NNReal
@@ -56,12 +105,12 @@ noncomputable def rightMeasure [MeasurableSpace (G ⧸ H)] [MeasurableSpace (Rig
     (μ : Measure (G ⧸ H)) : Measure (RightCosets H) :=
   μ.map (invCoset H)
 
+
 open MeasureTheory MeasureTheory.Measure Topology in
 open scoped ENNReal NNReal in
 variable {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [MeasurableSpace G] [BorelSpace G] (H : Subgroup G) in
 omit [MeasurableSpace G] [BorelSpace G] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.InvariantRadonFibre.IsInvariantRadon.regular [LocallyCompactSpace G]
     [SecondCountableTopology G] [IsClosed (H : Set G)] [MeasurableSpace (G ⧸ H)]
     [BorelSpace (G ⧸ H)] {μ : Measure (G ⧸ H)} (h : _root_.GlobalTheory.IndefiniteRowSideFullHecke.InvariantRadonFibre.IsInvariantRadon H μ) :
@@ -141,28 +190,5 @@ def CompactClause : Prop :=
 def QuotientMeasures : Prop :=
   InvariantMeasureClause ∧ NormaliseQuotientClause ∧ NormaliseSubgroupClause ∧
     NormaliseGroupClause ∧ DiscreteClause ∧ ModulusClause ∧ CompactClause
-
-example {G : Type} [Group G] (Γ : Subgroup G) (γ : Γ) (g : G) : γ • g = (γ : G) * g := rfl
-
-example {G : Type} [Group G] (H : Subgroup G) (a g : G) :
-    a • (g : G ⧸ H) = ((a * g : G) : G ⧸ H) := rfl
-
-example (G : Type) [CommGroup G] [TopologicalSpace G] [MeasurableSpace G] : IsUnimodular G := by
-  intro μ hμ
-  refine ⟨fun g => ?_⟩
-  have := map_mul_left_eq_self μ g
-  simpa [mul_comm] using this
-
-example (G : Type) [Group G] [Finite G] [TopologicalSpace G] (H : Subgroup G)
-    [MeasurableSpace (G ⧸ H)] [DiscreteMeasurableSpace (G ⧸ H)] :
-    IsInvariantRadon H (Measure.count : Measure (G ⧸ H)) where
-  ne_zero := Measure.count_ne_zero''
-  finiteOnCompacts := inferInstance
-  invariant := ⟨fun c s _ => by
-    have h1 := Measure.count_injective_image (f := (MulAction.toPerm c).symm)
-      (MulAction.toPerm c : (G ⧸ H) ≃ (G ⧸ H)).symm.injective s
-    rw [← h1]
-    congr 1
-    exact (Equiv.image_symm_eq_preimage (MulAction.toPerm c) s).symm⟩
 
 end GlobalTheory.IndefiniteRowSideFullHecke.InvariantRadonFibre

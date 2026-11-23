@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.GenericPointSectionHypotheses
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.GenericPointSectionHypotheses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -19,12 +72,10 @@ def aff (y : Fin (N + 1) → Ω) (j : Fin (N + 1)) : Fin (N + 1) → Ω := fun l
 theorem aff_def (y : Fin (N + 1) → Ω) (j : Fin (N + 1)) : aff y j = fun l => y l / y j := rfl
 
 variable (k) in
-
 def affRing (y : Fin (N + 1) → Ω) (j : Fin (N + 1)) : Subalgebra k Ω :=
   (aeval (aff y j) : Poly k N →ₐ[k] Ω).range
 
 variable (k) in
-
 def affPiece (y : Fin (N + 1) → Ω) (j : Fin (N + 1)) (n : ℕ) : Submodule k Ω :=
   Submodule.span k {z | ∃ f : Poly k N, f.IsHomogeneous n ∧ z = aeval (aff y j) f}
 
@@ -32,6 +83,7 @@ variable {y : Fin (N + 1) → Ω} {j : Fin (N + 1)}
 
 theorem aeval_aff_of_mem_primeOf {f : Poly k N} (hf : f ∈ primeOf (S := k) y) :
     aeval (aff y j) f = 0 := by
+
   rw [← sum_homogeneousComponent f, map_sum]
   refine Finset.sum_eq_zero fun d _ => ?_
   rw [aff_def, aeval_div_of_isHomogeneous (homogeneousComponent_isHomogeneous d f),
@@ -51,7 +103,7 @@ theorem le_zero_of_add_one_le_one {d : WithBot ℕ∞} (h : d + 1 ≤ 1) : d ≤
       subst hm
       simp
 
-theorem isField_affRing (hy : IsSubvar y (primeOf (S := k) y) 0) (hj : y j ≠ 0) :
+theorem isField_affRing (hy : IsSubvar (x := y) (primeOf (S := k) y) 0) (hj : y j ≠ 0) :
     IsField (affRing k y j) := by
   let φ : Poly k N →ₐ[k] affRing k y j := (aeval (aff y j)).rangeRestrict
   have hφ : Function.Surjective φ := AlgHom.rangeRestrict_surjective _
@@ -107,7 +159,7 @@ theorem funField_eq (hj : y j ≠ 0) (hF : IsField (affRing k y j)) :
     rintro _ ⟨l, rfl⟩
     exact IntermediateField.subset_adjoin _ _ ⟨j, l, hj, rfl⟩
 
-theorem finiteDimensional_affField (hy : IsSubvar y (primeOf (S := k) y) 0) (hj : y j ≠ 0) :
+theorem finiteDimensional_affField (hy : IsSubvar (x := y) (primeOf (S := k) y) 0) (hj : y j ≠ 0) :
     FiniteDimensional k ((affRing k y j).toIntermediateField' (isField_affRing hy hj)) := by
   set E := (affRing k y j).toIntermediateField' (isField_affRing hy hj)
   let g : Poly k N →ₐ[k] E :=
@@ -133,13 +185,14 @@ theorem affPiece_mono (hj : y j ≠ 0) {m n : ℕ} (h : m ≤ n) :
 
 theorem aeval_mem_affPiece (hj : y j ≠ 0) (f : Poly k N) :
     aeval (aff y j) f ∈ affPiece k y j f.totalDegree := by
+
   rw [show aeval (aff y j) f = ∑ d ∈ Finset.range (f.totalDegree + 1),
-      aeval (aff y j) (homogeneousComponent d f) by rw [← map_sum, sum_homogeneousComponent]]
+    aeval (aff y j) (homogeneousComponent d f) by rw [← map_sum, sum_homogeneousComponent]]
   refine Submodule.sum_mem _ fun d hd => ?_
   have hd' : d ≤ f.totalDegree := Nat.lt_succ_iff.mp (Finset.mem_range.mp hd)
   exact affPiece_mono hj hd' (Submodule.subset_span ⟨_, homogeneousComponent_isHomogeneous d f, rfl⟩)
 
-theorem eventually_affPiece_eq (hy : IsSubvar y (primeOf (S := k) y) 0) (hj : y j ≠ 0) :
+theorem eventually_affPiece_eq (hy : IsSubvar (x := y) (primeOf (S := k) y) 0) (hj : y j ≠ 0) :
     ∀ᶠ n : ℕ in atTop, affPiece k y j n = Subalgebra.toSubmodule (affRing k y j) := by
   have := finiteDimensional_affField hy hj
   have hfin : (Subalgebra.toSubmodule (affRing k y j)).FG := by

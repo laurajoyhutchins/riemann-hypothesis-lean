@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseDefs
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseLocal
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseDefs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
+import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+import GroundTheory.ProfiniteCohomology.Colimit
+import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ExistsUnitsToIdelesEqOfIdelesSumInvEqZero
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseLocal
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -9,9 +59,9 @@ open IsDedekindDomain NumberField CategoryTheory GroundTheory.Global
 
 open scoped DirectSum
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1))) (n : ℕ)
 
@@ -38,7 +88,7 @@ theorem gsRoots_ρ_apply_of_mem (hμ : ∀ ζ : ℚ̄, ζ ^ n = 1 → ζ ∈ K.1
 
 theorem nonempty_addEquiv_gsRoots [NeZero n] (hμ : ∀ ζ : ℚ̄, ζ ^ n = 1 → ζ ∈ K.1) :
     Nonempty (gsRoots S n ≃+ ZMod n) := by
-  obtain ⟨ζ₀, hζ₀⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℚ̄ n
+  obtain ⟨ζ₀, hζ₀⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot ℚ̄ n
   have hK : ζ₀ ∈ K.1 := hμ ζ₀ hζ₀.pow_eq_one
   set z : maxUnramifiedOutside K.1 ℚ̄ S := algebraMap K.1 (maxUnramifiedOutside K.1 ℚ̄ S) ⟨ζ₀, hK⟩
   have hz : IsPrimitiveRoot z n :=
@@ -92,7 +142,7 @@ section Inv
 variable (ιs : ∀ v : S, ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1))
   [NeZero n] [Fintype S]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem surjective_gsCompactInv [Nonempty S] (hodd : Odd n ∨ IsTotallyComplex K.1)
     (h3 : Subsingleton (cohomology (gsRoots S n) 3))
@@ -107,8 +157,8 @@ theorem surjective_gsCompactInv [Nonempty S] (hodd : Odd n ∨ IsTotallyComplex 
   refine (gsSumInvRoots_apply S ιs n _).trans ?_
   exact (sum_apply_pi_single (fun w => gsLocalInvRoots S ιs n w) v η).trans hη
 
-omit [Fintype S] in
 
+omit [Fintype S] in
 abbrev gsLocalBrauerRoots (v : S) (z : cohomology (Rep.res (gsFinFamily S ιs v).toMonoidHom (gsRoots S n)) 2) :
     localGaloisCohomology K 2 (.inr (v : HeightOneSpectrum (𝓞 K.1))) :=
   (cohomologyMap (rootsLocalMorZ S ιs n v) 2).hom (cohomologyULiftIntAddEquiv _ 2 z)
@@ -133,8 +183,8 @@ theorem nsmul_gsLocalBrauerRoots (v : S)
   exact (map_nsmul _ n _).symm.trans ((congrArg _ ((map_nsmul _ n z).symm.trans
     ((congrArg _ h).trans (map_zero _)))).trans (map_zero _))
 
-open Classical in
 
+open Classical in
 noncomputable def gsBrauerFamily
     (ξ : ∀ v : S, cohomology (Rep.res (gsFinFamily S ιs v).toMonoidHom (gsRoots S n)) 2) :
     ⨁ w : Place K.1, localGaloisCohomology K 2 w :=
@@ -175,8 +225,8 @@ theorem sumPlaceInv_gsBrauerFamily
   exact (sumPlaceInv_of _ _).trans
     ((placeInv_gsLocalBrauerRoots S n ιs v (ξ v)).trans (zmodToQZ_gsLocalInvRoots S ιs n v (ξ v)).symm)
 
-omit [NeZero n] [Fintype S] in
 
+omit [NeZero n] [Fintype S] in
 theorem placeInv_brauerLocal_sUnitsBrauer (v : S) (y : cohomology (galSUnitsMax K.1 ℚ̄ S) 2) :
     placeInv (.inr (v : HeightOneSpectrum (𝓞 K.1)))
         (brauerLocal (gsLocalEmbeddings S ιs) (sUnitsBrauer K S y) (.inr (v : HeightOneSpectrum (𝓞 K.1)))) =
@@ -191,25 +241,54 @@ theorem placeInv_brauerLocal_sUnitsBrauer (v : S) (y : cohomology (galSUnitsMax 
   refine (placeInv_inr_apply _ _).trans ?_
   simp only [gsLocalEmbeddings_fin]
 
-omit [NeZero n] [Fintype S] in
 
+omit [NeZero n] [Fintype S] in
 theorem exists_sUnits_of_mem_localPrimaryKernel (ℓ : ℕ) (hℓ : ℓ.Prime)
     (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
     (β : ⨁ w : Place K.1, localGaloisCohomology K 2 w) (hβ : β ∈ localPrimaryKernel K S ℓ) :
     ∃ y : cohomology (galSUnitsMax K.1 ℚ̄ S) 2, (∃ j : ℕ, ℓ ^ j • y = 0) ∧
-      brauerLocal (gsLocalEmbeddings S ιs) (sUnitsBrauer K S y) = β :=
-  ⟨((sUnitsH2PrimaryEquiv K S ℓ hℓ hS (gsLocalEmbeddings S ιs)).symm ⟨β, hβ⟩).1, ((sUnitsH2PrimaryEquiv K S ℓ hℓ hS (gsLocalEmbeddings S ιs)).symm ⟨β, hβ⟩).2,
-    (coe_sUnitsH2PrimaryEquiv_apply K S ℓ hℓ hS (gsLocalEmbeddings S ιs) _).symm.trans
-      (congrArg Subtype.val ((sUnitsH2PrimaryEquiv K S ℓ hℓ hS (gsLocalEmbeddings S ιs)).apply_symm_apply ⟨β, hβ⟩))⟩
+      brauerLocal (gsLocalEmbeddings S ιs) (sUnitsBrauer K S y) = β := by
+  let ι := gsLocalEmbeddings S ιs
+  obtain ⟨⟨k, hk⟩, hloc, hsum⟩ := hβ
+  obtain ⟨b, hb⟩ := (sumPlaceInv_eq_zero_iff ι β).mp hsum
+  let f := brauerLocal ι
+  have hbk : ℓ ^ k • b = 0 :=
+    brauerLocal_injective ι ((map_nsmul f (ℓ ^ k) b).trans
+      ((congrArg (fun t => ℓ ^ k • t) hb).trans (hk.trans (map_zero f).symm)))
+  obtain ⟨z, hz⟩ := exists_gsBrauerInfl_eq K S ℓ hℓ hS b k hbk
+  let e := cohomologyULiftIntAddEquiv (galUnits K.1 (maxUnramifiedOutside K.1 ℚ̄ S)) 2
+  let x := e.symm z
+  have hex : e x = z := e.apply_symm_apply z
+  let infl := (gsBrauerInfl K S 2).hom
+  have hzk : ℓ ^ k • z = 0 :=
+    gsBrauerInfl_injective K S ((map_nsmul infl (ℓ ^ k) z).trans
+      ((congrArg (fun t => ℓ ^ k • t) hz).trans (hbk.trans (map_zero infl).symm)))
+  have hxk : ℓ ^ k • x = 0 :=
+    (map_nsmul e.symm (ℓ ^ k) z).symm.trans
+      ((congrArg e.symm hzk).trans (map_zero e.symm))
+  obtain ⟨y, hy⟩ := exists_sUnitsToUnits_eq K S ι ℓ hℓ hS x k hxk (by
+    intro v hv
+    let res := (gsLocalRes S (ι.fin v) 2).hom
+    refine (congrArg res hex).trans ((brauerLocal_gsBrauerInfl_inr K S ι v z).symm.trans ?_)
+    exact (congrArg (fun t => f t (.inr v)) hz).trans
+      ((congrArg (fun t => t (.inr v)) hb).trans (hloc v hv)))
+  have hyb : sUnitsBrauer K S y = b :=
+    (sUnitsBrauer_apply K S y).trans
+      ((congrArg infl ((congrArg e hy).trans hex)).trans hz)
+  have hyk : ℓ ^ k • sUnitsBrauer K S y = 0 :=
+    (congrArg (fun t => ℓ ^ k • t) hyb).trans hbk
+  obtain ⟨y', hj, hy'⟩ := exists_primary_map_eq (sUnitsBrauer K S) hℓ
+    (isTorsion_cohomology (galSUnitsMax K.1 ℚ̄ S) (Nat.le_succ 1) y) hyk
+  exact ⟨y', hj, (congrArg f (hy'.trans hyb)).trans hb⟩
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem injective_gsCompactInv (ℓ k : ℕ) (hℓ : ℓ.Prime) (hnk : n = ℓ ^ k)
     (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
     (hodd : Odd n ∨ IsTotallyComplex K.1) (h3 : Subsingleton (cohomology (gsRoots S n) 3))
     (ht : ∀ v, Function.Injective (gsLocalInvRoots S ιs n v)) :
     Function.Injective (gsCompactInv S ιs n hodd h3) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro z hz0
   refine Exists.elim (localToCompact_two_surjective S ιs n h3 z) (fun ξ hξ => ?_)
   subst hξ
@@ -222,10 +301,15 @@ theorem injective_gsCompactInv (ℓ k : ℕ) (hℓ : ℓ.Prime) (hnk : n = ℓ ^
   refine Exists.elim (exists_sUnits_of_mem_localPrimaryKernel S ιs ℓ hℓ hS _ hmem) (fun y hy => ?_)
   refine Exists.elim hy.1 (fun j hj => ?_)
   have hyβ' := hy.2
-  have hny : n • y = 0 := by
-    refine eq_zero_of_sUnitsBrauer_eq_zero K S ℓ hℓ hS (n • y) j (by rw [smul_comm, hj, smul_zero]) ?_
-    apply brauerLocal_injective (gsLocalEmbeddings S ιs)
-    rw [map_nsmul, map_nsmul, hyβ', nsmul_gsBrauerFamily, map_zero]
+  let f := sUnitsBrauer K S
+  let g := brauerLocal (gsLocalEmbeddings S ιs)
+  have hb : f (n • y) = 0 :=
+    brauerLocal_injective (gsLocalEmbeddings S ιs)
+      ((congrArg g (map_nsmul f n y)).trans ((map_nsmul g n (f y)).trans
+        ((congrArg (fun t => n • t) hyβ').trans
+          ((nsmul_gsBrauerFamily S n ιs ξ).trans (map_zero g).symm))))
+  have hny : n • y = 0 := eq_zero_of_sUnitsBrauer_eq_zero K S ℓ hℓ hS (n • y) j
+    (by rw [smul_comm, hj, smul_zero]) hb
 
   have hnS : ∀ v ∉ S, ((n : ℕ) : 𝓞 K.1) ∉ v.asIdeal := fun v hv hn => by
     subst hnk
@@ -240,15 +324,19 @@ theorem injective_gsCompactInv (ℓ k : ℕ) (hℓ : ℓ.Prime) (hnk : n = ℓ ^
     intro v
     apply ht v
     apply zmodToQZ_injective
-    refine (zmodToQZ_gsLocalInvRoots S ιs n v _).trans ((gsLocalInvRootsQZ_cohomologyMapAlong S ιs n v x).trans ?_)
+    refine (zmodToQZ_gsLocalInvRoots S ιs n v _).trans ?_
+    refine (gsLocalInvRootsQZ_cohomologyMapAlong S ιs n v x).trans ?_
     refine Eq.trans ?_ ((placeInv_gsLocalBrauerRoots S n ιs v (ξ v)).trans (zmodToQZ_gsLocalInvRoots S ιs n v (ξ v)).symm)
     refine Eq.trans ?_ (congrArg (placeInv (K := K) (.inr (v : HeightOneSpectrum (𝓞 K.1))))
       (gsBrauerFamily_inr S n ιs ξ v))
     refine Eq.trans ?_ (congrArg (fun β : ⨁ w : Place K.1, localGaloisCohomology K 2 w =>
       placeInv (K := K) (.inr (v : HeightOneSpectrum (𝓞 K.1))) (β (.inr (v : HeightOneSpectrum (𝓞 K.1))))) hyβ')
     refine Eq.trans ?_ (placeInv_brauerLocal_sUnitsBrauer S ιs v y).symm
-    rw [← hx]
-    rfl
+    exact congrArg (fun t : cohomology (galSUnitsMax K.1 ℚ̄ S) 2 =>
+      brauerInvZOfIsSepClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1)
+        (AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1))
+        ((gsLocalRes S (ιs v) 2).hom (cohomologyULiftIntAddEquiv _ 2
+          ((cohomologyMap (sUnitsToUnits S (maxUnramifiedOutside K.1 ℚ̄ S)) 2).hom t)))) hx
   have hg : (globalToLocal (gsFinFamily S ιs) (gsRoots S n) _ (fun _ => 𝟙 _) 2).hom x = ξ := funext hres
   exact hg ▸ localToCompact_globalToLocal_apply (gsFinFamily S ιs) (gsRoots S n) 2 x
 

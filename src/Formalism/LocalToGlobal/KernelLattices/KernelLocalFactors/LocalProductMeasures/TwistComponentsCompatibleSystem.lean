@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.MuProd
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.MuProd
+public import Formalism.LocalToGlobal.Divisibility.DivisibilityProofs.TuplesP
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.AdeleIntA
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum
 open scoped TensorProduct
@@ -62,7 +104,7 @@ theorem xs_den (v : HeightOneSpectrum (𝓞 F)) (a : E)
     { carrier := {t | ∃ r : 𝓞 E, algebraMap (𝓞 E) E t * a = algebraMap (𝓞 E) E r}
       add_mem' := by
         rintro x y ⟨r, hr⟩ ⟨r', hr'⟩
-        exact ⟨r + r', by rw [map_add, add_mul, hr, hr', map_add]⟩
+        exact ⟨r + r', by rw [map_add (f := _), add_mul, hr, hr', map_add (f := _)]⟩
       zero_mem' := ⟨0, by rw [map_zero, zero_mul]⟩
       smul_mem' := by
         rintro c x ⟨r, hr⟩
@@ -118,7 +160,7 @@ theorem xs_supp (v : HeightOneSpectrum (𝓞 F)) (a : Eˣ) : locId E v a ∈ sup
   rw [b_mem_suppAt]
   intro v' hv'
   show (Algebra.TensorProduct.map (AlgHom.id F E) (evalV F v')) ((a : E) ⊗ₜ[F] Formalism.L2.G.sgl F v 1 + (1 : E) ⊗ₜ[F] (1 - Formalism.L2.G.sgl F v 1)) = 1
-  rw [map_add, Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul, map_sub, Formalism.L2.G.sgl_apply_ne F v 1 hv', TensorProduct.tmul_zero,
+  rw [map_add (f := _), Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul, map_sub, Formalism.L2.G.sgl_apply_ne F v 1 hv', TensorProduct.tmul_zero,
     zero_add, sub_zero, map_one (evalV F v')]
   rfl
 

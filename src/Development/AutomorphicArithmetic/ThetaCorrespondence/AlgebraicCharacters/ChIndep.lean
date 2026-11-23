@@ -1,7 +1,53 @@
-import Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.EmbOrbit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeilDeligneParamAboveLIndependentLocalEmbedding
+module
+
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.EmbOrbit
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinrankLetterHomComp
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RootOfUnityPrimeToTeichmullerLift
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeilDeligneParamAboveLIndependentLocalEmbedding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CharpolyWeilDelignePotSemistableEnlargeCoefficie
+
+@[expose] public section
+
 open UpperTheory.Lit.CharWD GlobalTheory.Published
 
 noncomputable section SlopeTestRemainingChoices
@@ -113,7 +159,7 @@ private theorem exists_st {P Q : LocPrime l} {AP : LocAinf l P} {AQ : LocAinf l 
       refine algHom_ext' (AlgHom.ext fun b => ?_) ?_
       · simp [stMap_C, h1]
       · have : (e : P.R.B →ₐ[ℚ_[l]] Q.R.B) P.tB = u • Q.tB := ht
-        simp only [AlgHom.comp_apply, actSt_X, map_add, stMap_X, stMap_C, map_smul, this, smul_add, smul_C, smul_smul,
+        simp only [AlgHom.comp_apply, actSt_X, map_add (f := _), stMap_X, stMap_C, map_smul, this, smul_add, smul_C, smul_smul,
           hk, PadicInt.coe_mul, hzd]
         congr 3
         ring
@@ -144,7 +190,7 @@ private theorem exists_D {P Q : LocPrime l} {AP : LocAinf l P} {AQ : LocAinf l Q
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul v b => exact h v b
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have a1 : ∀ g x, S (stRep P ρ g x) = stRep Q ρ g (S x) := fun g =>
     ext _ _ fun v b => by rw [stRep_tmul, stRep_tmul, hS, h1]
   have a2 := ext (phiV P LL V) (phiV Q LL V) fun v b => by rw [phiV_tmul, phiV_tmul, hS, h2]
@@ -214,7 +260,9 @@ private theorem wdPst_indep {P Q : LocPrime l} {AP : LocAinf l P} {AQ : LocAinf 
   have h2 : ∀ v, e (wdN P ι ρ v) = (ι (a : Om l) • wdN Q ι ρ) (e v) := fun v => by
     have : Φ.comp (wdN P ι ρ) = (ι (a : Om l) • wdN Q ι ρ).comp Φ :=
       LinearMap.ext_on_range (span_wdMk P ι ρ) fun x => by
-        simp only [LinearMap.comp_apply, LinearMap.smul_apply, wdN_mk, hΦ, hN, wdMk_smul]
+        simp only [LinearMap.comp_apply, LinearMap.smul_apply, wdN_mk, hΦ, hN]
+        change wdMk Q ι ρ ((Dpst Q ρ).module.toSMul.smul a (monD Q ρ (T x))) = _
+        exact wdMk_smul Q ι ρ a _
     exact LinearMap.congr_fun this v
   have ha' : ι (a : Om l) ≠ 0 := (_root_.map_ne_zero ι).mpr fun h0 => ha (Subtype.ext h0)
   rw [wdPst_of_isPst ι B h hj hV, wdPst_of_isPst ι B h hj hV']

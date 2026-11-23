@@ -1,11 +1,66 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StVarWirtinger
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StDiscriminantSheetCover
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetComass
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetAreaCompare
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetImageAreaSet
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PNullSmaller
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PBadSetSmaller
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StVarWirtinger
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StDiscriminantSheetCover
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSheetComass
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.GraphChartEventuallyEqSheet
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PBadSetSmaller
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PNullSmaller
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetAreaCompare
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetComass
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetImageAreaSet
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeFormCompare
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -42,8 +97,8 @@ theorem maDens_euclPot_comp {n D : ℕ} (s : (Fin D → ℂ) → Fin n → ℂ) 
 
 end VarWirtinger
 
-open VarWirtinger in
 
+open VarWirtinger in
 theorem VarWirtinger.proof (hDSC : DiscriminantSheetCover.Statement) (hMF : MassFinite.Statement) :
     VarWirtinger.Statement := by
   classical
@@ -95,7 +150,7 @@ theorem VarWirtinger.proof (hDSC : DiscriminantSheetCover.Statement) (hMF : Mass
     rw [hfibeq, finsum_mem_range hinj, finsum_eq_sum_of_fintype]
     refine Finset.sum_congr rfl fun j _ => ?_
     have h : ∃ s', IsSheetAt J A (s k j y) s' := ⟨_, hsh j⟩
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     have hxf : s k j y ∈ fibre J A y := hfibeq ▸ ⟨j, rfl⟩
     rw [hterm _ _ hxf h]
     have heq := SheetSumMeasurable.sheet_eventuallyEq (hsh j) h.choose_spec
@@ -162,7 +217,7 @@ theorem VarWirtinger.proof (hDSC : DiscriminantSheetCover.Statement) (hMF : Mass
       · rw [Set.indicator_of_notMem (show y ∉ E k j from fun h => hB h.2),
           Set.indicator_of_notMem (show s k j y ∉ (fun x => WithLp.toLp 2 x) ⁻¹' B from hB), zero_mul,
           ENNReal.ofReal_zero]
-    rw [setLIntegral_congr_fun (hUD k).2.1 h1, lintegral_finset_sum _ (fun j _ =>
+    rw [setLIntegral_congr_fun (hUD k).2.1 h1, MeasureTheory.lintegral_finsetSum _ (fun j _ =>
       (((SheetAreaCompare.measurable_sheetJac (s k j)).ennreal_ofReal.const_mul (ENNReal.ofReal κ)).indicator
         (hEm k j))), Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_

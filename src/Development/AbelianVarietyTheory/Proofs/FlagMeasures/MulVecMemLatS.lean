@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SelfDualAt
-import Formalism.LocalToGlobal.HermitianForms.TiedStep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SelfDualAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.UG Formalism.L2.Forms NumberField IsDedekindDomain Matrix GlobalTheory.St.G
 open scoped TensorProduct
@@ -54,12 +94,13 @@ private theorem isUnit_end_lemma {M : Type} [AddCommGroup M] [Module K M] [Modul
 
 private theorem isLocalizedModule_lemma_2 {V : Type} [AddCommGroup V] [Module K V] [Module O V]
     [IsScalarTower O K V] (L : Submodule O V) (hL : Submodule.span K (L : Set V) = ⊤) :
-    IsLocalizedModule (nonZeroDivisors O) L.subtype where
-  map_units x := isUnit_end_lemma (K := K) x
-  surj y := by
+    IsLocalizedModule (nonZeroDivisors O) L.subtype := by
+  refine ⟨fun x => isUnit_end_lemma (K := K) x, ?_, ?_⟩
+  · intro y
     obtain ⟨a, ha⟩ := exists_smul_mem L hL y
     exact ⟨(⟨_, ha⟩, a), rfl⟩
-  exists_of_eq {x₁ x₂} h := ⟨1, by rw [show x₁ = x₂ from Subtype.ext h]⟩
+  · intro x₁ x₂ h
+    exact ⟨1, by rw [show x₁ = x₂ from Subtype.ext h]⟩
 
 theorem exists_extend {V W : Type} [AddCommGroup V] [Module K V] [Module O V] [IsScalarTower O K V]
     [AddCommGroup W] [Module K W] [Module O W] [IsScalarTower O K W]
@@ -120,7 +161,7 @@ private theorem retract_lemma_3 [IsDedekindDomain O] {M : Type} [AddCommGroup M]
         rw [LinearMap.smulRight_apply, hcx, zero_smul]
     · rintro y z ⟨g, hg1, hg2⟩ ⟨g', hg1', hg2'⟩
       refine ⟨g + g', fun x => ?_, fun x hx => ?_⟩
-      · rw [LinearMap.add_apply, map_add, hg1, hg1', add_mul]
+      · rw [LinearMap.add_apply, map_add (f := _), hg1, hg1', add_mul]
       · rw [LinearMap.add_apply, hg2 x hx, hg2' x hx, add_zero]
   refine ⟨LinearMap.id - g, fun x => ?_, fun x hx => ?_⟩
   · rw [LinearMap.sub_apply, map_sub, hg1, one_mul, LinearMap.id_apply, sub_self]

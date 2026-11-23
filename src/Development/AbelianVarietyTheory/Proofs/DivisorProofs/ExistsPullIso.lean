@@ -1,17 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LamRange
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrPull
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniformisedMemberDividingThetaConstantNeZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPointsFramesThetaSectionGenericFibreMember
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecScalOneVal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUInvariantUnderFieldEmbedding
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NormVal
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsFibreIso
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFramesOnUniformisedModelFibre
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LinCombValueAct
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecScalOneVal
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFrameRatio
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsProjectiveRep
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniqueThickTorusLevelWeightExpansion
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpandsGTransport
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GmMulEqOfResMulEq
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkDescendsAlongBaseChange
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUInvariantUnderFieldEmbedding
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.StalkMapInjectiveOfFlat
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumFCalculus
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaOperatorsProjectiveRepresentation
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniqueThickTorusLevelWeightExpansion
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsProjectiveRep
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LinCombValueAct
+import Development.AbelianVarietyTheory.Statements.TorsionEndomorphisms.ExistsGeneratorOfIsField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitValue
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -290,7 +336,7 @@ theorem exists_ext (hG : GlobalFnsSt) (U : Unif I D A G) {w₀ : W0 U.toUnifPre}
     rw [show coef (0 : Fam D.toPre F k) _ wk' = fun _ => 0 from funext (coef_zero gen')]; exact sumF_zero⟩
   have Pl : ∀ (c : F) s s', P s → P s' → P (c • s + s') := by
     rintro c s s' ⟨a, h₁, h₂⟩ ⟨a', h₁', h₂'⟩
-    refine ⟨c * a + a', by rw [map_add, map_smul]; exact valAt_lin h₁ h₁' c, ?_⟩
+    refine ⟨c * a + a', by rw [map_add (f := _), map_smul]; exact valAt_lin h₁ h₁' c, ?_⟩
     rw [show coef (c • s + s') _ wk' = _ from funext (coef_lin gen' s s' c)]
     exact sumF_lin h₂ h₂' c
   have all : P s := by
@@ -381,14 +427,14 @@ variable {A : PolAV (Spec (CommRingCat.of (FractionRing R)))} {A' : PolAV (Spec 
   {Φ : A'.A.left ⟶ A.A.left} {v : LB.Iso A'.L (A.L.pull Φ)}
   {Ω : (TFK (R := R') F ⊗ A'.A).left ⟶ (TFK (R := R) F ⊗ A.A).left}
 
-variable (v Ω) in
 
+variable (v Ω) in
 def AbUp {k : ℕ} (t' : SecA A' F k) (t : SecA A F k) : Prop :=
   ∀ (Z : Scheme.{0}) (r : Z ⟶ (TFK (R := R') F ⊗ A'.A).left) (z : Z) J J', Good A.L z J → Good A'.L z J' →
     sA t (r ≫ Ω) z J = (om v z J J' (r ≫ (snd (TFK (R := R') F) A'.A).left) ^ (k : ℤ)).val * sA t' r z J'
 
-variable (v) in
 
+variable (v) in
 def FrUp {x' : TFK (R := R') F ⟶ A'.A} (e' : FrAt x') {x : TFK (R := R) F ⟶ A.A} (e : FrAt x) (ρ : F) : Prop :=
   ∀ (z : Sp F) J J', Good A.L z J → Good A'.L z J' →
     (om (Z := Sp F) v z J J' x'.left).val * (vS e' z J').val = constVal (𝟙 (Sp F)) z ρ * (vS e z J).val
@@ -477,7 +523,7 @@ theorem exists_point (hG : GlobalFnsSt) (hI : I.map φ ≤ I') (hF : Compat φ F
   simp only [add_zero] at S
   exact S
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_expand (hG : GlobalFnsSt) {U : Unif I D A G} {U' : Unif I' D' A' G'}
     {bc : G' ≅ (Over.pullback (specOf φ)).obj G} (hbc : IsMonHom bc.hom) (hU : IsPullUnif φ hD bc U U') (hF : Compat φ F)

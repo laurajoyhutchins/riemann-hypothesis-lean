@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Etale.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.CommRing
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -51,8 +98,8 @@ theorem jet_ext {κ : Type} {m : ℕ} {A : Type} [CommRing A] [Algebra R A] {ψ�
   intro j
   exact h j
 
-variable (R) in
 
+variable (R) in
 def jetLift {κ : Type} {m : ℕ} {A : Type} [CommRing A] [Algebra R A] (J : Ideal A) (hJ : J ^ (m + 1) = ⊥)
     (b : κ → A) (hb : ∀ j, b j ∈ J) : JetR R κ m →ₐ[R] A :=
   Ideal.Quotient.liftₐ _ (MvPolynomial.aeval b) (fun a ha => by
@@ -68,7 +115,7 @@ def jetLift {κ : Type} {m : ℕ} {A : Type} [CommRing A] [Algebra R A] (J : Ide
 
 theorem jetLift_zR {κ : Type} {m : ℕ} {A : Type} [CommRing A] [Algebra R A] (J : Ideal A)
     (hJ : J ^ (m + 1) = ⊥) (b : κ → A) (hb : ∀ j, b j ∈ J) (j : κ) :
-    jetLift R J hJ b hb (zR m j) = b j := by
+    jetLift (R := R) J hJ b hb (zR m j) = b j := by
   show MvPolynomial.aeval b (MvPolynomial.X j) = b j
   simp
 
@@ -121,15 +168,15 @@ section Etale
 variable {R : Type} [CommRing R] {n : ℕ} {S : Type} [CommRing S] [Algebra R S]
   [Algebra (MvPolynomial (Fin n) R) S] [IsScalarTower R (MvPolynomial (Fin n) R) S]
 
-variable (R) in
 
+variable (R) in
 abbrev sX (j : Fin n) : S := algebraMap (MvPolynomial (Fin n) R) S (MvPolynomial.X j)
 
 variable [Algebra.FormallyEtale (MvPolynomial (Fin n) R) S] (ε : S →ₐ[R] R)
 
 theorem etale_ext {A : Type} [CommRing A] [Algebra R A] (aug : A →ₐ[R] R)
     (hJ : IsNilpotent (RingHom.ker aug)) (φ₁ φ₂ : S →ₐ[R] A) (h1 : aug.comp φ₁ = ε) (h2 : aug.comp φ₂ = ε)
-    (hs : ∀ j : Fin n, φ₁ (sX (S := S) R j) = φ₂ (sX (S := S) R j)) : φ₁ = φ₂ := by
+    (hs : ∀ j : Fin n, φ₁ (sX (R := R) (S := S) j) = φ₂ (sX (R := R) (S := S) j)) : φ₁ = φ₂ := by
   let ρ : MvPolynomial (Fin n) R →ₐ[R] A := φ₁.comp (IsScalarTower.toAlgHom R (MvPolynomial (Fin n) R) S)
   have hρ2 : φ₂.comp (IsScalarTower.toAlgHom R (MvPolynomial (Fin n) R) S) = ρ := by
     apply MvPolynomial.algHom_ext
@@ -151,8 +198,8 @@ theorem etale_ext {A : Type} [CommRing A] [Algebra R A] (aug : A →ₐ[R] R)
   exact AlgHom.congr_fun this x
 
 theorem etale_exists {A : Type} [CommRing A] [Algebra R A] (aug : A →ₐ[R] R)
-    (hJ : IsNilpotent (RingHom.ker aug)) (b : Fin n → A) (hb : ∀ j, aug (b j) = ε (sX R j)) :
-    ∃ φ : S →ₐ[R] A, aug.comp φ = ε ∧ ∀ j, φ (sX R j) = b j := by
+    (hJ : IsNilpotent (RingHom.ker aug)) (b : Fin n → A) (hb : ∀ j, aug (b j) = ε (sX (R := R) j)) :
+    ∃ φ : S →ₐ[R] A, aug.comp φ = ε ∧ ∀ j, φ (sX (R := R) j) = b j := by
   let ρ : MvPolynomial (Fin n) R →ₐ[R] A := MvPolynomial.aeval b
   letI : Algebra (MvPolynomial (Fin n) R) A := ρ.toRingHom.toAlgebra
   haveI : IsScalarTower R (MvPolynomial (Fin n) R) A := IsScalarTower.of_algebraMap_eq (fun r => (ρ.commutes r).symm)
@@ -174,7 +221,7 @@ theorem etale_exists {A : Type} [CommRing A] [Algebra R A] (aug : A →ₐ[R] R)
           (IsScalarTower.algebraMap_apply R (MvPolynomial (Fin n) R) S r).symm, AlgHom.commutes,
           Algebra.algebraMap_self, RingHom.id_apply]
       · intro j
-        show Ideal.Quotient.mk J (algebraMap R A (ε (sX R j))) = Ideal.Quotient.mk J (ρ (MvPolynomial.X j))
+        show Ideal.Quotient.mk J (algebraMap R A (ε (sX (R := R) j))) = Ideal.Quotient.mk J (ρ (MvPolynomial.X j))
         rw [MvPolynomial.aeval_X, Ideal.Quotient.eq, RingHom.mem_ker, map_sub, AlgHom.commutes,
           Algebra.algebraMap_self, RingHom.id_apply, hb, sub_self]
     exact fun p => RingHom.congr_fun this p

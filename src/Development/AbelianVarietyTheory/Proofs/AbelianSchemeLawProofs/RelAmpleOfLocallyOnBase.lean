@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsOneAddKill
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsOneAddKill
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+
+@[expose] public section
 
 noncomputable section
 
@@ -233,7 +279,7 @@ theorem gen_iff {R T : Type} [CommRing R] {D : Z.Opens} (ψ : R →+* Γ(Z, D)) 
     | add x y _ _ hx hy =>
       obtain ⟨p, hp⟩ := hx
       obtain ⟨q, hq⟩ := hy
-      exact ⟨p + q, fun z hz => by rw [map_add, map_add, hp, hq]; rfl⟩
+      exact ⟨p + q, fun z hz => by rw [map_add (f := _), map_add (f := _), hp, hq]; rfl⟩
     | neg x _ hx =>
       obtain ⟨p, hp⟩ := hx
       exact ⟨-p, fun z hz => by rw [map_neg, map_neg, hp]; rfl⟩
@@ -254,7 +300,7 @@ theorem gen_iff {R T : Type} [CommRing R] {D : Z.Opens} (ψ : R →+* Γ(Z, D)) 
     | add p q hp hq =>
       obtain ⟨a, ha, e⟩ := hp
       obtain ⟨b, hb, e'⟩ := hq
-      exact ⟨a + b, add_mem ha hb, fun z hz => by rw [map_add, map_add, e, e']; rfl⟩
+      exact ⟨a + b, add_mem ha hb, fun z hz => by rw [map_add (f := _), map_add (f := _), e, e']; rfl⟩
     | mul_X p t hp =>
       obtain ⟨a, ha, e⟩ := hp
       exact ⟨a * ρ t, mul_mem ha (Subring.subset_closure (Or.inr ⟨t, rfl⟩)), fun z hz => by

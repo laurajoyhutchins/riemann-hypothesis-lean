@@ -1,23 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.CompRightEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.KappaSt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
-import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PDiagFibreFubini
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SphereMeasureStereographicIntegralStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.XiPotentialHessianDecompositionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantCofactorExpansionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.EvalW
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantLinearFunctionalStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantTwoRowExpansionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantOneRowExpansionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.WordCoefficientSecondDerivativeStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RowProductFirstDerivativeStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ComplexHessianTwoPointCombinationStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ComplexHessianBlockCombinationStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SpherePairLogSineMomentStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SphereMomentPowerStatement
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PDiagFibreFubini
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.EvalW
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.InFlagDomainOne
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ComplexHessianBlockCombinationStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ComplexHessianTwoPointCombinationStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantLinearFunctionalStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantOneRowExpansionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantTwoRowExpansionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RowProductFirstDerivativeStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SphereMomentPowerStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SpherePairLogSineMomentStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.WordCoefficientSecondDerivativeStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.XiPotentialHessianDecompositionStatement
+import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PDiagFibreMoment
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights
 open scoped ComplexOrder
 open ReciprocityTheory.ChartRestriction.G.AI GroundTheory.Heights₂.Heights.Inter
@@ -169,8 +213,9 @@ theorem fibre_integral_normal : GroundTheory.Heights₂.Heights.Inter.FibreLocal
   have hpush : pushMomentPoly k = -(∑ i, X i ^ 2) ^ (k - 1) := by
     have h2 := h.2.2.2.1 k hk (MvPolynomial (Fin 3) ℝ) X
     rwa [aeval_X_left_apply] at h2
+
   rw [Finset.sum_congr rfl hword, ← Finset.mul_sum, ← Finset.mul_sum, ← map_sum,
-    DiagFibreMoment.sum_diagWordMomentPoly, hfib]
+  DiagFibreMoment.sum_diagWordMomentPoly, hfib]
   simp_rw [hY]
   rw [integral_const_mul, GlobalTheory.T.sphere_moment_power]
   have hp : (-(2 * (k : ℝ) - 1)) * ℓ (momentPoly sphereMeasure (fun _ => 1) (dotPoly (id : S2 → S2) ^ (2 * k - 2))) =

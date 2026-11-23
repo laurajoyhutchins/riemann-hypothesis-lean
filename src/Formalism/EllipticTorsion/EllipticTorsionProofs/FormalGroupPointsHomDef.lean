@@ -1,9 +1,68 @@
-import Formalism.EllipticTorsion.FormalGroupPointsParametrisation
-import Formalism.EllipticTorsion.EllipticTorsionProofs.ExistsUnitFactor
-import Formalism.EllipticTorsion.EllipticTorsionProofs.WPoint
-import Formalism.EllipticTorsion.EllipticTorsionProofs.WSubst
-import Formalism.EllipticTorsion.EllipticTorsionProofs.WChord
-import Formalism.EllipticTorsion.EllipticTorsionProofs.NDeriv
+module
+
+public import Formalism.EllipticTorsion.FormalGroupPointsParametrisation
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.ExistsUnitFactor
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.NDeriv
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.WChord
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.WPoint
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.WSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open PowerSeries
 
@@ -80,11 +139,9 @@ def IL (K : Type u) [NormedField K] [IsUltrametricDist K] : Subring (MvPowerSeri
   mul_mem' hF hG := SubstitutionCoefficientCongruence.integral_mul hF hG
   one_mem' := SubstitutionCoefficientCongruence.integral_one
   add_mem' {F G} hF hG := fun d => by
-    rw [map_add]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hF d) (hG d))
+    rw [map_add (f := _)]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hF d) (hG d))
   zero_mem' := fun d => by simp
   neg_mem' {F} hF := fun d => by rw [map_neg, norm_neg]; exact hF d
-
-theorem mem_IL {F : MvPowerSeries (Fin 2) K} : F ∈ IL K ↔ IntegralMv F := Iff.rfl
 
 theorem summable_prod_term {F G : MvPowerSeries (Fin 2) K} (hF : IntegralMv F)
     (hG : IntegralMv G) {a b : K} (ha : ‖a‖ < 1) (hb : ‖b‖ < 1) :
@@ -183,8 +240,6 @@ theorem evalMv2_subst_X0 (w : PowerSeries K) (a b : K) :
   have := WeierstrassChordSeries.coeff_Wi w 0 (Finsupp.single 0 n)
   unfold WeierstrassChordSeries.Wi at this
   simp [term, this]
-
-theorem integral_of_mem {F : MvPowerSeries (Fin 2) K} (h : F ∈ IL K) : IntegralMv F := h
 
 theorem coeff_subst_two (G s t : MvPowerSeries (Fin 2) K) (hs0 : MvPowerSeries.constantCoeff s = 0)
     (ht0 : MvPowerSeries.constantCoeff t = 0) (e : Fin 2 →₀ ℕ) :
@@ -492,26 +547,26 @@ variable {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
 
 theorem map_chordPX (a1 a2 z1 z2 w1 w2 c v : R) :
     f (chordPX a1 a2 z1 z2 w1 w2 c v) = chordPX (f a1) (f a2) (f z1) (f z2) (f w1) (f w2) (f c) (f v) := by
-  simp only [chordPX, map_sub, map_add, map_mul, map_pow]
+  simp only [chordPX, map_sub, map_add (f := _), map_mul, map_pow]
 
 theorem map_chordPY (a1 a3 z1 z2 w1 w2 c v : R) :
     f (chordPY a1 a3 z1 z2 w1 w2 c v) = chordPY (f a1) (f a3) (f z1) (f z2) (f w1) (f w2) (f c) (f v) := by
-  simp only [chordPY, map_sub, map_add, map_mul, map_pow]
+  simp only [chordPY, map_sub, map_add (f := _), map_mul, map_pow]
 
 theorem map_tanPX (a1 a2 a3 a4 z w c v : R) :
     f (tanPX a1 a2 a3 a4 z w c v) = tanPX (f a1) (f a2) (f a3) (f a4) (f z) (f w) (f c) (f v) := by
-  simp only [tanPX, map_sub, map_add, map_mul, map_pow, map_neg, map_ofNat]
+  simp only [tanPX, map_sub, map_add (f := _), map_mul, map_pow, map_neg, map_ofNat]
 
 theorem map_tanPY (a1 a2 a3 a4 z w c v : R) :
     f (tanPY a1 a2 a3 a4 z w c v) = tanPY (f a1) (f a2) (f a3) (f a4) (f z) (f w) (f c) (f v) := by
-  simp only [tanPY, map_sub, map_add, map_mul, map_pow, map_neg, map_ofNat]
+  simp only [tanPY, map_sub, map_add (f := _), map_mul, map_pow, map_neg, map_ofNat]
 
 theorem map_weqP (a1 a2 a3 a4 a6 s v : R) :
     f (weqP a1 a2 a3 a4 a6 s v) = weqP (f a1) (f a2) (f a3) (f a4) (f a6) (f s) (f v) := by
-  simp only [weqP, map_sub, map_add, map_mul, map_pow]
+  simp only [weqP, map_sub, map_add (f := _), map_mul, map_pow]
 
 theorem map_mP (a1 a3 z w : R) : f (mP a1 a3 z w) = mP (f a1) (f a3) (f z) (f w) := by
-  simp only [mP, map_add, map_mul, map_neg, map_ofNat]
+  simp only [mP, map_add (f := _), map_mul, map_neg, map_ofNat]
 
 end Maps
 

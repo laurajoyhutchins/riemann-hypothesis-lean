@@ -1,9 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.LocalRingStructure
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LetterSandwichOfFrobMatrices
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
-import Development.AbelianVarietyTheory.Counterexamples.NonGaloisSurvey.CriterionWithoutRoot
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.LocalRingStructure
+public import Development.AbelianVarietyTheory.Counterexamples.NonGaloisSurvey.CriterionWithoutRoot
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LetterSandwichOfFrobMatrices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,7 +120,8 @@ theorem simple_zero (i : ZMod n) (ζ : LL) (hζ : QRoot W i ζ) :
   have h1 : W.lev i ζ W.Q * ((PowerSeries.C ζ * E) ^ (PD.p ^ (W.s - 1)) - 1) =
       E ^ (PD.p ^ W.s) - 1 := by
     rw [GlobalTheory.WachHeightTest.Q_eq]
-    simp only [map_sum, map_pow, map_add, map_one, hlev]
+
+    simp only [map_sum, map_pow, map_add (f := _), map_one, hlev]
     rw [geom_sum_mul, ← pow_mul, ← pow_succ, ← hs, mul_pow, ← map_pow, hp.pow_eq_one, map_one,
       one_mul]
   have h2 : PowerSeries.X ^ 2 ∣ E ^ (PD.p ^ W.s) - 1 := by
@@ -110,12 +156,12 @@ theorem mem_smul_iff {ι : Type} [Fintype ι] (nb : Module.Basis ι (LetA O n) �
       · rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
         refine ⟨(W.N T).add_mem ha hb, fun j => ?_⟩
         have e : (⟨a + b, (W.N T).add_mem ha hb⟩ : ↥(W.N T)) = ⟨a, ha⟩ + ⟨b, hb⟩ := rfl
-        rw [e, map_add, Finsupp.add_apply]
+        rw [e, map_add (f := _), Finsupp.add_apply]
         exact I.add_mem (ha' j) (hb' j)
     exact key.2
   · intro h
     have h1 := congrArg Subtype.val (nb.sum_repr ⟨y, hy⟩)
-    simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul] at h1
+    simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul] at h1
     rw [← h1]
     exact Submodule.sum_mem _ fun j _ => Submodule.smul_mem_smul (h j) (nb j).2
 

@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.ThinScalesBound
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumAT
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.ThinScalesBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,15 +145,6 @@ def ModSideU (M : Model F E) (r n : ℕ) (mode : Bool) : Prop :=
         (al₁ a : E) = H.ZZplus t₁ (Fin.last r) a.castSucc ∧
         (al₂ a : E) = HermSp.ZZplusOf M (H.Zhat f₂ f₂') t₁.T t₁.T' (Fin.last r) a.castSucc) →
       Nat.card (Theta H t₁ ⟨⊥, f₂, f₂', t₁.T, t₁.T'⟩ φ φ') = M.nIsoBA Y₁ Y₂ be₁ be₂ al₁ al₂
-
-theorem localCount_of_lattice_module (M : Model F E) (r n : ℕ) (hL : LatSide M r n) (h0 : ModSide0 M r n M.split.isSome)
-    (hU : ModSideU M r n M.split.isSome) : Formalism.MainNotions.ThinScalesBound.FamilyLocalModel M r n := by
-  intro V _ _ H hn t₁ hg f₂ f₂' φ φ' hF hF' hI hs hs' S P₁ P₂
-  have hT : LocalCountHypotheses H t₁ f₂ f₂' φ φ' := ⟨hg, hF, hF', hI, hs, hs'⟩
-  have hLat := hL V H hn t₁ f₂ f₂' φ φ' hT
-  refine ⟨fun hD Z₁ Z₂ h₁ h₂ => ?_, fun hD Y₁ Y₂ be₁ be₂ al₁ al₂ hY hba => ?_⟩
-  · exact hLat.trans (h0 rfl V H hn t₁ f₂ f₂' φ φ' hT hD Z₁ Z₂ h₁ h₂)
-  · exact hLat.trans (hU rfl V H hn t₁ f₂ f₂' φ φ' hT hD Y₁ Y₂ be₁ be₂ al₁ al₂ hY hba)
 
 end Props
 

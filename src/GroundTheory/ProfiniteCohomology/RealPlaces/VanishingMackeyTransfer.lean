@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyPlaces
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingUnitsTwo
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyPlaces
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeModules
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingUnitsTwo
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.FiniteOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -55,7 +100,7 @@ variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   {L : FiniteSubfield} [Fact (K ≤ L)]
   (hL : ∀ x : L.1, algebraMap L.1 ℚ̄ x ∈ maxUnramifiedOutside K.1 ℚ̄ S)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_real_data (v : {v : InfinitePlace K.1 // v.IsReal}) (x : galUnramifiedOutside K.1 ℚ̄ S)
     (hreal : (infPlaceOfEmbedding (gsRealEmbedding S ιr v x) L : InfinitePlace L.1).IsReal) :
@@ -122,28 +167,24 @@ theorem exists_real_data (v : {v : InfinitePlace K.1 // v.IsReal}) (x : galUnram
       infCompletionEmbedding (gsRealEmbedding S ιr v x) L y
     rw [ha]
     exact σ.commutes a
-  refine ⟨ιw, galConjEquiv θ hfix, fun g hg => ?_⟩
-  have key : ∀ y : maxUnramifiedOutside L.1 ℚ̄ (placesOver S),
-      θ.symm (gsRealEmbedding S ιr v x ((gsBaseChange S hL ⟨x * gsRealFamily S ιr v g * x⁻¹, hg⟩ y :
-        maxUnramifiedOutside L.1 ℚ̄ (placesOver S)) : ℚ̄)) =
-      θ.symm (g (gsRealEmbedding S ιr v x (y : ℚ̄))) := by
-    intro y
+  refine ⟨ιw, galConjEquiv θ hfix, ?_⟩
+  intro g hg
+  let E := maxUnramifiedOutside L.1 ℚ̄ (placesOver S)
+  let ρ := ιw.comp E.val
+  let σ : gsOpenSubgroup S hL := ⟨x * gsRealFamily S ιr v g * x⁻¹, hg⟩
+  let τ := galConjEquiv θ hfix g
+  have hleft (y : E) : ρ (gsBaseChange S hL σ y) = θ.symm (g (gsRealEmbedding S ιr v x y)) := by
+    have hb := coe_gsBaseChange_apply hL σ y
     have hc := gsRealEmbedding_conj S ιr v x g ((gsFieldEquiv hL).symm y)
-    rw [coe_fieldEquivOfRestrictScalarsEq_symm] at hc
-    rw [coe_gsBaseChange_apply]
-    exact congrArg θ.symm hc
-  have hιw : ∀ z, ιw z = θ.symm (gsRealEmbedding S ιr v x z) := fun _ => rfl
-  have key' : ∀ y : maxUnramifiedOutside L.1 ℚ̄ (placesOver S),
-      (ιw.comp (maxUnramifiedOutside L.1 ℚ̄ (placesOver S)).val)
-        (gsBaseChange S hL ⟨x * gsRealFamily S ιr v g * x⁻¹, hg⟩ y) =
-      galConjEquiv θ hfix g ((ιw.comp (maxUnramifiedOutside L.1 ℚ̄ (placesOver S)).val) y) := by
-    intro y
-    simp only [AlgHom.comp_apply, IntermediateField.coe_val, galConjEquiv_apply]
-    rw [hιw, hιw, θ.apply_symm_apply]
-    exact key y
-  exact ((decompHom_eq_iff (Kv := (infPlaceOfEmbedding (gsRealEmbedding S ιr v x) L : InfinitePlace L.1).Completion)
-    (ιw.comp (maxUnramifiedOutside L.1 ℚ̄ (placesOver S)).val) (galConjEquiv θ hfix g)
-    (gsBaseChange S hL ⟨x * gsRealFamily S ιr v g * x⁻¹, hg⟩)).2 key').symm
+    exact (congrArg (fun z : ℚ̄ => θ.symm (gsRealEmbedding S ιr v x z)) hb).trans
+      (congrArg (fun z : AlgebraicClosure v.1.Completion => θ.symm z) hc)
+  have hright (y : E) : τ (ρ y) = θ.symm (g (gsRealEmbedding S ιr v x y)) :=
+    (galConjEquiv_apply θ hfix g (ρ y)).trans
+      (congrArg (fun z : AlgebraicClosure v.1.Completion => θ.symm (g z))
+        (θ.apply_symm_apply (gsRealEmbedding S ιr v x y)))
+  exact ((decompHom_eq_iff (K := L.1) (E := E)
+    (Kv := (infPlaceOfEmbedding (gsRealEmbedding S ιr v x) L : InfinitePlace L.1).Completion)
+    ρ τ (gsBaseChange S hL σ)).2 (fun y => (hleft y).trans (hright y).symm)).symm
 
 end Data
 
@@ -196,8 +237,8 @@ def trivialRes (n : ℕ) (c : cohomology (Rep.trivial k W V) n) :
   fun p => (cohomologyMapAlong (f p).toMonoidHom (continuous_toMonoidHom (f p))
     (𝟙 (Rep.res (f p).toMonoidHom (Rep.trivial k W V))) n).hom c
 
-include hσ hmem he in
 
+include hσ hmem he in
 theorem trivialRes_transfer (n : ℕ) :
     (Function.Injective (globalToLocal g (Rep.trivial k Γ V) (fun q => Rep.res (g q).toMonoidHom
         (Rep.trivial k Γ V)) (fun _ => 𝟙 _) n).hom → Function.Injective (trivialRes (k := k) V f n)) ∧
@@ -265,16 +306,16 @@ variable {k G : Type} [CommRing k] [Group G] [TopologicalSpace G] [IsTopological
   [∀ w, IsTopologicalGroup (F w)] [∀ w, CompactSpace (F w)] (ψ : ∀ w, F w →ₜ* G)
   (W : OpenSubgroup G) (V : Type) [AddCommGroup V] [Module k V] [IsDiscreteRep (Rep.trivial k (W : Subgroup G) V)]
 
-omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 
+omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 theorem mackeyTopRes_trivial_eq [∀ p : MackeyTopIndex ψ W, IsDiscreteRep
       (Rep.res (mackeyConjₜ W (ψ p.1.1) p.1.2.out).toMonoidHom (Rep.trivial k (W : Subgroup G) V))] (n : ℕ) :
     mackeyTopRes ψ W (Rep.trivial k (W : Subgroup G) V) n =
       trivialRes (k := k) V (fun p : MackeyTopIndex ψ W => mackeyConjₜ W (ψ p.1.1) p.1.2.out) n :=
   rfl
 
-omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 
+omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 theorem mackeyTopRes_transfer {Γ : Type} [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ]
     (E : (W : Subgroup G) ≃ₜ* Γ) [IsDiscreteRep (Rep.trivial k Γ V)]
     {Q : Type} {D : Q → Type} [∀ q, Group (D q)] [∀ q, TopologicalSpace (D q)] [∀ q, IsTopologicalGroup (D q)]
@@ -291,9 +332,12 @@ theorem mackeyTopRes_transfer {Γ : Type} [Group Γ] [TopologicalSpace Γ] [IsTo
     (Function.Surjective (globalToLocal g (Rep.trivial k Γ V) (fun q => Rep.res (g q).toMonoidHom
         (Rep.trivial k Γ V)) (fun _ => 𝟙 _) n).hom →
       Function.Surjective (mackeyTopRes ψ W (Rep.trivial k (W : Subgroup G) V) n)) := by
-  rw [mackeyTopRes_trivial_eq]
-  exact trivialRes_transfer E V (fun p : MackeyTopIndex ψ W => mackeyConjₜ W (ψ p.1.1) p.1.2.out) g σ hσ mem hmem
-    e he n
+  have ht := trivialRes_transfer (k := k) (W := (W : Subgroup G)) (Γ := Γ)
+    (C := fun p : MackeyTopIndex ψ W =>
+      ↥(mackeySubgroup (W : Subgroup G) (ψ p.1.1).toMonoidHom p.1.2.out)) (D := D)
+    E V (fun p => mackeyConjₜ W (ψ p.1.1) p.1.2.out) g σ hσ mem hmem e he n
+  rw [mackeyTopRes_trivial_eq (k := k) ψ W V n]
+  apply ht
 
 end Apply
 
@@ -325,9 +369,9 @@ theorem exists_real_data_of_eq (p : MackeyTopIndex (gsRealFamily S ιr) (gsOpenS
 
 variable (h2S : ∀ v : HeightOneSpectrum (𝓞 K.1), ((2 : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
 
-set_option maxHeartbeats 1000000 in
-include h2S in
 
+
+include h2S in
 theorem gsMackeyTop_gsOpenSubgroup (j : ℕ) :
     (4 ≤ j → GsMackeyTopInjective S ιr (gsOpenSubgroup S hL) j) ∧
       (3 ≤ j → GsMackeyTopSurjective S ιr (gsOpenSubgroup S hL) j) := by
@@ -349,25 +393,40 @@ theorem gsMackeyTop_gsOpenSubgroup (j : ℕ) :
     (congrArg (gsBaseChange S hL) (Subtype.ext rfl)).trans
       (he w (x : Gal(AlgebraicClosure (mem w).1.1.1.Completion / (mem w).1.1.1.Completion))
         ((mem_mackeySubgroup _ _ _ _).1 x.2))
-  have : ∀ p : MackeyTopIndex (gsRealFamily S ιr) (gsOpenSubgroup S hL),
+  have hdiscreteK : ∀ p : MackeyTopIndex (gsRealFamily S ιr) (gsOpenSubgroup S hL),
       IsDiscreteRep (Rep.res (mackeyConjₜ (gsOpenSubgroup S hL) (gsRealFamily S ιr p.1.1) p.1.2.out).toMonoidHom
         (Rep.trivial (ULift.{0} ℤ) (gsOpenSubgroup S hL : Subgroup (galUnramifiedOutside K.1 ℚ̄ S))
           (ULift.{0} (ZMod 2)))) := fun p =>
     IsDiscreteRep.res (continuous_toMonoidHom _) _
-  have : ∀ w : {w : InfinitePlace L.1 // w.IsReal},
+  have hdiscreteL : ∀ w : {w : InfinitePlace L.1 // w.IsReal},
       IsDiscreteRep (Rep.res (gsRealFamily (placesOver S) ιrL w).toMonoidHom
         (Rep.trivial (ULift.{0} ℤ) (galUnramifiedOutside L.1 ℚ̄ (placesOver S)) (ULift.{0} (ZMod 2)))) := fun w =>
     IsDiscreteRep.res (continuous_toMonoidHom _) _
-  have ht := mackeyTopRes_transfer (k := ULift.{0} ℤ) (gsRealFamily S ιr) (gsOpenSubgroup S hL)
-    (ULift.{0} (ZMod 2)) (gsBaseChange S hL) (gsRealFamily (placesOver S) ιrL) (realMemberPlace S ιr hL)
-    (realMemberPlace_injective S ιr hL) mem hmem e' he' j
-  exact ⟨fun hj => ht.1 (injective_gsRealRes_zmodRep_two (placesOver S) ιrL h2SL hj),
-    fun hj => ht.2 (surjective_gsRealRes_zmodRep_two (placesOver S) ιrL h2SL hj)⟩
+  have transfer := @mackeyTopRes_transfer (ULift.{0} ℤ) (galUnramifiedOutside K.1 ℚ̄ S) _ _ _ _
+    {v : InfinitePlace K.1 // v.IsReal} (fun v => Gal(AlgebraicClosure v.1.Completion / v.1.Completion))
+    _ _ _ (gsRealFamily S ιr) (gsOpenSubgroup S hL) (ULift.{0} (ZMod 2)) _ _ (isDiscreteRep_of_isTrivial _)
+    (galUnramifiedOutside L.1 ℚ̄ (placesOver S)) _ _ _ (gsBaseChange S hL)
+    (isDiscreteRep_zmodRep_two_gs (K := L) (placesOver S))
+    {w : InfinitePlace L.1 // w.IsReal} (fun w => Gal(AlgebraicClosure w.1.Completion / w.1.Completion))
+    _ _ _ (gsRealFamily (K := L) (placesOver S) ιrL) (realMemberPlace S ιr hL)
+    (realMemberPlace_injective S ιr hL) mem hmem
+  have ht := @transfer e' he' hdiscreteK hdiscreteL j
+  constructor
+  · intro hj
+    have hi := injective_gsRealRes_zmodRep_two (K := L) (placesOver S) ιrL h2SL (r := j) hj
+    unfold GsMackeyTopInjective
+    apply ht.1
+    exact hi
+  · intro hj
+    have hs := surjective_gsRealRes_zmodRep_two (K := L) (placesOver S) ιrL h2SL (r := j) hj
+    unfold GsMackeyTopSurjective
+    apply ht.2
+    exact hs
 
 variable (ιs : ∀ v : S, ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1))
 
-include h2S in
 
+include h2S in
 theorem gsTateCompactCohomology_coind_zmodRep_two_eq_zero
     (W : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S)) {r : ℕ} (hr : 4 ≤ r)
     (x : gsTateCompactCohomology S ιr ιs (Rep.coind (W : Subgroup (galUnramifiedOutside K.1 ℚ̄ S)).subtype

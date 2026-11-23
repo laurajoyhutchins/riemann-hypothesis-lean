@@ -1,6 +1,49 @@
-import Formalism.WachLatticeTwists.SplitLocalLifts.Cocycles1MapOfEquivariant
-import Formalism.WachLatticeTwists.CoprimeLiftBounds.CoprimeLiftProofs.SelmerInjColumnPlace
-import Formalism.WachLatticeTwists.TorsionLengthCounts.RowCol
+module
+
+public import Formalism.WachLatticeTwists.SplitLocalLifts.Cocycles1MapOfEquivariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.WachLatticeTwists.CoprimeLiftBounds.Statement
+
+@[expose] public section
 
 open Finset Classical
 
@@ -43,10 +86,10 @@ theorem colK : StatColK := by
   refine ⟨fun a g => if h : g ∈ Dl then inc ((Kz a : Dl → P) ⟨g, h⟩) else 0, Kz, ?_, hKz1, ?_⟩
   · intro a g
     dsimp only
-    rw [dif_pos g.2]
+    rw [dite_eq_left g.2]
   · intro a g hg
     dsimp only
-    rw [dif_pos hg, ← hev, hKz2 a ⟨g, hg⟩, hκ a ⟨g, hg⟩]
+    rw [dite_eq_left hg, ← hev, hKz2 a ⟨g, hg⟩, hκ a ⟨g, hg⟩]
 
 theorem colk : StatColk := by
   intro O A T' G _ _ _ _ _ P _ _ _ _ M _ _ _ r χ E δO Dl inc ev hE hM hev hs Hf₁ Hf₂ ℓ e' u uz huz hmem hL
@@ -55,7 +98,7 @@ theorem colk : StatColk := by
   refine ⟨fun g => if h : g ∈ Dl then inc ((kz : Dl → P) ⟨g, h⟩) else 0, kz, ?_, hk1, ?_, ?_⟩
   · intro g
     dsimp only
-    rw [dif_pos g.2]
+    rw [dite_eq_left g.2]
   · intro g
     dsimp only
     split_ifs with h
@@ -63,7 +106,7 @@ theorem colk : StatColk := by
     · exact ⟨0, (zero_mul E).symm⟩
   · intro g hg m
     dsimp only
-    rw [dif_pos hg, hM, hk2 ⟨g, hg⟩, Submodule.coe_smul, huz ⟨g, hg⟩, smul_eq_mul, mul_assoc]
+    rw [dite_eq_left hg, hM, hk2 ⟨g, hg⟩, Submodule.coe_smul, huz ⟨g, hg⟩, smul_eq_mul, mul_assoc]
 
 theorem colFun : StatColFun := by
   intro O A T' G _ _ _ _ _ P _ _ _ _ V _ _ r χ Dl inc Hf₁ Lf H K Kz hK hKz s
@@ -75,31 +118,5 @@ theorem colFun : StatColFun := by
     rfl
   rw [e]
   exact h
-
-theorem rowLift : StatRowLift := by
-  intro O _ _ _ H₁ Cs _ _ _ _ Hf₁ Fs g ℓ e' hL
-  have h1 : ∀ x : Fs, ((ℓ : O) ^ e') • x ∈ (Hf₁.map g).comap Fs.subtype := by
-    intro x
-    rw [Submodule.mem_comap, Submodule.subtype_apply, Submodule.coe_smul]
-    exact hL _ x.2
-  refine ⟨h1, ?_⟩
-  intro hfin
-  exact Formalism.RepresentationBoundsCohomology.rowColength O Fs _ ℓ e' h1
-
-theorem rowIm : StatRowIm := by
-  intro O Dw T₁ T₂ _ _ _ _ _ _ ρ₁ ρ₂ π hπ C₁ Hf₁ Fs hFun hC
-  refine ⟨?_, ?_⟩
-  · rintro x ⟨y, hy, rfl⟩
-    obtain ⟨a, ha, rfl⟩ := hC y hy
-    refine ⟨(a : Dw → T₁), a.2, ha, ?_⟩
-    have hm : (fun g => π ((a : Dw → T₁) g)) ∈ coZ1s ρ₂ := (cocycles1MapOfEquivariant ρ₁ ρ₂ π hπ a).2
-    unfold clsOf
-    rw [dif_pos hm]
-    rfl
-  · rintro x ⟨y, hy, rfl⟩
-    exact hFun y hy
-
-theorem locLift : StatLocLift := by
-  refine ⟨?_, ?_⟩ <;> intros <;> exact Iff.rfl
 
 end Formalism.RepresentationBoundsCohomology.JL

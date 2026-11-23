@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Completion.InfinitePlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -7,8 +56,8 @@ open NumberField NumberField.InfinitePlace
 
 variable {K : Type*} [Field K] [NumberField K]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem apply_eq_abs_embedding_of_isReal {v : InfinitePlace K} (hv : v.IsReal) (x : K) :
     v x = |embedding_of_isReal hv x| := by
   rw [← norm_embedding_of_isReal hv x, Real.norm_eq_abs]
@@ -55,30 +104,13 @@ theorem exists_units_neg_iff_mem (S : Set {v : InfinitePlace K // v.IsReal}) :
   · rw [if_neg hv, map_one, abs_lt] at h
     exact ⟨⟨fun h' => by linarith [h.1], fun h' => absurd h' hv⟩, ⟨fun _ => hv, fun _ => by linarith [h.1]⟩⟩
 
-theorem exists_units_sign (ε : {v : InfinitePlace K // v.IsReal} → ℤˣ) :
-    ∃ a : Kˣ, ∀ v : {v : InfinitePlace K // v.IsReal},
-      (SignType.sign (embedding_of_isReal v.2 (a : K)) : ℤ) = (ε v : ℤ) := by
-  obtain ⟨a, ha⟩ := exists_units_neg_iff_mem {v | ε v = -1}
-  refine ⟨a, fun v => ?_⟩
-  rcases Int.units_eq_one_or (ε v) with hε | hε
-  · have hpos : 0 < embedding_of_isReal v.2 (a : K) := (ha v).2.2 (by simp [hε])
-    rw [sign_pos hpos, hε]
-    rfl
-  · have hneg : embedding_of_isReal v.2 (a : K) < 0 := (ha v).1.2 hε
-    rw [sign_neg hneg, hε]
-    rfl
 
 omit [NumberField K] in
-
 theorem extensionEmbeddingOfIsReal_algebraMap {v : InfinitePlace K} (hv : v.IsReal) (x : K) :
     Completion.extensionEmbeddingOfIsReal hv (algebraMap K v.Completion x) = embedding_of_isReal hv x :=
-  Completion.extensionEmbeddingOfIsReal_coe hv (WithAbs.toAbs v.1 x)
-
-theorem exists_units_neg_iff_mem_completion (S : Set {v : InfinitePlace K // v.IsReal}) :
-    ∃ a : Kˣ, ∀ v : {v : InfinitePlace K // v.IsReal},
-      (Completion.extensionEmbeddingOfIsReal v.2 (algebraMap K v.1.Completion (a : K)) < 0 ↔ v ∈ S) ∧
-      (0 < Completion.extensionEmbeddingOfIsReal v.2 (algebraMap K v.1.Completion (a : K)) ↔ v ∉ S) := by
-  obtain ⟨a, ha⟩ := exists_units_neg_iff_mem S
-  exact ⟨a, fun v => by simpa only [extensionEmbeddingOfIsReal_algebraMap] using ha v⟩
+  by
+    rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply,
+      Algebra.algebraMap_self_apply]
+    simpa using Completion.extensionEmbeddingOfIsReal_coe hv (WithAbs.toAbs v.1 x)
 
 end GroundTheory.ProfCoh

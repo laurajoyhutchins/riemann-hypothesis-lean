@@ -1,9 +1,61 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.ThetaIdempotents.HeckeEta
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EisensteinCovariance
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSumInvariantWeylInvolution
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHalfTr
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlockMatrixInjective
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlockMatrixInjective
+public import Development.AbelianVarietyTheory.BlockTheory.SiegelEisenstein.GramMatrixAdjoint
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.RationalAdelicMatricesSelfAnnihilatorStatement
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BruhatImpliesFieldGeneration
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHalfTr
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EisensteinBruhatDecomposition
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EisensteinRationalPoints
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HalfTrAddSwap
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RationalGroupInductionGenerators
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSumInvariantWeylInvolution
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TraceInnerMul
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,9 +88,6 @@ theorem pr_add_right (b₀ : HermE D ρ) (u v v' : Mx D ρ p) : pr b₀ u (v + v
 theorem pr_neg_left (b₀ : HermE D ρ) (u v : Mx D ρ p) : pr b₀ (-u) v = -pr b₀ u v := by
   simp only [pr_def, adj_neg, Matrix.neg_mul]
 
-theorem pr_neg_right (b₀ : HermE D ρ) (u v : Mx D ρ p) : pr b₀ u (-v) = -pr b₀ u v := by
-  simp only [pr_def, Matrix.mul_neg]
-
 theorem adj_pr (b₀ : HermE D ρ) (u v : Mx D ρ p) : adj (pr b₀ u v) = pr b₀ v u := by
   simp only [pr_def, adj_mul, adj_adj, adj_B, Matrix.mul_assoc]
 
@@ -60,7 +109,7 @@ theorem trace_swap_pr (b₀ : HermE D ρ) {b : Mx D p p} (hb : adj b = b) (u v :
   rw [← trace_adj, adj_mul, hb, adj_pr, Matrix.trace_mul_comm]
 
 theorem halfTr_add'' (a c : AE D) : halfTr (a + c) = halfTr a + halfTr c := by
-  simp only [halfTr, trA, map_add, mul_add]
+  simp only [halfTr, trA, map_add (f := _), mul_add]
 
 theorem halfTr_neg'' (a : AE D) : halfTr (-a) = -halfTr a := by
   simp only [halfTr, trA, map_neg, mul_neg]

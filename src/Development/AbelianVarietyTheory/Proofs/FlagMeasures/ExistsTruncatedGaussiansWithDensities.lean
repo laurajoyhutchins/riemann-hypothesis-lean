@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SiegelMeanCc
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianQuadricDensityExistsPosContinuous
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SiegelMeanCc
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianQuadricDensityExistsPosContinuous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.GaussMean
 
@@ -48,7 +94,7 @@ theorem prodFun_nonneg {n : ℕ} (y : Fin n → ℂ) : 0 ≤ prodFun g y := Fins
 include h0 h1 in
 theorem prodFun_le {n : ℕ} (y : Fin n → ℂ) : prodFun g y ≤ gauss y := by
   rw [← prodFun_exp]
-  exact Finset.prod_le_prod (fun _ _ => h0 _) fun _ _ => h1 _
+  exact Finset.prod_le_prod₀ (fun _ _ => h0 _) fun _ _ => h1 _
 
 include hc h0 h1 in
 theorem integrable_prodFun (n : ℕ) : Integrable (prodFun g : (Fin n → ℂ) → ℝ) :=
@@ -214,7 +260,7 @@ theorem tendsto_cutExp (r : ℝ) : Filter.Tendsto (fun k => cutExp k r) Filter.a
 
 theorem tendsto_prodFun {n : ℕ} (y : Fin n → ℂ) : Filter.Tendsto (fun k => prodFun (cutExp k) y) Filter.atTop
     (nhds (prodFun (fun r => Real.exp (-r)) y)) :=
-  tendsto_finset_prod _ fun _ _ => tendsto_cutExp _
+  tendsto_finsetProd _ fun _ _ => tendsto_cutExp _
 
 theorem hasCompactSupport_prodFun (k n : ℕ) : HasCompactSupport (prodFun (cutExp k) : (Fin n → ℂ) → ℝ) := by
   refine HasCompactSupport.intro (isCompact_closedBall (0 : Fin n → ℂ) (k + 1)) fun y hy => ?_
@@ -227,7 +273,7 @@ theorem hasCompactSupport_prodFun (k n : ℕ) : HasCompactSupport (prodFun (cutE
 
 theorem contDiff_prodFun (k n : ℕ) :
     ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (prodFun (cutExp k) : (Fin n → ℂ) → ℝ) :=
-  contDiff_prod fun i _ => (contDiff_cutExp k).comp ((contDiff_apply ℝ ℂ i).norm_sq ℂ)
+  contDiff_prod fun i _ => (contDiff_cutExp k).comp ((contDiff_apply ℝ (fun _ => ℂ) i).norm_sq ℂ)
 
 theorem tendsto_dens {n : ℕ} (ε : Fin (n + 1) → Bool) (t : ℝ) :
     Filter.Tendsto (fun k => dens (cutExp k) ε t) Filter.atTop (nhds (dens (fun r => Real.exp (-r)) ε t)) := by
@@ -248,7 +294,7 @@ theorem exists_truncated (n : ℕ) (ε : Fin n → Bool) :
       ∀ β : ℝ, β ≠ 0 → Filter.Tendsto (fun k => D k β) Filter.atTop (nhds (gaussDens ε β)) := by
   have key : ∀ y : Fin n → ℂ, Monotone (fun k => prodFun (cutExp k) y) ∧
       Filter.Tendsto (fun k => prodFun (cutExp k) y) Filter.atTop (nhds (gauss y)) := fun y =>
-    ⟨fun _ _ h => Finset.prod_le_prod (fun _ _ => cutExp_nonneg _ _) fun _ _ => cutExp_mono _ h,
+    ⟨fun _ _ h => Finset.prod_le_prod₀ (fun _ _ => cutExp_nonneg _ _) fun _ _ => cutExp_mono _ h,
       prodFun_exp y ▸ tendsto_prodFun y⟩
   obtain _ | n := n
   · refine ⟨fun k => prodFun (cutExp k), fun _ _ => 0, fun k => ⟨contDiff_prodFun k 0,

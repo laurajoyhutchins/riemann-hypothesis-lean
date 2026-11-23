@@ -1,4 +1,53 @@
-import Formalism.HermitianCurvature.Statement
+module
+
+public import Formalism.HermitianCurvature.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.RecText
 
@@ -66,7 +115,6 @@ theorem recT : Formalism.FourierDecayAlt.RecursionText := by
           rw [hM]
           have e1 : lam ^ (k + 1 - t) ≤ lam ^ k := pow_le_pow_right₀ hlam1 (by omega)
           have e2 : Q (k + 1 - t) ≤ Q (k + 1) := hQmono (by omega)
-          have e3 : 0 ≤ lam ^ (k + 1 - t) := pow_nonneg (by linarith) _
           have e4 : 0 ≤ Q (k + 1 - t) := by linarith [hQ1 (k + 1 - t)]
           have e5 : 0 ≤ lam ^ k := pow_nonneg (by linarith) _
           have := mul_le_mul e1 e2 e4 e5
@@ -95,7 +143,6 @@ theorem recT : Formalism.FourierDecayAlt.RecursionText := by
       _ = _ := by ring
   set x := ((r : ℝ) + 1) * a with hxdef
   have hx0 : 0 ≤ x := by positivity
-  have hx32 : x ≤ 3 / 2 := by rw [hxdef]; nlinarith
   have step2 : (lam ^ (r + 1)) ^ 2 ≤ Real.exp (6 * x) := by
     rw [← pow_mul]
     have h1 : lam ≤ Real.exp (ε + 2 * a) := by

@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.TateCohomology.InducedNorm
-import GroundTheory.TateCohomology.DimensionShift
-import GroundTheory.TateCohomology.TateConnecting
+module
+
+public import GroundTheory.TateCohomology.TateConnecting
+public import GroundTheory.TateCohomology.Induced
+public import Mathlib.RingTheory.Flat.Basic
+public import GroundTheory.TateCohomology.DimensionShift
+public import GroundTheory.TateCohomology.InducedNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open CategoryTheory MonoidalCategory
@@ -43,7 +92,7 @@ theorem augmentation_ρ (g : G) (x : (Rep.leftRegular k G).V) :
     augmentation k G ((Rep.leftRegular k G).ρ g x) = augmentation k G x := by
   induction x using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | single h r =>
     simp only [Representation.ofMulAction_single, smul_eq_mul]
     rw [augmentation_single, augmentation_single]
@@ -116,7 +165,7 @@ theorem whiskerRight_retract (f : A ⟶ B) (r : B.V →ₗ[k] A.V)
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul a y => rw [whiskerRight_hom_tmul, LinearMap.rTensor_tmul, hr]
-  | add s t hs ht => rw [map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), hs, ht]
 
 theorem whiskerLeft_retract (f : A ⟶ B) (r : B.V →ₗ[k] A.V)
     (hr : ∀ a, r (f.hom a) = a) (Y : Rep.{u} k G) (t : (Y ⊗ A : Rep k G)) :
@@ -124,21 +173,21 @@ theorem whiskerLeft_retract (f : A ⟶ B) (r : B.V →ₗ[k] A.V)
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul y a => rw [whiskerLeft_hom_tmul, LinearMap.lTensor_tmul, hr]
-  | add s t hs ht => rw [map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), hs, ht]
 
 theorem whiskerRight_hom_eq_rTensor (f : A ⟶ B) (Y : Rep.{u} k G) (t : (A ⊗ Y : Rep k G)) :
     (f ▷ Y).hom t = LinearMap.rTensor Y.V f.hom.toLinearMap t := by
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul a y => rfl
-  | add s t hs ht => rw [map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), hs, ht]
 
 theorem whiskerLeft_hom_eq_lTensor (Y : Rep.{u} k G) (f : A ⟶ B) (t : (Y ⊗ A : Rep k G)) :
     (Y ◁ f).hom t = LinearMap.lTensor Y.V f.hom.toLinearMap t := by
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul a y => rfl
-  | add s t hs ht => rw [map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), hs, ht]
 
 theorem function_exact_of_shortExact {S : ShortComplex (Rep.{u} k G)} (hS : S.ShortExact) :
     Function.Exact S.f.hom.toLinearMap S.g.hom.toLinearMap := by
@@ -205,11 +254,11 @@ theorem injective_whiskerRight_tensor_of_flat (Y : Rep.{u} k G)
     hf (TensorProduct.leftComm k X₁.V V.V Y.V) (TensorProduct.leftComm k X₂.V V.V Y.V) fun x => ?_
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add s t hs ht => simp only [map_add, hs, ht]
+  | add s t hs ht => simp only [map_add (f := _), hs, ht]
   | tmul a t =>
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add s t hs ht => simp only [TensorProduct.tmul_add, map_add, hs, ht]
+    | add s t hs ht => simp only [TensorProduct.tmul_add, map_add (f := _), hs, ht]
     | tmul v y => rfl
 
 theorem injective_whiskerLeft_whiskerRight_of_flat (Y : Rep.{u} k G)
@@ -218,11 +267,11 @@ theorem injective_whiskerLeft_whiskerRight_of_flat (Y : Rep.{u} k G)
     hf (TensorProduct.assoc k V.V X₁.V Y.V) (TensorProduct.assoc k V.V X₂.V Y.V) fun x => ?_
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add s t hs ht => simp only [map_add, hs, ht]
+  | add s t hs ht => simp only [map_add (f := _), hs, ht]
   | tmul t y =>
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add s t hs ht => simp only [TensorProduct.add_tmul, map_add, hs, ht]
+    | add s t hs ht => simp only [TensorProduct.add_tmul, map_add (f := _), hs, ht]
     | tmul v a => rfl
 
 theorem injective_tensor_whiskerLeft_of_flat (Y : Rep.{u} k G)
@@ -231,11 +280,11 @@ theorem injective_tensor_whiskerLeft_of_flat (Y : Rep.{u} k G)
     hf (TensorProduct.assoc k V.V Y.V X₁.V) (TensorProduct.assoc k V.V Y.V X₂.V) fun x => ?_
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add s t hs ht => simp only [map_add, hs, ht]
+  | add s t hs ht => simp only [map_add (f := _), hs, ht]
   | tmul t a =>
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add s t hs ht => simp only [TensorProduct.add_tmul, map_add, hs, ht]
+    | add s t hs ht => simp only [TensorProduct.add_tmul, map_add (f := _), hs, ht]
     | tmul v y => rfl
 
 theorem injective_whiskerLeft_whiskerLeft_of_flat (Y : Rep.{u} k G)
@@ -244,11 +293,11 @@ theorem injective_whiskerLeft_whiskerLeft_of_flat (Y : Rep.{u} k G)
     hf (TensorProduct.leftComm k Y.V V.V X₁.V) (TensorProduct.leftComm k Y.V V.V X₂.V) fun x => ?_
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add s t hs ht => simp only [map_add, hs, ht]
+  | add s t hs ht => simp only [map_add (f := _), hs, ht]
   | tmul y t =>
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add s t hs ht => simp only [TensorProduct.tmul_add, map_add, hs, ht]
+    | add s t hs ht => simp only [TensorProduct.tmul_add, map_add (f := _), hs, ht]
     | tmul v a => rfl
 
 end FlatRep
@@ -266,7 +315,7 @@ theorem augSES_zero (X : Rep.{u} k G) : augIdealι k G ▷ X ≫ augX X = 0 := b
     rw [augX_tmul]
     have hy : augmentation k G y.1 = 0 := y.2
     exact (congrArg (· • a) hy).trans (zero_smul k a)
-  | add s t hs ht => rw [map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), hs, ht]
 
 theorem augX_naturality {X Y : Rep.{u} k G} (f : X ⟶ Y) :
     Rep.leftRegular k G ◁ f ≫ augX Y = augX X ≫ f := by
@@ -277,11 +326,12 @@ theorem augX_naturality {X Y : Rep.{u} k G} (f : X ⟶ Y) :
     change (augX Y).hom (x ⊗ₜ[k] f.hom a) = f.hom ((augX X).hom (x ⊗ₜ[k] a))
     rw [augX_tmul, augX_tmul, map_smul]
   | add s t hs ht =>
-    rw [map_add, map_add, hs, ht]
+    rw [map_add (f := _), map_add (f := _), hs, ht]
+
 
 variable (k G) in
-
-noncomputable def augSES : Rep.{u} k G ⥤ ShortComplex (Rep.{u} k G) where
+noncomputable def augSES (k G : Type u) [CommRing k] [Group G] :
+    Rep.{u} k G ⥤ ShortComplex (Rep.{u} k G) where
   obj X := ShortComplex.mk (augIdealι k G ▷ X) (augX X) (augSES_zero X)
   map f :=
     { τ₁ := augIdeal k G ◁ f
@@ -294,13 +344,6 @@ noncomputable def augSES : Rep.{u} k G ⥤ ShortComplex (Rep.{u} k G) where
   map_comp _ _ := ShortComplex.hom_ext _ _ (MonoidalCategory.whiskerLeft_comp _ _ _)
     (MonoidalCategory.whiskerLeft_comp _ _ _) rfl
 
-@[simp] theorem augSES_obj_X₁ (X : Rep.{u} k G) : ((augSES k G).obj X).X₁ = augIdeal k G ⊗ X := rfl
-
-@[simp] theorem augSES_obj_X₂ (X : Rep.{u} k G) :
-    ((augSES k G).obj X).X₂ = Rep.leftRegular k G ⊗ X := rfl
-
-@[simp] theorem augSES_obj_X₃ (X : Rep.{u} k G) : ((augSES k G).obj X).X₃ = X := rfl
-
 theorem augSES_decomp (X : Rep.{u} k G) (t : (Rep.leftRegular k G ⊗ X : Rep k G)) :
     (augIdealι k G ▷ X).hom (LinearMap.rTensor X.V (augIdealRetract k G) t) +
       (MonoidAlgebra.single 1 1 ⊗ₜ[k] (augX X).hom t : (Rep.leftRegular k G ⊗ X : Rep k G)) = t := by
@@ -311,7 +354,7 @@ theorem augSES_decomp (X : Rep.{u} k G) (t : (Rep.leftRegular k G ⊗ X : Rep k 
       TensorProduct.tmul_smul, TensorProduct.smul_tmul', MonoidAlgebra.smul_single, smul_eq_mul,
       mul_one, ← TensorProduct.add_tmul, sub_add_cancel]
   | add s t hs ht =>
-    rw [map_add, map_add, map_add, TensorProduct.tmul_add]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), TensorProduct.tmul_add]
     conv_rhs => rw [← hs, ← ht]
     abel
 
@@ -341,9 +384,6 @@ theorem augSES_tensorLeft_shortExact (A B : Rep.{u} k G) :
     (Function.LeftInverse.injective (whiskerLeft_retract _ _ (augSES_f_retract B) A))
 
 variable [Fintype G]
-
-theorem tateAcyclic_augSES_X₂ (X : Rep.{u} k G) : TateAcyclic ((augSES k G).obj X).X₂ :=
-  tateAcyclic_leftRegular_tensor X
 
 theorem tateAcyclic_augSES_tensorRight_X₂ (A B : Rep.{u} k G) :
     TateAcyclic (((augSES k G).obj A).map (tensorRight B)).X₂ :=

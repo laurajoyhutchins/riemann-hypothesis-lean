@@ -1,5 +1,60 @@
-import Formalism.HermitianCurvature.StatementE
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Herglotz
+module
+
+public import Formalism.HermitianCurvature.StatementE
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Herglotz
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.PeakFunction
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.HLsc
 
@@ -13,16 +68,13 @@ noncomputable def tp (B : Finset (Fin d → ℤ)) (c : (Fin d → ℤ) → ℂ) 
 lemma continuous_ee (σ : Fin d → ℤ) : Continuous (fun y : Fin d → ℝ => ee y σ) := by
   unfold ee; fun_prop
 
-lemma continuous_tp (B : Finset (Fin d → ℤ)) (c : (Fin d → ℤ) → ℂ) : Continuous (tp B c) := by
-  unfold tp
-  exact continuous_finsetSum _ (fun σ _ => continuous_const.mul (continuous_ee σ))
-
 lemma normSq_tp (B : Finset (Fin d → ℤ)) (c : (Fin d → ℤ) → ℂ) (y : Fin d → ℝ) :
     ((‖tp B c y‖ ^ 2 : ℝ) : ℂ) =
       ∑ σ ∈ B, ∑ σ' ∈ B, ee y (σ - σ') * c σ * starRingEnd ℂ (c σ') := by
   push_cast
   rw [← Complex.mul_conj']
   unfold tp
+
   rw [map_sum, Finset.sum_mul_sum]
   refine Finset.sum_congr rfl (fun σ _ => Finset.sum_congr rfl (fun σ' _ => ?_))
   rw [← ee_mul_conj, map_mul]
@@ -124,7 +176,7 @@ lemma key_upper {N : (Fin d → ℝ) → ℝ} {A : (Fin d → ℤ) → ℂ} (hin
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum (fun σ' _ => ?_))
   rw [norm_mul, norm_mul, RCLike.norm_conj]
 
-def cube (d : ℕ) : Set (Fin d → ℝ) := Set.Icc (fun _ => -(1 / 2)) (fun _ => 1 / 2)
+def cube (d : ℕ) : Set (Fin d → ℝ) := {z | z ∈ Set.Icc (fun _ => -(1 / 2)) (fun _ => 1 / 2)}
 
 lemma integral_one_dim (m : ℤ) :
     ∫ t in Set.Icc (-(1 / 2) : ℝ) (1 / 2), Complex.exp (2 * π * Complex.I * (((m : ℝ) : ℂ) * (t : ℂ))) =
@@ -132,7 +184,7 @@ lemma integral_one_dim (m : ℤ) :
   rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le (by norm_num)]
   by_cases hm : m = 0
   · simp [hm]; norm_num
-  · rw [if_neg hm]
+  · rw [ite_eq_right hm]
     have hc : (2 * π * Complex.I * ((m : ℝ) : ℂ)) ≠ 0 := by
       have hpi : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
       simp [hm, hpi]
@@ -201,7 +253,7 @@ lemma parseval (B : Finset (Fin d → ℤ)) (c : (Fin d → ℤ) → ℂ) :
     push_cast
     refine Finset.sum_congr rfl (fun σ hσ => ?_)
     simp_rw [ite_mul, zero_mul, one_mul]
-    rw [Finset.sum_ite_eq, if_pos hσ, Complex.mul_conj']
+    rw [Finset.sum_ite_eq, ite_eq_left hσ, Complex.mul_conj']
   rw [h3] at h
   exact_mod_cast h
 
@@ -279,7 +331,7 @@ lemma pk_lt (y : Fin d → ℝ) (hy : y ∈ cube d) (hy0 : y ≠ 0) : pk y < pk 
       by_contra hcon
       push Not at hcon
       exact hy0 (funext hcon)
-    refine Finset.prod_lt_prod (fun i _ => lt_of_le_of_ne (by positivity) (hz i).symm)
+    refine Finset.prod_lt_prod₀ (fun i _ => lt_of_le_of_ne (by positivity) (hz i).symm)
       (fun i _ => ?_) ⟨j, Finset.mem_univ j, ?_⟩
     · rw [fac_eq]; linarith [Real.cos_le_one (2 * π * y i)]
     · rw [fac_eq]
@@ -305,7 +357,7 @@ lemma pk_le (y : Fin d → ℝ) : pk y ≤ 4 ^ d := by
   have h4 : (4 : ℝ) ^ d = ∏ _j : Fin d, (4 : ℝ) := by simp
   rw [h4]
   unfold pk
-  refine Finset.prod_le_prod (fun i _ => by positivity) (fun i _ => ?_)
+  refine Finset.prod_le_prod₀ (fun i _ => by positivity) (fun i _ => ?_)
   rw [fac_eq]; linarith [Real.cos_le_one (2 * π * y i)]
 
 lemma normSq_prod (n : ℕ) (y : Fin d → ℝ) :

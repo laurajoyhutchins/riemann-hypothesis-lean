@@ -1,12 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.QuadraticClassFieldTheory
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuadraticExtNormFormOverAlgebra
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitNormFormAtOddPlace
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUnitMulSqQuadraticDefectStep
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsGlobalUniformizerResidueRepresentatives
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsSubSqLtOneOfTwoLtOne
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSquareMulOfNonsquareUnits
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.QuadraticClassFieldTheory
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsGlobalUniformizerResidueRepresentatives
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsSubSqLtOneOfTwoLtOne
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUnitMulSqQuadraticDefectStep
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSquareMulOfNonsquareUnits
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSquareOfValuedSubOneLt
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuadraticExtNormFormOverAlgebra
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitNormFormAtOddPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain IsLocalRing
 open scoped WithZero
@@ -285,7 +337,7 @@ theorem isSquare_mul_of_near {x y : v.adicCompletion F} (hx : Valued.v x = 1) (h
   have key : ∀ r s : v.adicCompletionIntegers F,
       residue _ s ^ 2 + residue _ s = residue _ r → IsSquare (1 + 4 * (r : v.adicCompletion F)) := by
     intro r s h
-    have h1 := (hres (r - (s ^ 2 + s))).1 (by rw [map_sub, map_add, map_pow, h, sub_self])
+    have h1 := (hres (r - (s ^ 2 + s))).1 (by rw [map_sub, map_add (f := _), map_pow, h, sub_self])
     refine isSquare_of_near Valued.v (GlobalTheory.LocalQuad.isSquare_of_valued_sub_one_lt F v)
       (s := 1 + 2 * (s : v.adicCompletion F)) (Valuation.map_one_add_of_lt _ ?_) ?_
     · rw [map_mul]
@@ -314,7 +366,7 @@ theorem isSquare_mul_of_near {x y : v.adicCompletion F} (hx : Valued.v x = 1) (h
       exact hy' (ey ▸ key t s h))
   obtain ⟨s, rfl⟩ := residue_surjective s
   have := key (r + t + 2 * (2 * r * t)) s (by
-    rw [hs, map_add, map_add, map_mul, map_ofNat, h20, zero_mul, add_zero])
+    rw [hs, map_add (f := _), map_add (f := _), map_mul, map_ofNat, h20, zero_mul, add_zero])
   have e : x * y = 1 + 4 * ((r : v.adicCompletion F) + t + 2 * (2 * r * t)) := by
     rw [ex, ey]; ring
   rw [e]
@@ -385,8 +437,8 @@ theorem eta_mul {K L A : Type} [Field K] [Field L] [Algebra K L] [CommRing A] [A
 
 end NormIndex
 
-open NormIndex in
 
+open NormIndex in
 theorem localCharacters : ∀ (K L : Type) [Field K] [NumberField K] [Field L] [NumberField L]
     [Algebra K L] [Algebra.IsQuadraticExtension K L], LocalCharacters K L := by
   intro K L _ _ _ _ _ _

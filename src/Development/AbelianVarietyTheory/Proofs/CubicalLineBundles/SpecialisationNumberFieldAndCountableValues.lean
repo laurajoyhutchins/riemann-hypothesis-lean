@@ -1,17 +1,65 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.Algebra.AlgebraicCard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Complex.Cardinality
+public import Mathlib.FieldTheory.AlgebraicClosure
+public import Mathlib.FieldTheory.RatFunc.AsPolynomial
+
+@[expose] public section
 
 namespace GlobalTheory
-
-theorem exists_algHom_isAlgebraic_of_finiteType (F A L : Type*) [Field F] [CommRing A]
-    [Nontrivial A] [Algebra F A] [Algebra.FiniteType F A] [Field L] [IsAlgClosed L] [Algebra F L] :
-    ∃ φ : A →ₐ[F] L, ∀ x, IsAlgebraic F (φ x) := by
-  obtain ⟨m, hm⟩ := Ideal.exists_maximal A
-  letI : Field (A ⧸ m) := Ideal.Quotient.field m
-  have : Module.Finite F (A ⧸ m) := finite_of_finite_type_of_isJacobsonRing F (A ⧸ m)
-  refine ⟨(IsAlgClosed.lift : (A ⧸ m) →ₐ[F] L).comp (Ideal.Quotient.mkₐ F m), fun x => ?_⟩
-  exact (Algebra.IsAlgebraic.isAlgebraic (R := F) (Ideal.Quotient.mkₐ F m x)).algHom
-    (IsAlgClosed.lift : (A ⧸ m) →ₐ[F] L)
 
 theorem _root_.GlobalTheory.exists_ringHom_extend_of_finiteType (F A L : Type*) [Field F] [CommRing A]
     [Nontrivial A] [Algebra F A] [Algebra.FiniteType F A] [Field L] [IsAlgClosed L]
@@ -20,24 +68,15 @@ theorem _root_.GlobalTheory.exists_ringHom_extend_of_finiteType (F A L : Type*) 
   letI : Field (A ⧸ m) := Ideal.Quotient.field m
   haveI : Module.Finite F (A ⧸ m) := finite_of_finite_type_of_isJacobsonRing F (A ⧸ m)
   letI : Algebra F L := σ.toAlgebra
-  let ψ : (A ⧸ m) →ₐ[F] L := IsAlgClosed.lift
+  let ψ : (A ⧸ m) →ₐ[F] L := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   refine ⟨ψ.toRingHom.comp (Ideal.Quotient.mk m), fun x => ?_⟩
   have h1 : Ideal.Quotient.mk m (algebraMap F A x) = algebraMap F (A ⧸ m) x := rfl
   simp only [RingHom.comp_apply, h1, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgHom.commutes]
   rfl
-
-theorem exists_fg_subalgebra_over {k L : Type*} [Field k] [Field L] [Algebra k L]
-    (F : IntermediateField k L) (R : Subalgebra k L) (hR : R.FG) (u : L) :
-    ∃ A : Subalgebra F L, Algebra.FiniteType F A ∧ R ≤ A.restrictScalars k ∧ u ∈ A := by
-  classical
-  obtain ⟨s, rfl⟩ := hR
-  refine ⟨Algebra.adjoin F (↑(insert u s) : Set L), ?_, ?_, ?_⟩
-  · exact (Subalgebra.fg_iff_finiteType _).1 ⟨_, rfl⟩
-  · refine Algebra.adjoin_le fun x hx => ?_
-    have : x ∈ Algebra.adjoin F (↑(insert u s) : Set L) :=
-      Algebra.subset_adjoin (Finset.mem_coe.2 (Finset.mem_insert_of_mem (Finset.mem_coe.1 hx)))
-    exact this
-  · exact Algebra.subset_adjoin (Finset.mem_coe.2 (Finset.mem_insert_self _ _))
 
 private lemma exists_algHom_extend_of_fg_ne_zero {k L M : Type*} [Field k] [Field L] [Algebra k L]
     [Field M] [IsAlgClosed M] [Algebra k M] (F : IntermediateField k L) (σ : F →ₐ[k] M)
@@ -120,27 +159,6 @@ theorem _root_.GlobalTheory.exists_specialisation_finite {k L : Type*} [Field k]
     show ((ρ₁ c : algebraicClosure k L) : L) = c
     rw [hfix c hcL]
     rfl
-
-theorem exists_algHom_apply_eq_of_transcendental {k L : Type*} [Field k] [Field L] [Algebra k L]
-    [IsAlgClosed L] (R : Subalgebra k L) (hR : R.FG) (c : R) (hc : Transcendental k (c : L))
-    (t : L) (ht : Transcendental k t) : ∃ ρ : R →ₐ[k] L, ρ c = t := by
-  let F : IntermediateField k L := IntermediateField.adjoin k {(c : L)}
-  let σ : F →ₐ[k] L := (IntermediateField.val _).comp
-    ((RatFunc.algEquivOfTranscendental t ht).toAlgHom.comp
-      (RatFunc.algEquivOfTranscendental (c : L) hc).symm.toAlgHom)
-  have hσ : σ (IntermediateField.AdjoinSimple.gen k (c : L)) = t := by
-    change ((RatFunc.algEquivOfTranscendental t ht)
-      ((RatFunc.algEquivOfTranscendental (c : L) hc).symm
-        (IntermediateField.AdjoinSimple.gen k (c : L))) : L) = t
-    rw [RatFunc.algEquivOfTranscendental_symm_gen, RatFunc.algEquivOfTranscendental_X]
-  obtain ⟨A, hA, hRA, -⟩ := exists_fg_subalgebra_over F R hR 0
-  obtain ⟨φ, hφ⟩ := exists_ringHom_extend_of_finiteType F A L σ.toRingHom
-  let ι : R →+* A :=
-    { toFun := fun x => ⟨x.1, hRA x.2⟩
-      map_one' := rfl, map_mul' := fun _ _ => rfl, map_zero' := rfl, map_add' := fun _ _ => rfl }
-  refine ⟨{ φ.comp ι with commutes' := fun a => ?_ }, ?_⟩
-  · exact (hφ (algebraMap k F a)).trans (σ.commutes a)
-  · exact (hφ (IntermediateField.AdjoinSimple.gen k (c : L))).trans hσ
 
 theorem _root_.GlobalTheory.specialisation_numberField_and_countable_values :
     ∀ (k : IntermediateField ℚ ℂ) [FiniteDimensional ℚ k] (R : Subalgebra k ℂ), R.FG →

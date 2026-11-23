@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.EnergyAbs
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HaarOn
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.EnergyAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,7 +128,7 @@ theorem haarSub_prop {S : Set G} {μ ν : Measure G} (hμ : LeftHaarSub S μ) (h
   rw [Measure.add_apply] at hAfin
   have hμA : μ' A ≠ ⊤ := (lt_of_le_of_lt le_self_add hAfin).ne
   have hνA : ν' A ≠ ⊤ := (lt_of_le_of_lt le_add_self hAfin).ne
-  haveI : BorelSpace H := Subtype.borelSpace (H : Set G)
+  haveI : BorelSpace H := Subtype.borelSpace (fun x => x ∈ (H : Set G))
   haveI : SecondCountableTopology H := by
     first
       | exact inferInstanceAs (SecondCountableTopology (H : Set G))
@@ -94,7 +142,7 @@ theorem haarSub_prop {S : Set G} {μ ν : Measure G} (hμ : LeftHaarSub S μ) (h
     rw [heq, hc, zero_smul]
   · calc μ = μ'.map Subtype.val := hμm.symm
       _ = ((μ' A / ν' A) • ν').map Subtype.val := by rw [← heq]
-      _ = (μ' A / ν' A) • ν'.map Subtype.val := Measure.map_smul _ _ _
+      _ = (μ' A / ν' A) • ν'.map Subtype.val := Measure.map_smul _ hemb.measurable.aemeasurable
       _ = (μ' A / ν' A) • ν := by rw [hνm]
 
 def cjB (b : G) (y : G) : G := b⁻¹ * y * b
@@ -138,14 +186,14 @@ theorem map_cjB {S : Set G} {μ : Measure G} (hμ : LeftHaarSub S μ) (b : G) (h
       ext x
       simp only [Set.mem_preimage, Set.mem_compl_iff, hb x]
     · intro s hs
-      rw [Measure.map_map (continuous_mul_left s).measurable hcont.measurable]
+      rw [Measure.map_map (continuous_const_mul s).measurable hcont.measurable]
       have e1 : (fun x => s * x) ∘ cjB b = cjB b ∘ (fun y => (b * s * b⁻¹) * y) := by
         funext y
         simp [cjB, mul_assoc]
       have hs' : b * s * b⁻¹ ∈ S := by
         rw [hb]
         simpa [cjB, mul_assoc] using hs
-      rw [e1, ← Measure.map_map hcont.measurable (continuous_mul_left _).measurable, hl _ hs']
+      rw [e1, ← Measure.map_map hcont.measurable (continuous_const_mul _).measurable, hl _ hs']
   exact haarSub_prop hL ⟨hC, h1, hm, hi, hσ, h0, hc, hl⟩
 
 theorem cjB_pow_iff {S : Set G} {a : G} (ha : ∀ s, s ∈ S ↔ cjB a s ∈ S) (m : ℕ) (s : G) :

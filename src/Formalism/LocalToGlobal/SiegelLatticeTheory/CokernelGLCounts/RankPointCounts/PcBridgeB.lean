@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PcBridgeA
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCountOfIso
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PcBridgeA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCountOfIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,15 +143,15 @@ theorem lr_eq : lr (Z.Z.map M.R.subtype) = toE M al := by
 
 include hY hbe hal hsch in
 theorem hb_corner : alQ M Y al (Submodule.Quotient.mk be) + (Rs M.R).mkQ u = 0 := by
-  rw [linQ_mk, ← map_add, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+  rw [linQ_mk, ← map_add (f := _), Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
   refine ⟨Z.Z (Fin.last m) (Fin.last m), ?_⟩
   rw [← hsch, hd_eq M Y Z hY, lc_eq M Z be hbe, lr_eq M Z al hal]
   simp only [Algebra.linearMap_apply]
   rw [add_sub_cancel]
   rfl
 
-include hY hbe hal hsch in
 
+include hY hbe hal hsch in
 theorem schur_M (v : Fin (m + 1) → E) :
     toE M al ⬝ᵥ ((Y.Z.map M.R.subtype)⁻¹ *ᵥ fun a => v a.castSucc) + u * ((Z.Z.map M.R.subtype)⁻¹ *ᵥ v) (Fin.last m) =
       v (Fin.last m) := by
@@ -146,7 +191,7 @@ theorem thetaRaw_mem (v : Fin (m + 1) → M.R) : thetaRaw M Y Z u v ∈ NF (alQ 
   show _ ∈ LinearMap.ker _
   rw [LinearMap.mem_ker, thetaRaw_apply]
   simp only [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.fst_apply, LinearMap.snd_apply]
-  rw [linQ_mk, ← map_add, schur_M M Y Z be al hY hbe hal u hsch (toE M v), Submodule.mkQ_apply,
+  rw [linQ_mk, ← map_add (f := _), schur_M M Y Z be al hY hbe hal u hsch (toE M v), Submodule.mkQ_apply,
     Submodule.Quotient.mk_eq_zero]
   exact ⟨v (Fin.last m), rfl⟩
 
@@ -174,7 +219,7 @@ theorem Theta_surjective : Function.Surjective (Theta M Y Z be al hY hbe hal u h
       rw [LinearMap.mem_ker] at hce'
       simp only [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.fst_apply,
         LinearMap.snd_apply] at hce'
-      rw [linQ_mk, ← map_add, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at hce'
+      rw [linQ_mk, ← map_add (f := _), Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at hce'
       obtain ⟨r, hr⟩ := hce'
       change ((r : M.R) : E) = _ at hr
       refine ⟨Fin.snoc (α := fun _ => M.R) x r, ?_⟩
@@ -188,9 +233,7 @@ theorem Theta_surjective : Function.Surjective (Theta M Y Z be al hY hbe hal u h
       refine Prod.ext ?_ ?_
       · show Submodule.Quotient.mk (fun a => Fin.snoc (α := fun _ => M.R) x r a.castSucc) =
           Submodule.Quotient.mk x
-        congr 1
-        funext a
-        simp
+        simp only [Fin.snoc_castSucc]
       · show u * _ = e
         linear_combination hs + hr
 
@@ -217,8 +260,8 @@ theorem toE_inj {k : ℕ} {x y : Fin k → M.R} (h : toE M x = toE M y) : x = y 
   funext j
   exact Subtype.ext (congrFun h j)
 
-include hY hbe in
 
+include hY hbe in
 theorem head_rows (x : Fin (m + 1) → M.R) :
     toE M (fun a => (Z.Z *ᵥ x) a.castSucc) = Y.Z.map M.R.subtype *ᵥ toE M (fun a => x a.castSucc) +
       (x (Fin.last m) : E) • toE M be := by
@@ -420,7 +463,7 @@ theorem schur_eq {n s : E} {P X L U : Matrix (Fin (m + 1)) (Fin (m + 1)) E} (hL 
   have hhd : hd P = hd L * hd X * hd U := by
     rw [hP]
     ext a b
-    simp [hd, mul_apply, Fin.sum_univ_castSucc, hL.2 _ _ (Fin.castSucc_lt_last a),
+    simp [hd, Matrix.mul_apply, Fin.sum_univ_castSucc, hL.2 _ _ (Fin.castSucc_lt_last a),
       hU.2 _ _ (Fin.castSucc_lt_last b)]
   have hdetP : P.det = X.det := by
     rw [hP, det_mul, det_mul, hdetL, hdetU, one_mul, mul_one]

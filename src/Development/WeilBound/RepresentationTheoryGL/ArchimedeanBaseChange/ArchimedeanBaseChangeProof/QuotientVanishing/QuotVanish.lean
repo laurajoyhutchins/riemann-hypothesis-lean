@@ -1,4 +1,48 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.OnlyIsotropic
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.VeryCuspZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,19 +99,6 @@ def uOf {K : Type} [Field K] {n : ℕ} {W₁ W₂ : Submodule K (Fin n → K)} (
     noncomm_ring
     rw [h3]; simp
 
-def NilChange : Prop := ∀ (n : ℕ) (W₁ W₂ : Submodule ℂ (Fin n → ℂ)) (hW : W₁ ≤ W₂) (e : GL (Fin n) ℂ),
-  (e * thetaR (starRingEnd ℂ) n e).val.charpoly.Separable → perpD (starRingEnd ℂ) e W₁ = W₂ →
-  perpD (starRingEnd ℂ) e W₂ = W₁ → ∀ [MeasurableSpace (nilrad W₁ W₂)] [BorelSpace (nilrad W₁ W₂)]
-  (ν : Measure (nilrad W₁ W₂)) [ν.IsAddHaarMeasure],
-  ∃ (Φ : nilrad W₁ W₂ ≃ᵐ nilrad W₁ W₂) (c : NNReal), 0 < c ∧ ν.map Φ = c • ν ∧
-    ∀ X, uOf hW (Φ X) * e = twConj (thetaR (starRingEnd ℂ) n) (uOf hW X) e
-
-def CentFlag : Prop := ∀ (n : ℕ) (d : GL (Fin n) ℂ) (W₁ W₂ : Submodule ℂ (Fin n → ℂ)),
-  (d * thetaR (starRingEnd ℂ) n d).val.charpoly.Separable → perpD (starRingEnd ℂ) d W₁ = W₂ →
-  perpD (starRingEnd ℂ) d W₂ = W₁ → twCent (thetaR (starRingEnd ℂ) n) d ≤ flagStab W₁ W₂ ∧
-  ∀ q ∈ flagStab W₁ W₂, perpD (starRingEnd ℂ) (twConj (thetaR (starRingEnd ℂ) n) q d) W₁ = W₂ ∧
-    perpD (starRingEnd ℂ) (twConj (thetaR (starRingEnd ℂ) n) q d) W₂ = W₁
-
 def QuotVanish : Prop := ∀ (n : ℕ) [MeasurableSpace (GL (Fin n) ℂ)] [BorelSpace (GL (Fin n) ℂ)]
   (μ : Measure (GL (Fin n) ℂ)) [μ.IsHaarMeasure] (d : GL (Fin n) ℂ) (μT : Measure (twCent (thetaR (starRingEnd ℂ) n) d))
   [μT.IsHaarMeasure] (W₁ W₂ : Submodule ℂ (Fin n → ℂ)) (hW : W₁ ≤ W₂) [MeasurableSpace (nilrad W₁ W₂)]
@@ -79,12 +110,6 @@ def QuotVanish : Prop := ∀ (n : ℕ) [MeasurableSpace (GL (Fin n) ℂ)] [Borel
 
 def KerFin : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (φ : GA E n → ℂ), IsTest φ →
   ∀ C : Set (GA E n), IsCompact C → Set.Finite {d : GL (Fin n) E | ∃ x ∈ C, φ (twConj (thetaA E n) x (ratGL E n d)) ≠ 0}
-
-def AbsUnfold : Prop := ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [LocallyCompactSpace G]
-  [SecondCountableTopology G] [MeasurableSpace G] [BorelSpace G] (μ : Measure G) [μ.IsHaarMeasure] (Γ Γ₀ : Subgroup G)
-  (Fd : Set G) (F : G → ℂ), Countable Γ → DiscreteTopology Γ → Γ₀ ≤ Γ → IsFundamentalDomain Γ Fd μ → Measurable F →
-  (∀ g ∈ Γ₀, ∀ x, F (g * x) = F x) → Integrable (fun x => ∑' q : Γ ⧸ Γ₀.subgroupOf Γ, ‖F ((q.out : G)⁻¹ * x)‖) (μ.restrict Fd) →
-  ∫ x in Fd, ∑' q : Γ ⧸ Γ₀.subgroupOf Γ, F ((q.out : G)⁻¹ * x) ∂μ = quotIntegral μ Γ₀ Measure.count F
 
 end PositivityTheory.Rg.BcB.D4
 

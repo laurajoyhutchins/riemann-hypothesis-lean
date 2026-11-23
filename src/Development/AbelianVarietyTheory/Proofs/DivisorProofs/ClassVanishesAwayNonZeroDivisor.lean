@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyTwistedFilteredColimitContinuityStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyTwistedFilteredColimitContinuityStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -39,8 +80,8 @@ theorem away_ext {a : R} {S : Type} [CommRing S] {f g : Localization.Away a →+
     (h : f.comp (algebraMap R _) = g.comp (algebraMap R _)) : f = g :=
   IsLocalization.ringHom_ext (Submonoid.powers a) h
 
-variable (R) in
 
+variable (R) in
 def diag : Idx R ⥤ CommRingCat.{0} where
   obj a := CommRingCat.of (Localization.Away a.val)
   map {a b} h := CommRingCat.ofHom (tr (leOfHom h : a.val ∣ b.val))
@@ -61,8 +102,8 @@ theorem toFrac_comp (a : Idx R) : (toFrac a).comp (algebraMap R _) = algebraMap 
   IsLocalization.Away.lift_comp a.val
     (IsLocalization.map_units (FractionRing R) (⟨a.val, a.mem⟩ : nonZeroDivisors R))
 
-variable (R) in
 
+variable (R) in
 def cocone : Cocone (diag R) where
   pt := CommRingCat.of (FractionRing R)
   ι :=
@@ -83,8 +124,8 @@ theorem desc_unit (s : Cocone (diag R)) (y : nonZeroDivisors R) :
   rw [← RingHom.comp_apply (tr _), tr_comp]
   exact (IsLocalization.Away.algebraMap_isUnit (S := Localization.Away y.1) y.1).map (s.ι.app b).hom
 
-variable (R) in
 
+variable (R) in
 def isColim : IsColimit (cocone R) where
   desc s := CommRingCat.ofHom (IsLocalization.lift (M := nonZeroDivisors R) (S := FractionRing R) (desc_unit s))
   fac s a := by
@@ -110,8 +151,8 @@ theorem spMap_comp {A A' A'' : Type} [CommRing A] [CommRing A'] [CommRing A''] (
 
 end GlobalTheory.EtC.TotFracAway
 
-open GlobalTheory.EtC.TotFracAway in
 
+open GlobalTheory.EtC.TotFracAway in
 theorem GlobalTheory.EtC.classVanishesAwayNZD : ∀ (q : ℕ) (R : Type) [CommRing R], IsUnit (q : R) → ∀ (n i : ℤ)
     (z : Ht q (sp R) n i), pull _ (spMap (algebraMap R (FractionRing R))) _ _ z = 0 →
     ∃ g ∈ nonZeroDivisors R, pull _ (spMap (algebraMap R (Localization.Away g))) _ _ z = 0 := by
@@ -132,6 +173,3 @@ theorem GlobalTheory.EtC.classVanishesAwayNZD : ∀ (q : ℕ) (R : Type) [CommRi
     rw [tr_comp]
   rw [e, spMap_comp, pull_comp]
   exact hk
-
-example : ∀ (q : ℕ) (R : Type) [CommRing R], IsUnit (q : R) → ∀ (n i : ℤ) (z : Ht q (sp R) n i), pull _ (spMap (algebraMap R (FractionRing R))) _ _ z = 0 → ∃ g ∈ nonZeroDivisors R, pull _ (spMap (algebraMap R (Localization.Away g))) _ _ z = 0 :=
-  GlobalTheory.EtC.classVanishesAwayNZD

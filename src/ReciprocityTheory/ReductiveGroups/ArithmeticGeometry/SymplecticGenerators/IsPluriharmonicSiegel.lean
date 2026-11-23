@@ -1,5 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+module
+
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.LinearAlgebra.SymplecticGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,11 +63,6 @@ def phDom (g : ℕ) : Set (Fin g → Fin g → ℂ) :=
 def IsHoloSiegel (g : ℕ) (H : Matrix (Fin g) (Fin g) ℂ → ℂ) : Prop :=
   DifferentiableOn ℂ (fun x : Fin g → Fin g → ℂ => H (phSym (Matrix.of x))) (phDom g)
 
-def IsPluriharmonicSiegel (g : ℕ) (u : Matrix (Fin g) (Fin g) ℂ → ℝ) : Prop :=
-  ContDiffOn ℝ 2 (fun x : Fin g → Fin g → ℂ => u (phSym (Matrix.of x))) (phDom g) ∧
-    ∀ τ ∈ SiegelH (Fin g), ∀ V : Matrix (Fin g) (Fin g) ℂ, V.IsSymm →
-      InnerProductSpace.HarmonicAt (fun w : ℂ => u (τ + w • V)) 0
-
 def phActC {g : ℕ} (γ : Matrix (Fin g ⊕ Fin g) (Fin g ⊕ Fin g) ℂ) (τ : Matrix (Fin g) (Fin g) ℂ) :
     Matrix (Fin g) (Fin g) ℂ :=
   (γ.toBlocks₁₁ * τ + γ.toBlocks₁₂) * (γ.toBlocks₂₁ * τ + γ.toBlocks₂₂)⁻¹
@@ -33,18 +73,6 @@ def phAct {g : ℕ} (γ : Matrix (Fin g ⊕ Fin g) (Fin g ⊕ Fin g) ℤ) (τ : 
 
 def IsSpInvariant {α : Type*} (g : ℕ) (f : Matrix (Fin g) (Fin g) ℂ → α) : Prop :=
   ∀ γ ∈ Matrix.symplecticGroup (Fin g) ℤ, ∀ τ ∈ SiegelH (Fin g), f (phAct γ τ) = f τ
-
-def PhStatement : Prop :=
-  ∀ g : ℕ, 2 ≤ g → ∀ u : Matrix (Fin g) (Fin g) ℂ → ℝ, IsPluriharmonicSiegel g u →
-    IsSpInvariant g u → ∃ c : ℝ, ∀ τ ∈ SiegelH (Fin g), u τ = c
-
-def PhReStatement : Prop :=
-  ∀ g : ℕ, ∀ u : Matrix (Fin g) (Fin g) ℂ → ℝ, IsPluriharmonicSiegel g u →
-    ∃ H : Matrix (Fin g) (Fin g) ℂ → ℂ, IsHoloSiegel g H ∧ ∀ τ ∈ SiegelH (Fin g), (H τ).re = u τ
-
-def PhInvStatement : Prop :=
-  ∀ g : ℕ, 2 ≤ g → ∀ H : Matrix (Fin g) (Fin g) ℂ → ℂ, IsHoloSiegel g H →
-    IsSpInvariant g (fun τ => (H τ).re) → IsSpInvariant g H
 
 def PhKoecherStatement : Prop :=
   ∀ g : ℕ, 2 ≤ g → ∀ N : ℕ, 1 ≤ N → ∀ F : Matrix (Fin g) (Fin g) ℂ → ℂ, IsHoloSiegel g F →

@@ -1,5 +1,60 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.DensGSC
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.DensGSC
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.DensGS
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.DensGSO
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,6 +99,7 @@ private theorem hermSp_h_sum_left {M : Loc.Model F E} {V : Type} [AddCommGroup V
 private theorem hermSp_h_sum_right' {M : Loc.Model F E} {V : Type} [AddCommGroup V] [Module E V]
     (H : Loc.HermSp M V) {ι : Type} (s : Finset ι) (f : ι → V) (x : V) :
     H.h x (∑ i ∈ s, f i) = ∑ i ∈ s, H.h x (f i) := by
+
   rw [H.h_herm, hermSp_h_sum_left, map_sum]
   exact Finset.sum_congr rfl (fun i _ => (H.h_herm (f i) x).symm)
 
@@ -55,8 +111,9 @@ theorem form_fst {M : Loc.Model F E} {V : Type} [AddCommGroup V] [Module E V] (H
     (e : E ≃ₐ[F] F × F) (he : ∀ x, e (M.L.cj x) = (e x).swap) {n : ℕ} (β : Module.Basis (Fin n) E V)
     (x y : V) : (e (H.h x y)).1 = (sig e β x).1 ⬝ᵥ (amat H e β *ᵥ (sig e β y).2) := by
   conv_lhs => rw [← β.sum_repr x, ← β.sum_repr y]
+
   simp only [hermSp_h_sum_left, hermSp_h_sum_right', H.h_smul_left, hermSp_h_smul_right, map_sum, map_mul, Prod.fst_sum, Prod.fst_mul, he,
-    Prod.fst_swap]
+  Prod.fst_swap]
   simp only [amat, sig, dotProduct, Matrix.mulVec, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
@@ -68,8 +125,9 @@ theorem form_snd {M : Loc.Model F E} {V : Type} [AddCommGroup V] [Module E V] (H
   have hs : ∀ k l, (e (H.h (β k) (β l))).2 = (e (H.h (β l) (β k))).1 := fun k l => by
     rw [H.h_herm (β l) (β k), he]; rfl
   conv_lhs => rw [← β.sum_repr x, ← β.sum_repr y]
+
   simp only [hermSp_h_sum_left, hermSp_h_sum_right', H.h_smul_left, hermSp_h_smul_right, map_sum, map_mul, Prod.snd_sum, Prod.snd_mul, he,
-    Prod.snd_swap, hs]
+  Prod.snd_swap, hs]
   simp only [amat, sig, dotProduct, Matrix.mulVec, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring

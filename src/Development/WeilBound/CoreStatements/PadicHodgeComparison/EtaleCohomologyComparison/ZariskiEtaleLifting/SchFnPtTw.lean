@@ -1,7 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapAcrFromBase
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FrobeniusElementAlt
-import BuildAid.D2
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapAcrFromBase
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FrobeniusElementAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -90,9 +129,6 @@ def ptTw (hσ : ∀ x, galOC σ (κ x) = κ x) : F.pt κ ⟶ twF σ ⋙ F.pt κ 
         ((twU_mapU σ f _).trans (congrArg (mapU f) ((twUEquiv σ A).apply_symm_apply x))).symm
     exact map_sq F.Pt _ _ _ _ e _
 
-theorem schFn_ptTw {X : Scheme.{0}} (q : X ⟶ Spec (CommRingCat.of O)) (hσ : ∀ x, galOC σ (κ x) = κ x) :
-    ptTw (schFn q) κ σ hσ = pxTw q κ σ hσ := rfl
-
 end Gal
 
 noncomputable def frb {B : Type} [CommRing B] (h : (l : B) = 0) : B →+* B :=
@@ -130,12 +166,19 @@ theorem phi_mk (A : PAlg l) (n : ℕ) (r : A.Acr n) :
   rw [← map_sub, ← hc, map_mul, map_natCast]
   exact Ideal.mul_mem_left _ _ (Ideal.mem_sup_left (Ideal.mem_span_singleton_self _))
 
-def phiMorC (n : ℕ) : CH.Mor (Oc F κ true n) (Oc F κ true n) (ACris.phi ℂ_[l] l) :=
-  omMor (crMor (F := F) (F' := F) (b := bs l true n) (b' := bs l true n) (ht := rfl) (ht' := rfl) ((base l).phi n) rfl
-    ((base l).dpP_phi n) (phiPt F κ n) fun _ y r =>
-      ((congrArg y.1.1 (phi_mk (base l) n r)).trans (map_pow y.1.1 _ l)).symm) (ACris.phi ℂ_[l] l) ((base l).phi_cris n)
+def phiMorC (n : ℕ) : CH.Mor (Oc F κ true n) (Oc F κ true n) (ACris.phi (K := ℂ_[l]) (p := l)) := by
+  have hcris (a : Acris l) : (base l).phi n ((base l).cris n a) =
+      (base l).cris n (ACris.phi (K := ℂ_[l]) (p := l) a) :=
+    (base l).pdOk_frob.acr_cris (base l).frob_comp_s (ACris.phiZero (K := ℂ_[l]) (p := l))
+      (fun y => RingHom.congr_fun (f := ACris.phiAway ℂ_[l] l)
+        (awayW_ext fun x => by rw [ACris.phiAway_algebraMap, awayW_algebraMap, wmap_frobenius]) y.1) n a
+  exact
+    omMor (crMor (F := F) (F' := F) (b := bs l true n) (b' := bs l true n) (ht := rfl) (ht' := rfl) ((base l).phi n) rfl
+      ((base l).dpP_phi n) (phiPt F κ n) fun _ y r =>
+        ((congrArg y.1.1 (phi_mk (base l) n r)).trans (map_pow y.1.1 _ l)).symm)
+      (ACris.phi (K := ℂ_[l]) (p := l)) hcris
 
-def phiHc (n j : ℕ) : Hc F κ true n j →ₛₗ[ACris.phi ℂ_[l] l] Hc F κ true n j := (phiMorC F κ n).pull j
+def phiHc (n j : ℕ) : Hc F κ true n j →ₛₗ[ACris.phi (K := ℂ_[l]) (p := l)] Hc F κ true n j := (phiMorC F κ n).pull j
 
 def cmpMor (n : ℕ) : CH.Mor (Oc F κ false n) (Oc F κ true n) (RingHom.id _) :=
   omMor (crMor (F := F) (F' := F) (b := bs l false n) (b' := bs l true n) (ht := rfl) (ht' := rfl) (RingHom.id _) rfl
@@ -149,8 +192,8 @@ def pullMorC (u : Fn.Map F F') (k : Bool) (n : ℕ) : CH.Mor (Oc F' κ k n) (Oc 
 
 def pullHc (u : Fn.Map F F') (k : Bool) (n j : ℕ) : Hc F' κ k n j →ₗ[Acris l] Hc F κ k n j := (pullMorC κ u k n).pull j
 
-variable (l) in
 
+variable (l) in
 structure Compat : Prop where
   red : ∀ {O : Type} [CommRing O] (F : Fn O) (κ : O →+* OC l) (k : Bool) {m n : ℕ} (h : n ≤ m) (j : ℕ) (x : Hc F κ k m j),
     β F κ k n j (redHc F κ k h j x) = (CH.Mor.ofNatTrans (redEl (F.pt κ) h)).pull j (β F κ k m j x)

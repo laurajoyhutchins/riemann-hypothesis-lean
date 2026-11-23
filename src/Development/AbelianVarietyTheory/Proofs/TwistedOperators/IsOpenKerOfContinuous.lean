@@ -1,9 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.PositiveTwistAverage
+module
+
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsOpenKerFinIdele
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.PositiveTwistAverage
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddCharConductorAndHaarIntegersExist
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsClopenIsCompactMapsPair
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RootExchangeSupportAndFourierRelation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OrbitLocallyConstant
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegrableOfMemSB
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddCharConductorAndHaarIntegersExist
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsClopenIsCompactMapsPair
+
+@[expose] public section
+
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.IndefiniteRowSideFullHecke.PositiveTwistAverage
 open Filter Topology
 
@@ -11,24 +69,7 @@ noncomputable section
 namespace GlobalTheory.RootEx.UniformLattices
 
 theorem eq_one_of_pow_near {z : ℂ} (h : ∀ n : ℕ, ‖z ^ n - 1‖ < 1 / 2) : z = 1 := by
-  by_contra hz
-  have hp : 0 < ‖z - 1‖ := norm_pos_iff.2 (sub_ne_zero.2 hz)
-  obtain ⟨n, hn⟩ := exists_nat_gt (1 / ‖z - 1‖)
-  have h1 : ‖(∑ k ∈ Finset.range n, z ^ k) - n‖ ≤ n / 2 := by
-    have : (∑ k ∈ Finset.range n, z ^ k) - n = ∑ k ∈ Finset.range n, (z ^ k - 1) := by
-      rw [Finset.sum_sub_distrib]; simp
-    rw [this]
-    refine (norm_sum_le _ _).trans ?_
-    refine (Finset.sum_le_sum fun k _ => (h k).le).trans ?_
-    simp; linarith
-  have h2 : (n : ℝ) / 2 ≤ ‖∑ k ∈ Finset.range n, z ^ k‖ := by
-    have := norm_sub_norm_le (n : ℂ) (∑ k ∈ Finset.range n, z ^ k)
-    rw [norm_sub_rev, Complex.norm_natCast] at this
-    linarith
-  have h3 := h n
-  rw [← geom_sum_mul, norm_mul] at h3
-  rw [div_lt_iff₀ hp] at hn
-  nlinarith
+  apply GlobalTheory.CuspRep.eq_one_of_pow_near <;> assumption
 
 section Lattices
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
@@ -78,11 +119,11 @@ def ballLat (m : Type) (s : kˣ) : Submodule 𝒪[k] (m → k) where
     rw [map_mul]
     exact (mul_le_of_le_one_left' ((Valuation.mem_integer_iff _ _).mp a.2)).trans (hx i)
 
-theorem ballLat_isLattice (s : kˣ) : (ballLat m s).IsLattice k := by
+theorem ballLat_isLattice (s : kˣ) : (ballLat m s).IsFullLattice k := by
   classical
   have hs : ∀ i : m, (Pi.single i (s : k) : m → k) ∈ ballLat m s := fun i j => by
     rw [Pi.single_apply]; split_ifs <;> simp [cball]
-  constructor
+  refine { toIsLattice := Submodule.IsLattice.of_fg k ?_, span_eq_top := ?_ }
   · refine ⟨Finset.univ.image fun i : m => (Pi.single i (s : k) : m → k), le_antisymm ?_ fun x hx => ?_⟩
     · rw [Submodule.span_le]
       intro y hy
@@ -129,8 +170,9 @@ theorem exists_subset_ballLat {K : Set (m → k)} (hK : IsCompact K) :
     · exact ⟨a, subset_rfl, fun x (hx : x ∈ cball b) => le_trans (a := valuation k x) (c := valuation k (a : k)) hx h⟩
   exact ⟨s, fun x hx i => hs (Set.mem_iUnion.2 ⟨i, x, hx, rfl⟩)⟩
 
-theorem isCompact_lattice (L : Submodule 𝒪[k] (m → k)) (hL : L.IsLattice k) : IsCompact (L : Set (m → k)) := by
-  obtain ⟨S, hS⟩ := hL.fg
+theorem isCompact_lattice (L : Submodule 𝒪[k] (m → k)) (hL : L.IsFullLattice k) : IsCompact (L : Set (m → k)) := by
+  letI : L.IsFullLattice k := hL
+  obtain ⟨S, hS⟩ := hL.toIsLattice.fg
   obtain ⟨s, hs⟩ := exists_subset_ballLat (K := (S : Set (m → k))) S.finite_toSet.isCompact
   have h1 : L ≤ ballLat m s := hS ▸ Submodule.span_le.2 hs
   have h2 : IsCompact (ballLat m s : Set (m → k)) := by
@@ -141,7 +183,7 @@ theorem isCompact_lattice (L : Submodule 𝒪[k] (m → k)) (hL : L.IsLattice k)
 
 variable {ψ : AddChar k Circle}
 
-theorem perp_mem_nhds (hψ : Continuous ψ) (L : Submodule 𝒪[k] (m → k)) (hL : L.IsLattice k) :
+theorem perp_mem_nhds (hψ : Continuous ψ) (L : Submodule 𝒪[k] (m → k)) (hL : L.IsFullLattice k) :
     (perp ψ L : Set (m → k)) ∈ 𝓝 (0 : m → k) := by
   obtain ⟨s, hs⟩ := exists_cball_addChar_eq_one ψ hψ
   refine IsCompact.eventually_forall_of_forall_eventually (isCompact_lattice L hL)
@@ -151,7 +193,8 @@ theorem perp_mem_nhds (hψ : Continuous ψ) (L : Submodule 𝒪[k] (m → k)) (h
   exact hs _ hq
 
 theorem isCompact_perp (hψ : Continuous ψ) (hψ1 : ψ ≠ 1) [DecidableEq m] (L : Submodule 𝒪[k] (m → k))
-    (hL : L.IsLattice k) : IsCompact (perp ψ L : Set (m → k)) := by
+    (hL : L.IsFullLattice k) : IsCompact (perp ψ L : Set (m → k)) := by
+  letI : L.IsFullLattice k := hL
   have h := ExchangeSupport.mem_SB_of hψ1 ((perp ψ L : Set (m → k)).indicator fun _ => (1 : ℂ)) ?_ ?_
   · have h2 : IsCompact (closure _) := h.2
     rwa [Set.support_indicator, Function.support_const one_ne_zero, Set.inter_univ,
@@ -211,7 +254,7 @@ theorem integral_eq_sum_reps [MeasurableSpace V] [BorelSpace V] (m : Measure V) 
     · rw [h0 β hβ]
       refine (Finset.sum_eq_zero fun t ht => Set.indicator_of_notMem (fun h => hβ ?_) _).symm
       simpa using add_mem (hT.1 t ht) (hBD h)
-  rw [integral_congr_ae (Eventually.of_forall e), integral_finset_sum, Finset.mul_sum]
+  rw [integral_congr_ae (Eventually.of_forall e), MeasureTheory.integral_finsetSum, Finset.mul_sum]
   · refine Finset.sum_congr rfl fun t _ => ?_
     rw [integral_indicator_const _ (hm t), Measure.real, measure_preimage_add, Complex.real_smul]
     rfl
@@ -238,16 +281,6 @@ variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
   {A P P' : Type} [AddCommGroup A] [Module ℂ A] [AddCommGroup P] [Module ℂ P] [AddCommGroup P'] [Module ℂ P']
   {σ : Representation ℂ (GL (n ⊕ Fin c) k) A} {π : Representation ℂ (GL n k) P}
   {π' : Representation ℂ (GL n' k) P'}
-
-def omS {a : Type} (b : Type) [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] (μ : kˣ →* ℂˣ) :
-    Representation ℂ (GL a k) (SB (Matrix b a k)) := (omR μ).comp (MonoidHom.inl _ _)
-
-def untw {m : Type} [Fintype m] [DecidableEq m] (η : kˣ →* ℂˣ) (σ : Representation ℂ (GL m k) A) :
-    Representation ℂ (GL m k) A where
-  toFun g := (((η (Matrix.GeneralLinearGroup.det g))⁻¹ : ℂˣ) : ℂ) • σ g
-  map_one' := by simp
-  map_mul' g h := by
-    simp only [map_mul, mul_inv, Units.val_mul, smul_mul_smul_comm]
 
 end Target
 

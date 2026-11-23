@@ -1,11 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RootsReverseProd
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RootsMinpolyPhi
+public import Mathlib.RepresentationTheory.Coinduced
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCharLab
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RootsMinpolyPhi
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemChainVecsDet
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LabelEqOfSuppAdds
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,9 +57,6 @@ open scoped Classical
 section Dual
 
 variable {g : ℕ} [Fact g.Prime]
-
-def conjAlg {G : Type} (a : MonoidAlgebra ℂ G) : MonoidAlgebra ℂ G :=
-  MonoidAlgebra.ofCoeff (a.coeff.mapRange (starRingEnd ℂ) (map_zero _))
 
 theorem phi_conj (L : LabelDatum g) (x : Fbar g) : GalSer.phi L (starRingAut : ℂ ≃+* ℂ) x = x⁻¹ := by
   by_cases hx : x = 0
@@ -34,22 +71,7 @@ theorem phi_conj (L : LabelDatum g) (x : Fbar g) : GalSer.phi L (starRingAut : �
 
 theorem roots_reverse {K : Type} [Field K] (s : Multiset K) (hs : (0 : K) ∉ s) :
     ((s.map fun x => X - C x).prod.reverse).roots = s.map (·⁻¹) := by
-  induction s using Multiset.induction_on with
-  | empty => simp [reverse]
-  | cons a s ih =>
-    rw [Multiset.mem_cons, not_or] at hs
-    have ha : a ≠ 0 := fun h => hs.1 h.symm
-    have hX : (X : K[X]).reverse = 1 := by simp [reverse]
-    have e : (X - C a : K[X]).reverse = C (-a) * (X - C a⁻¹) := by
-      rw [sub_eq_add_neg, ← C_neg, reverse_add_C, natDegree_X, hX, mul_sub, ← C_mul, neg_mul,
-        mul_inv_cancel₀ ha]
-      simp [add_comm]
-    have hm : (s.map fun x => X - C x).prod ≠ 0 :=
-      (monic_multiset_prod_of_monic _ _ fun x _ => monic_X_sub_C x).ne_zero
-    rw [Multiset.map_cons, Multiset.prod_cons, reverse_mul_of_domain, e, roots_mul, roots_C_mul _ (neg_ne_zero.2 ha),
-      roots_X_sub_C, ih hs.2, Multiset.map_cons, Multiset.singleton_add]
-    exact mul_ne_zero (mul_ne_zero (C_ne_zero.2 (neg_ne_zero.2 ha)) (X_sub_C_ne_zero _))
-      (by rwa [Ne, reverse_eq_zero])
+  apply GlobalTheory.DualLabel.roots_reverse_prod <;> assumption
 
 theorem rel_dual (L : LabelDatum g) {f : (ZMod g)[X]} (hm : f.Monic) (h0 : f.coeff 0 ≠ 0) :
     GalSer.Rel L (starRingAut : ℂ ≃+* ℂ) f (C (f.coeff 0)⁻¹ * f.reverse) := by
@@ -66,11 +88,6 @@ theorem rel_dual (L : LabelDatum g) {f : (ZMod g)[X]} (hm : f.Monic) (h0 : f.coe
     simp only [phi_conj]
     exact roots_reverse _ hz
 
-def suppSpan {n r : ℕ} (Ω : Rep.{0} ℂ (GL (Fin n) ℚ_[g])) (σ : Rep.{0} ℂ (GL (Fin r) ℚ_[g])) (t : ℕ) {s : ℕ}
-    (χ : Fin s → (ZMod g)ˣ →* ℂˣ) : Submodule ℂ Ω :=
-  Submodule.span ℂ {w | ∃ (π : Rep.{0} ℂ (GL (Fin n) ℚ_[g])) (φ : π ⟶ Ω) (u : π),
-    SuppAdds ⟨r, σ⟩ ⟨n, π⟩ t χ ∧ u ∈ chainVecs π.ρ r t χ ∧ w = φ.hom u}
-
 end Dual
 
 local instance factTypePrime (D : D7) (k : Fin 2) : Fact (D.host.g k).Prime := ⟨D.host.g_prime k⟩
@@ -83,27 +100,5 @@ variable (D : D7)
   (ιV : ∀ μ j k v, D.what₂.Mt μ j →ₗ[ℂ] ΩV μ j k v)
   (ΩX : D.what₂.Tup → ∀ k, D.nd.PlG k → LocRep D k D.R.rankX')
   (ιX : ∀ μ k v, D.what₂.Amb μ →ₛₗ[starRingEnd ℂ] ΩX μ k v)
-
-def LabelTie : Prop :=
-  ∀ σ' k v, ∃ u ∈ fixK1 (σ σ' k v).ρ, actK (σ σ' k v).ρ (D.ntypes.eSer k (D.ntypes.labPar k σ' v)) u ≠ 0
-
-def ActionTieV : Prop :=
-  ∀ μ j, 1 ≤ j → j ≤ D.R.m → ∀ k v, Function.Injective (ιV μ j k v) ∧
-    ∀ a ∈ Subalgebra.center ℂ (MonoidAlgebra ℂ (Gn (D.host.g k) D.R.r)), ∀ F,
-      ιV μ j k v (D.ntypes.onMt μ j (atPlace D k v a) F) = actTop (ΩV μ j k v).ρ D.R.r D.R.t a (ιV μ j k v F)
-
-def ActionTieX : Prop :=
-  ∀ μ k v, Function.Injective (ιX μ k v) ∧
-    ∀ a ∈ Subalgebra.center ℂ (MonoidAlgebra ℂ (Gn (D.host.g k) D.R.r)), ∀ F,
-      ιX μ k v (D.ntypes.onAmb μ (atPlace D k v a) F) =
-        actTop (ΩX μ k v).ρ D.R.r (D.R.m * D.R.t) (conjAlg a) (ιX μ k v F)
-
-def SupportV : Prop :=
-  ∀ μ j, 1 ≤ j → j ≤ D.R.m → ∀ k v, ∃ χ : (ZMod (D.host.g k))ˣ →* ℂˣ, ∀ σ', ∀ F ∈ D.ntypes.MtPar μ j σ',
-    ιV μ j k v F ∈ suppSpan (ΩV μ j k v) (σ σ' k v) D.R.t (fun _ : Fin 1 => χ)
-
-def SupportX : Prop :=
-  ∀ μ k v, ∃ χ : Fin D.R.m → (ZMod (D.host.g k))ˣ →* ℂˣ, ∀ σ', ∀ F ∈ D.ntypes.AmbPar μ σ',
-    ιX μ k v F ∈ suppSpan (ΩX μ k v) (σ σ' k v) D.R.t χ
 
 end GlobalTheory.SeriesSupport

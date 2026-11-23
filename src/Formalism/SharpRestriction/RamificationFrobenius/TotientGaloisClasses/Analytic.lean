@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.PrimePairSizeCondition
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.PrimePairSizeCondition
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Data.FunLike.Fintype
+public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +65,8 @@ def G (y : ℝ) : ℝ :=
 def sumLamChi {N : ℕ} (χ : DirichletCharacter ℂ N) (y : ℝ) : ℂ :=
   ∑ n ∈ Finset.Icc 1 ⌊y⌋₊, (abelian₂ n : ℂ) * χ (n : ZMod N) * ((max (y / n - 1) 0 : ℝ) : ℂ)
 
-open Classical in
 
+open Classical in
 def gChi {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (y : ℝ) : ℂ :=
   if χ = 1 then ((G y : ℝ) : ℂ) else sumLamChi χ y + (y : ℂ) * logDerivativeAtOne χ
 
@@ -87,8 +134,6 @@ def psC : φ.Char := (Units.map (Int.castRingHom ℂ).toMonoidHom).comp φ.chQ
 
 def TrivialOnFirstFactor {φ : Frame} (θ : φ.Char) : Prop := ∀ s ∈ φ.A0, θ (φ.tau1 s) = 1
 
-def Chat : Set φ.Char := {θ | TrivialOnFirstFactor θ ∧ θ φ.iod = 1 ∧ θ φ.cc = 1}
-
 def Xp : Set φ.Char := {θ | TrivialOnFirstFactor θ ∧ θ φ.iod = 1}
 
 def Xm : Set φ.Char := {θ | TrivialOnFirstFactor θ ∧ θ φ.iod = -1}
@@ -137,19 +182,9 @@ def Bounded (S : Finset PChar) : Set φ.Char := {θ | (θ ∈ φ.Xp ∧ ¬ H.Kep
 
 def KeptInXp (S : Finset PChar) : Prop := ∀ ψ ∈ S, ∃ θ ∈ φ.Xp, H.IsPrimOf θ ψ.χ
 
-def KeptEqChat (S : Finset PChar) : Prop :=
-  (∀ ψ ∈ S, ∃ θ ∈ φ.Chat, H.IsPrimOf θ ψ.χ) ∧ ∀ θ ∈ φ.Chat, H.Kept S θ
-
-def KeptEqXp (S : Finset PChar) : Prop := H.KeptInXp S ∧ ∀ θ ∈ φ.Xp, H.Kept S θ
-
 def ChebyshevCharacterBound (x eps c : ℝ) : Prop :=
   ∀ (N : ℕ) [NeZero N] (χ : DirichletCharacter ℂ N), H.IsCharE χ →
     ∀ y : ℝ, Real.exp (x ^ (eps / 3)) / 3 ≤ y → ‖An.gChi χ y‖ ≤ y * Real.exp (-(c * x ^ (eps / 8)))
-
-def LogDerivativeBound (S : Finset PChar) (X x eps C : ℝ) : Prop :=
-  (∀ (N : ℕ) [NeZero N] (χ : DirichletCharacter ℂ N), H.IsPrimOf φ.chC χ → ‖An.logDerivativeAtOne χ‖ ≤ x ^ eps) ∧
-  ∀ θ ∈ H.Bounded S, ∀ (N : ℕ) [NeZero N] (χ : DirichletCharacter ℂ N), H.IsPrimOf θ χ →
-    ‖An.logDerivativeAtOne χ‖ ≤ C * Real.log X
 
 def BoundedCharsPointwise (S : Finset PChar) (x eps : ℝ) : Prop :=
   ∀ θ ∈ H.Bounded S, ∀ (N : ℕ) [NeZero N] (χ : DirichletCharacter ℂ N), H.IsPrimOf θ χ →
@@ -159,17 +194,6 @@ def ExceptionalCharacterKept (S : Finset PChar) (psK : Option PChar) : Prop :=
   (∀ ψ, psK = some ψ → H.IsPrimOf φ.psC ψ.χ) ∧ (psK = none → ¬ H.Kept S φ.psC)
 
 end HostRaw
-
-structure HostConditions (T : HType) (κ : HConst) (X x : ℝ) {φ : Frame} (H : HostRaw φ) : Prop where
-  kept : H.KeptInXp T.KEPT
-  a : H.ChebyshevCharacterBound x T.eps κ.c
-  b : H.LogDerivativeBound T.KEPT X x T.eps κ.C
-  c1 : H.BoundedCharsPointwise T.KEPT x T.eps
-  e : H.ExceptionalCharacterKept T.KEPT T.psK
-
-structure PreHostAn (T : HType) (κ : HConst) (X x : ℝ) {φ : Frame} (H : HostAx φ) (rr rr' : ℕ) : Prop
-    extends PreHost T κ X x H rr rr' where
-  ha10 : HostConditions T κ X x H.toHostRaw
 
 end Formalism.HC
 

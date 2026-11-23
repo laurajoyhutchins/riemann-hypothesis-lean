@@ -1,5 +1,54 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HkSum
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Satake
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HkSum
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SatakeRes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MeasureTheory NumberField IsDedekindDomain GlobalTheory.CuspRep GlobalTheory.CompanionTheory.CTFin GlobalTheory.LFun Formalism.UG Formalism.UG.P
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace UpperTheory.ConvolutionTheory.BW
 
@@ -95,7 +144,7 @@ theorem UpperTheory.exists_satakeTset_sum_eigenvector :
       satEig (qV E w) r B j • f := fun j hj => by
     rw [← UpperTheory.V.Cj.S.hkSum E w r V ρ ϖ hϖ hu j hj f hfix, hT ϖ hu j hj]
   set z := zGL r hπ with hzdef
-  have hfx : ∀ k ∈ KGL w r, ρ k f = f := fun k hk => GlobalTheory.LGrp.mem_fixed.1 hfix _ hk
+  have hfx : ∀ k ∈ KGL w (n := r), ρ k f = f := fun k hk => GlobalTheory.LGrp.mem_fixed.1 hfix _ hk
   have hB : ∀ i : SatakeIdx w hϖ (n := r) r, ρ (satakeB w hϖ hu i) f = ρ z f := by
     intro i
     obtain ⟨k₁, hk₁, k₂, hk₂, e⟩ := satakeB_mem w hϖ hu i
@@ -104,11 +153,11 @@ theorem UpperTheory.exists_satakeTset_sum_eigenvector :
       unfold diagJ
       congr 1
       funext i
-      simp
+      simp [i.isLt]
     have : satakeB w hϖ hu i = z * (k₁ * k₂) := by
       apply Units.ext
       rw [e, hdz, ← Units.val_mul, ← Units.val_mul, hzdef, ← zGL_comm, mul_assoc]
-    rw [this, map_mul, Module.End.mul_apply, hfx _ ((KGL w r).mul_mem hk₁ hk₂)]
+    rw [this, map_mul, Module.End.mul_apply, hfx _ ((KGL w (n := r)).mul_mem hk₁ hk₂)]
   obtain ⟨i₀⟩ := hne r le_rfl
   have hcard : (Fintype.card (SatakeIdx w hϖ (n := r) r) : ℂ) ≠ 0 := by
     have : Fintype.card (SatakeIdx w hϖ (n := r) r) ≠ 0 := by
@@ -141,4 +190,5 @@ theorem UpperTheory.exists_satakeTset_sum_eigenvector :
     exact inv_mem w har hπ (satakeB_mem w hϖ hu _)
   · rw [Equiv.sum_comp e.symm (fun i => ρ (z⁻¹ * satakeB w hϖ hu i) f)]
     simp only [map_mul, Module.End.mul_apply]
+
     rw [← map_sum, hsum _ (Nat.sub_le _ _), map_smul, hzi, smul_smul]

@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.Unramified.Locus
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.Polynomial.Eisenstein.IsIntegral
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.RamificationInertia.Unramified
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Eval
+
+@[expose] public section
 
 namespace ReciprocityTheory.Cheb
 
@@ -123,19 +181,6 @@ theorem cyclotomic_irreducible_of_isUnramifiedAt {K : Type*} [Field K] [NumberFi
     (cyclotomic.monic l (𝓞 K))).mp hirr2
   rwa [map_cyclotomic] at this
 
-theorem natCast_mem_of_liesOver {K : Type*} [Field K] [NumberField K] {p : ℕ}
-    (P : Ideal (𝓞 K)) [P.LiesOver (Ideal.span {(p : ℤ)})] : (p : 𝓞 K) ∈ P := by
-  have h : (p : ℤ) ∈ P.under ℤ := by
-    rw [← Ideal.LiesOver.over (P := P) (p := Ideal.span {(p : ℤ)})]
-    exact Ideal.mem_span_singleton_self _
-  simpa [Ideal.under, Ideal.mem_comap] using h
-
-theorem exists_forall_isUnramifiedAt_of_liesOver (K : Type*) [Field K] [NumberField K] :
-    ∃ N : ℕ, ∀ p : ℕ, p.Prime → N < p → ∀ (P : Ideal (𝓞 K)) [P.IsPrime]
-      [P.LiesOver (Ideal.span {(p : ℤ)})], Algebra.IsUnramifiedAt ℤ P := by
-  obtain ⟨N, hN⟩ := exists_forall_isUnramifiedAt K
-  exact ⟨N, fun p hp hpN P _ _ => hN p hp hpN P (natCast_mem_of_liesOver P)⟩
-
 theorem cyclotomic_irreducible_of_forall_isUnramifiedAt {K : Type*} [Field K] [NumberField K]
     {l : ℕ} (hl : l.Prime)
     (h : ∀ (P : Ideal (𝓞 K)) [P.IsPrime], (l : 𝓞 K) ∈ P → Algebra.IsUnramifiedAt ℤ P) :
@@ -152,11 +197,5 @@ theorem cyclotomic_irreducible_of_forall_isUnramifiedAt {K : Type*} [Field K] [N
   have hlM' : (l : 𝓞 K) ∈ M := hlM (Ideal.mem_span_singleton_self _)
   haveI := h M hlM'
   exact cyclotomic_irreducible_of_isUnramifiedAt hl M hlM'
-
-theorem exists_forall_cyclotomic_irreducible (K : Type*) [Field K] [NumberField K] :
-    ∃ N : ℕ, ∀ l : ℕ, l.Prime → N < l → Irreducible (cyclotomic l K) := by
-  obtain ⟨N, hN⟩ := exists_forall_isUnramifiedAt K
-  exact ⟨N, fun l hl hlN => cyclotomic_irreducible_of_forall_isUnramifiedAt hl
-    (fun P _ hP => hN l hl hlN P hP)⟩
 
 end ReciprocityTheory.Cheb

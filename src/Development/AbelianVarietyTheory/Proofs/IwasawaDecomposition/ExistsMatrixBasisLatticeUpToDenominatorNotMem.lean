@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+public import Mathlib.RingTheory.Localization.Finiteness
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -16,14 +68,16 @@ theorem exists_basis_up_to_fintype {O A E : Type} [CommRing O] [CommRing A] [IsD
       ∀ w ∈ L, (s : O) • w ∈ Submodule.span O (Set.range b) := by
   classical
   set M : Submodule A (n → E) := Submodule.span A (L : Set (n → E)) with hM
-  have : Submodule.IsLattice E M :=
-    { fg := by
+  have : Submodule.IsFullLattice E M :=
+    { toIsLattice := Submodule.IsLattice.of_fg E <| by
         obtain ⟨s, hs⟩ := hfg
         refine ⟨s, ?_⟩
         rw [hM, ← hs, Submodule.span_span_of_tower]
       span_eq_top := by rw [hM, Submodule.span_span_of_tower, hsp] }
   have hrk : Module.finrank A M = Fintype.card n := by
-    simpa using Submodule.IsLattice.finrank_of_pi E M
+    simpa using ((Submodule.IsFullLattice.finrank_eq E M).trans (Module.finrank_fintype_fun_eq_card E))
+  have := Submodule.IsLattice.free E M
+  have := Submodule.IsLattice.finite E M
   let c : Basis n A M := (Module.finBasisOfFinrankEq A M hrk).reindex (Fintype.equivFin n).symm
   have hc : ∀ i, ∃ t : S, (t : O) • (c i : n → E) ∈ L := fun i => by
     obtain ⟨t, ht⟩ := multiple_mem_span_of_mem_localization_span S A (L : Set (n → E)) _ (c i).2
@@ -37,9 +91,9 @@ theorem exists_basis_up_to_fintype {O A E : Type} [CommRing O] [CommRing A] [IsD
       Submodule.coe_smul_of_tower]
   let b : n → n → E := fun i => (c' i : n → E)
   have hli : LinearIndependent E b := by
-    have h : b = c'.extendOfIsLattice E := funext fun i => by simp [b]
+    have h : b = c'.extendOfIsFullLattice E := funext fun i => by simp [b]
     rw [h]
-    exact (c'.extendOfIsLattice E).linearIndependent
+    exact (c'.extendOfIsFullLattice E).linearIndependent
   have hspanA : Submodule.span A (Set.range b) = M := by
     have : Set.range b = M.subtype '' Set.range c' := by
       rw [← Set.range_comp]; rfl

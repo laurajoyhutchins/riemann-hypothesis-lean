@@ -1,28 +1,56 @@
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ConjReal
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.RealCyclotomicSubfield
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.FrobMulInertia
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.MuCardLeTwo
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Inertia
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Decomp
+module
+
+public import Formalism.FrobeniusOrbits.Statement
 import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CardTrivialFirstComponent
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.OrderOfSignGroupDvdTwo
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CardExtendedGaloisGroup
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Orbits
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.DiscriminantRealSubfield
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.DiscrB
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Principal
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ThickOrbit
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ThickFrames
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ExistsOpenNormalOrderOf
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.OrdUnimod
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.NcardEqTwoIff
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.OrbitSg
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ThickExists
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.EqZeroOfNegEq
-import Formalism.FrobeniusOrbits.RealSubfieldLeCompositum
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ConjReal
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Decomp
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.FrobMulInertia
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Inertia
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.MuCardLeTwo
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.RealCyclotomicSubfield
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FrobeniusOrbits.Final
 
@@ -35,7 +63,6 @@ theorem cmType : HostCMType := hostCMType_of hostGalois hostGalSpec
 theorem frob : HostFrob := hostFrob_of hostGalois hostGalSpec
 theorem splitK : HostSplitK := hostSplitK_of (hostFrob_of hostGalois hostGalSpec)
 theorem efgTwo : HostEFGTwo := hostEFGTwo_of hostInertia hostDecomp
-theorem ramified : HostRamified := hostRamified_of hostInertia
 
 theorem host_field :
     HostExample ∧ HostGroup ∧ HostOrders ∧ HostRecip ∧ HostFixed ∧ HostGalois ∧ HostGalSpec ∧
@@ -43,11 +70,5 @@ theorem host_field :
     HostDecomp ∧ HostDecompConj ∧ HostEFGTwo ∧ HostSplitK ∧ HostCMType :=
   ⟨hostExample, hostGroup, hostOrders, hostRecip, hostFixed, hostGalois, hostGalSpec, conj, real, f1, hostMu,
     frob, hostInertia, hostUnramEF, hostDecomp, hostDecompConj, efgTwo, splitK, cmType⟩
-
-theorem host_places :
-    HostThickOrbit ∧ HostThickExists ∧ HostTops ∧ HostProG ∧ HostStab ∧ HostOrdinary ∧ HostUnimodular ∧
-    HostConductor ∧ HostEta ∧ HostOrbitCountSg :=
-  ⟨hostThickOrbit, hostThickExists, hostTops, hostProG, hostStab, hostOrdinary, hostUnimodular,
-    hostConductor, hostEta, hostOrbitCountSg⟩
 
 end Formalism.FrobeniusOrbits.Final

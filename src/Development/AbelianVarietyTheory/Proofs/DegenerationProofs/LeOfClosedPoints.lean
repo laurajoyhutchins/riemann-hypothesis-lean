@@ -1,24 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
-import Development.AbelianVarietyTheory.Definitions.Degenerations.CompanionTheory
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisAdaptedToIdempotents
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisLatticeNear
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsMaximalComapMaximalIdealOO
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisAdaptedToIdempotents
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisLatticeNear
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsNeZeroOfLe
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUniqueIsRatio
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UniformisedTestDimensionsAndSplitFibre
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsNeZeroOfLe
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LePreimageOpenPartIffTestCoordinates
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.HomGenericPoint
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.HomGenericPoint
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LePreimageOpenPartIffTestCoordinates
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SpanRowsClassZeroEqInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGeometricTestMapClassicalPointStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsoSpecialFibreTestGeometricTestStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusActionWeightedChartsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -46,6 +84,7 @@ theorem crd_lin {k K : Type} [CommRing k] [CommRing K] {p : X ⟶ Sp k} {H : LB 
     (hx : x ≫ p = spMap ψ) {v : J → K} (hv : Crd H s x v) : Crd H t x (a.map ψ *ᵥ v) := by
   obtain ⟨l, c, hl, hv⟩ := hv
   refine ⟨l, c, hl, fun i => ?_⟩
+
   rw [ht i l, CrdCalc.valR_eq x _ hl, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, ← CrdCalc.valR_eq, ← CrdCalc.valR_eq,
@@ -59,6 +98,7 @@ theorem isAffineOpen_lin {k : Type} [CommRing k] {p : X ⟶ Sp k} {H : LB X} {J 
   · have h : ∑ j, constFn p (nonzeroLocus φ) (a j) * secRatio φ (s j) = 1 := by
       refine (eq_secRatio φ φ fun l => ?_).trans (secRatio_self φ)
       conv_lhs => rw [hφ l]
+
       rw [map_sum, map_sum, Finset.sum_mul]
       refine Finset.sum_congr rfl fun j _ => ?_
       have e : ∀ (U V : X.Opens) (e : U ≤ V), resG X e (constFn p V (a j)) = constFn p U (a j) := by
@@ -253,6 +293,7 @@ theorem proj_mem (hB : BaseFacts S M U₀ EE) (z : M.Z) (c : S.TT M z →+ ZMod 
       exact (Algebra.smul_def _ _).symm
   rw [ThetaSys.proj, finsum_eq_sum_of_fintype, e]
   refine hs _ _ ?_
+
   rw [← RingHom.mapMatrix_apply, map_sum, Matrix.sum_mulVec]
   refine Submodule.sum_mem _ fun t _ => ?_
   rw [RingHom.mapMatrix_apply, e]
@@ -289,8 +330,10 @@ theorem exists_adapted [hA : ArithBase o Ω] (hB : BaseFacts S M U₀ EE) (Q : C
       · exact (he c).symm
       · simp)))
     (hinc (hu.mul_left_cancel (by
+
       rw [map_sum, Matrix.mul_sum, map_one]
       simp only [he]
+
       rw [← Matrix.sum_mul, hP, ← map_sum, hsum, map_one, Matrix.one_mul, Matrix.mul_one])))
   set A₀ : Matrix S.J S.J (M.O z) := Matrix.of fun i j => e (κ i) j (col i) with hA₀
   let V : M.Z.Opens := ⟨⋂ i, ⋂ j, {x | inc A₀ i j ∈ M.O x} ∩ {x | inc A₀⁻¹ i j ∈ M.O x},

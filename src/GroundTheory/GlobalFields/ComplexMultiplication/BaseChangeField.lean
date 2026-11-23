@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeGalois
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeGalois
+public import GroundTheory.GlobalFields.ComplexMultiplication.AutCFixed
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeDegree
+import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeDescent
+import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialConstantField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -112,10 +162,10 @@ theorem isAlgebraic_coeffs [DecidableEq Ω] {r : RatFunc Ω}
   obtain ⟨h1, h2⟩ := map_eq_of_galFF_ratEmb E (g.restrictScalars F) (h g)
   rcases Finset.mem_union.mp hc with hc | hc
   · obtain ⟨n, -, rfl⟩ := Polynomial.mem_coeffs_iff.mp hc
-    have := congrArg (coeff · n) h1
+    have := congrArg (fun p : Polynomial Ω => p.coeff n) h1
     simpa using this
   · obtain ⟨n, -, rfl⟩ := Polynomial.mem_coeffs_iff.mp hc
-    have := congrArg (coeff · n) h2
+    have := congrArg (fun p : Polynomial Ω => p.coeff n) h2
     simpa using this
 
 omit [IsAlgClosed Ω] in
@@ -155,7 +205,7 @@ theorem _root_.GroundTheory.Arith.Abelian.Isogeny.exists_finiteDimensional_mapOf
       galFF E (g.restrictScalars F) a = a ∧ galFF E (g.restrictScalars F) b = b := by
     intro g
     have e := hyfix g
-    rw [hab, map_add, map_mul, galFF_genY] at e
+    rw [hab, map_add (f := _), map_mul, galFF_genY] at e
     exact eq_of_add_mul_genY_eq (galFF_mem_adjoin_genX E _ ha) (galFF_mem_adjoin_genX E _ hb)
       ha hb e
   have h1 := isAlgebraic_coeffs (E := E) (r := r) (fun g => by rw [hr]; exact hxfix g)
@@ -203,7 +253,7 @@ theorem _root_.GroundTheory.Arith.Abelian.Isogeny.exists_finiteDimensional_mapOf
     rw [Isogeny.congr_alt, ← hr]
     exact hrat r n₁ d₁ hn₁ hd₁
   have hy₁ : ffMap σ₁ C₁ y₁ = ψ₁.y := by
-    rw [Isogeny.congr_y, hab, map_add, map_mul, ← hr₂, ← hr₃, map_add, map_mul,
+    rw [Isogeny.congr_y, hab, map_add (f := _), map_mul, ← hr₂, ← hr₃, map_add (f := _), map_mul,
       hrat r₂ n₂ d₂ hn₂ hd₂, hrat r₃ n₃ d₃ hn₃ hd₃, ffMap_genY, ffCongr_genY]
   refine ⟨F₁, inferInstance, Isogeny.ofMap σ₁ ψ₁ x₁ y₁ hx₁ hy₁, h, h', ?_⟩
   rw [Isogeny.mapOf, Isogeny.map_ofMap]
@@ -226,8 +276,8 @@ section OverF
 variable {F Ω : Type u} [Field F] [Field Ω] [Algebra F Ω] [DecidableEq Ω]
 variable {E E' : WeierstrassCurve F} [E.IsElliptic] [E'.IsElliptic]
 
-omit [DecidableEq Ω] in
 
+omit [DecidableEq Ω] in
 theorem galFF_bcEmb (g : Ω ≃ₐ[F] Ω) (f : E.toAffine.FunctionField) :
     galFF E g (bcEmb (F' := Ω) E f) = bcEmb (F' := Ω) E f := by
   have e : (galFF E g).toRingHom.comp (bcEmb (F' := Ω) E).toRingHom =
@@ -287,8 +337,8 @@ theorem exists_pointMap_isogBaseChange_eq [PerfectField F] [IsAlgClosed Ω] [Dec
       (E'.toAffine.baseChange_nonsingular (f := Algebra.ofId F Ω) (algebraMap F Ω).injective a b).mp h
     exact ⟨.some a b hab, rfl⟩
 
-variable (Ω) in
 
+variable (Ω) in
 noncomputable def pointHomOver [PerfectField F] [IsAlgClosed Ω] [DecidableEq F] (φ : Isogeny E E') :
     E.toAffine.Point →+ E'.toAffine.Point :=
   AddMonoidHom.mk' (fun P => (exists_pointMap_isogBaseChange_eq (Ω := Ω) φ P).choose)
@@ -306,12 +356,6 @@ theorem constMap_pointHomOver [PerfectField F] [IsAlgClosed Ω] [DecidableEq F] 
       (isogBaseChange (F' := Ω) φ).pointMap (constMap E Ω P) :=
   (exists_pointMap_isogBaseChange_eq (Ω := Ω) φ P).choose_spec.symm
 
-omit [DecidableEq Ω] in
-
-theorem _root_.GroundTheory.Arith.Abelian.Isogeny.map_injective {F' : Type u} [Field F'] (σ : F →+* F')
-    {φ ψ : Isogeny E E'} (h : φ.map σ = ψ.map σ) : φ = ψ :=
-  Isogeny.ext_xy ((ffMap σ E).injective (by rw [← Isogeny.map_x, h, Isogeny.map_x]))
-    ((ffMap σ E).injective (by rw [← Isogeny.map_y, h, Isogeny.map_y]))
 
 end OverF
 

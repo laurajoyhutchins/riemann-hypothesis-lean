@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataTheta
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsBilinearFischerPairingMatrixEntryPolynomia
+module
+
+public import Formalism.LocalRingCardinality.DataTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,14 +91,8 @@ def opS (k' : ℕ) : Ix P Q → Ix P Q → Module.End ℂ (Mdl P Q)
 def actR (k : ℕ) : Mat P Q →ₗ[ℂ] Module.End ℂ (Mdl P Q) :=
   ∑ i, ∑ j, (Matrix.entryLinearMap ℂ ℂ i j).smulRight (opR P Q R k i j)
 
-def actS (k' : ℕ) : Mat P Q →ₗ[ℂ] Module.End ℂ (Mdl P Q) :=
-  ∑ i, ∑ j, (Matrix.entryLinearMap ℂ ℂ i j).smulRight (opS P Q S k' i j)
-
 theorem actR_apply (k : ℕ) (Z : Mat P Q) : actR P Q R k Z = ∑ i, ∑ j, Z i j • opR P Q R k i j := by
   simp [actR, LinearMap.sum_apply]
-
-theorem actS_apply (k' : ℕ) (Z : Mat P Q) : actS P Q S k' Z = ∑ i, ∑ j, Z i j • opS P Q S k' i j := by
-  simp [actS, LinearMap.sum_apply]
 
 theorem detR_ne_zero (P Q R : ℕ) (h : P ≤ R) : detR P Q R h ≠ 0 := by
   let g : Fin P × Fin P → Ix P Q × Ix R 0 := fun ac => (Sum.inl ac.1, Sum.inl (Fin.castLE h ac.2))

@@ -1,6 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.DPsiMonomialIwh
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.BlockSubstitutionBlockEmb
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.QaNuNextAdd
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.DPsiMonomialIwh
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.TieDefs
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.MemInvariantSectionsIffIntegral
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.MemInvariantSectionsTwoWeightIff
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.NuOfLoZero
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.NuOfWtPQCast
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.QaNuNextAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,13 +128,14 @@ theorem topCore (h2 : ExplicitMapOntoTwoLetters) (h5 : TwoLetterLatticeGaussInve
   classical
   rw [← tie3 h2 h5 hCO R m hm a b] at hΨ
   obtain ⟨f, hf, rfl⟩ := hΨ
-  refine ⟨coeff (vStar m a b) f, ?_⟩
-  have hT : coeff (vStar m a b) f • deltaB R.Kf m (PsiXY R.Kf m (monomial (vStar m a b) 1)) =
-      deltaB R.Kf m (PsiXY R.Kf m (monomial (vStar m a b) (coeff (vStar m a b) f))) := by
+  refine ⟨AddMonoidAlgebra.coeff f (vStar m a b), ?_⟩
+  have hT : AddMonoidAlgebra.coeff f (vStar m a b) • deltaB R.Kf m (PsiXY R.Kf m (monomial (vStar m a b) 1)) =
+      deltaB R.Kf m (PsiXY R.Kf m (monomial (vStar m a b) (AddMonoidAlgebra.coeff f (vStar m a b)))) := by
     rw [← map_smul, ← map_smul, smul_monomial, smul_eq_mul, mul_one]
   rw [hT]
-  have hsum : dPsi R.Kf m f = ∑ v ∈ f.support, deltaB R.Kf m (PsiXY R.Kf m (monomial v (coeff v f))) := by
+  have hsum : dPsi R.Kf m f = ∑ v ∈ f.support, deltaB R.Kf m (PsiXY R.Kf m (monomial v (AddMonoidAlgebra.coeff f v))) := by
     conv_lhs => rw [dPsi_apply, f.as_sum]
+
     simp only [map_sum]
   obtain ⟨s0, sl⟩ := qtW_vStar m a b hm
   ext u
@@ -97,15 +144,16 @@ theorem topCore (h2 : ExplicitMapOntoTwoLetters) (h5 : TwoLetterLatticeGaussInve
     · intro v hv hne
       by_contra hc
       apply hne
-      have w0 := rowA_of_iwh (dPsi_monomial_iwh R.Kf m v (coeff v f)) 0 u hc
-      have wl := rowA_of_iwh (dPsi_monomial_iwh R.Kf m v (coeff v f)) (Fin.last m) u hc
+      have w0 := rowA_of_iwh (dPsi_monomial_iwh R.Kf m v (AddMonoidAlgebra.coeff f v)) 0 u hc
+      have wl := rowA_of_iwh (dPsi_monomial_iwh R.Kf m v (AddMonoidAlgebra.coeff f v)) (Fin.last m) u hc
       exact qt_comb m a b v (hf v hv).1 (hf v hv).2 (by rw [← w0, hu.1]) (by rw [← wl, hu.2])
     · intro hv
-      rw [notMem_support_iff.1 hv, monomial_zero, map_zero, map_zero, coeff_zero]
-  · have c1 : coeff u (dPsi R.Kf m f) = 0 := by
+      rw [notMem_support_iff.1 hv, monomial_zero, map_zero, map_zero, AddMonoidAlgebra.coeff_zero]
+      rfl
+  · have c1 : AddMonoidAlgebra.coeff (dPsi R.Kf m f) u = 0 := by
       by_contra hc
       exact hu ⟨h0 u hc, hl u hc⟩
-    have c2 : coeff u (deltaB R.Kf m (PsiXY R.Kf m (monomial (vStar m a b) (coeff (vStar m a b) f)))) = 0 := by
+    have c2 : AddMonoidAlgebra.coeff (deltaB R.Kf m (PsiXY R.Kf m (monomial (vStar m a b) (AddMonoidAlgebra.coeff f (vStar m a b))))) u = 0 := by
       by_contra hc
       have w0 := rowA_of_iwh (dPsi_monomial_iwh R.Kf m _ _) 0 u hc
       have wl := rowA_of_iwh (dPsi_monomial_iwh R.Kf m _ _) (Fin.last m) u hc

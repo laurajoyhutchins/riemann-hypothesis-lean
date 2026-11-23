@@ -1,6 +1,47 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LogClosed
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LogChain
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,23 +59,11 @@ section Jet
 
 variable {k : Type} [CommRing k] {n : ℕ}
 
-def AgreeTo (N : ℕ) (g g' : PS k n d) : Prop :=
-  ∀ e : Fin n × Fin d →₀ ℕ, e.degree ≤ N → MvPowerSeries.coeff e g = MvPowerSeries.coeff e g'
-
 end Jet
 
 section Lin
 
 variable {k : Type} [CommRing k] {n : ℕ}
-
-def DofNL (F : Fin d → PS k 2 d) (b : Fin n) (u : Fin d → k) : PS k n d →ₗ[k] PS k n d where
-  toFun := DofN F b u
-  map_add' := by
-    intro x y
-    simp only [DofN, map_add, mul_add, Finset.sum_add_distrib]
-  map_smul' := by
-    intro c x
-    simp only [DofN, Derivation.map_smul, RingHom.id_apply, Finset.smul_sum, mul_smul_comm]
 
 theorem DpolyN_sub {ι : Type} [Fintype ι] (F : Fin d → PS k 2 d) (cp : ι → Fin n) (u : ι → Fin d → k)
     (P : MvPolynomial ι k) (g : PS k n d) (S : Finset (ι →₀ ℕ)) (hS : P.support ⊆ S) :
@@ -52,7 +81,7 @@ theorem DpolyN_addP {ι : Type} [Fintype ι] (F : Fin d → PS k 2 d) (cp : ι �
     DpolyN_sub F cp u P g (P.support ∪ Q.support) Finset.subset_union_left,
     DpolyN_sub F cp u Q g (P.support ∪ Q.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun e _ => ?_
-  rw [MvPolynomial.coeff_add, map_add, add_mul]
+  rw [MvPolynomial.coeff_add, map_add (f := _), add_mul]
 
 theorem DpolyN_smulP {ι : Type} [Fintype ι] (F : Fin d → PS k 2 d) (cp : ι → Fin n) (u : ι → Fin d → k)
     (c : k) (P : MvPolynomial ι k) (g : PS k n d) :
@@ -69,7 +98,7 @@ theorem nabValN_addP (B : FB R d O) (k : Type) [CommRing k] [Algebra ℚ k] [Alg
     (f : PS k n d) :
     nabValN B k h w0 m f cp u (P + Q) = nabValN B k h w0 m f cp u P + nabValN B k h w0 m f cp u Q := by
   unfold nabValN
-  rw [DpolyN_addP, map_add]
+  rw [DpolyN_addP, map_add (f := _)]
 
 theorem nabValN_smulP (B : FB R d O) (k : Type) [CommRing k] [Algebra ℚ k] [Algebra R k] (h : PS k 2 d) (w0 : O)
     (m : ℕ) {n : ℕ} {ι : Type} [Fintype ι] (cp : ι → Fin n) (u : ι → Fin d → k) (c : k) (P : MvPolynomial ι k)

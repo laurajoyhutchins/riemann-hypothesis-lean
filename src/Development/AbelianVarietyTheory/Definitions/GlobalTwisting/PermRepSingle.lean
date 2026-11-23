@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupHomology.Functoriality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,8 +64,8 @@ def permRep (X : Type) [MulAction G X] (A : Rep k G) : Representation k G (X →
 
 abbrev permT (X : Type) [MulAction G X] (A : Rep k G) : Rep k G := Rep.of (permRep X A)
 
-variable (k G) in
 
+variable (k G) in
 abbrev perm (X : Type) [MulAction G X] : Rep k G := permT X (Rep.trivial k G k)
 
 def permCoef (X : Type) [MulAction G X] {A B : Rep k G} (f : A ⟶ B) : permT X A ⟶ permT X B :=
@@ -37,10 +82,10 @@ def ptMap {H X : Type} [Group H] [MulAction G X] (φ : H →* G) (x : X) (hx : �
     change Finsupp.single x (A.ρ (φ h) a) = permRep X A (φ h) (Finsupp.single x a)
     rw [permRep_single, hx]⟩
 
-variable (k) in
 
+variable (k) in
 def ptH {H X : Type} [Group H] [MulAction G X] (φ : H →* G) (x : X) (hx : ∀ h, φ h • x = x) (n : ℕ) :
-    groupHomology (Rep.trivial k H k) n ⟶ groupHomology (perm k G X) n :=
+    groupHomology (Rep.trivial k H k) n ⟶ groupHomology (perm (k := k) (G := G) X) n :=
   groupHomology.map (A := Rep.trivial k H k) φ (ptMap φ x hx (Rep.trivial k G k)) n
 
 abbrev hMap {A B : Rep k G} (f : A ⟶ B) (n : ℕ) : groupHomology A n ⟶ groupHomology B n :=

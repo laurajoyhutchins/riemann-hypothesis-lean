@@ -1,5 +1,49 @@
-import Development.WeilBound.ThetaLifts.SmallCones.NormPiInfSmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdmissibleFormAdelicThetaSum
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.SliceAd
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdmissibleFormAdelicThetaSum
+import Development.WeilBound.ThetaLifts.LatticeBasics.IsCompactIntV
+public import Development.WeilBound.ThetaLifts.SmallCones.IdeleTop
+public import Development.WeilBound.ThetaLifts.SmallCones.NormPiInfSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,11 +88,12 @@ theorem exists_so {B : Base F E} {M : Model σ X W} (hM : M.IsGood B.ψ) {ι : T
   let x : Fin n × Fin d → mixedSpace F := fun i => evI F (w i)
   have h1 : ∑ i, g i x • φ i ∈ soSub B M := by
     convert contract hM hg x using 1
-    funext y
-    simp only [Finset.sum_apply, pureA_pt, Pi.smul_apply, smul_eq_mul]
+    ext y
+    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, pureA_pt]
   have h2 := congrArg Subtype.val (LinearMap.congr_fun hq ⟨_, h1⟩)
+
   simp only [LinearMap.comp_apply, Submodule.subtype_apply, map_sum, map_smul, LinearMap.id_apply, Submodule.coe_sum,
-    Submodule.coe_smul] at h2
+  Submodule.coe_smul] at h2
   have h3 := congrFun h2 fun i => (w i).2
   simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at h3 ⊢
   exact h3.symm
@@ -66,6 +111,7 @@ theorem dom_int {M : Model σ X W} {om : Rep σ X W} (hom : ∀ x, ∀ Φ ∈ sc
   · refine (mul_le_mul_left (lintegral_mono (g := fun x => ∑ i, ENNReal.ofReal (p i (g i l) * (ht h : ℝ) ^ k i) * G i x)
       fun x => ?_) _).trans (le_of_eq ?_)
     · refine le_trans (le_of_eq ?_) ((enorm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => hb i (g i l) x h))
+
       rw [theta, ← hl₀ _ (hom _ _ (Submodule.sum_mem _ fun i _ => pureA_mem _ (h1 i))), map_sum, map_sum]
       congr 1
       exact Finset.sum_congr rfl fun i _ => hl₀ _ (hom _ _ (pureA_mem _ (h1 i)))
@@ -109,10 +155,12 @@ theorem lineInt_of (hS : Slice) (hI : SchInt) (hT : TateAbs) : LineInt := by
   choose T hT using fun i => hl₁ _ (h1 i)
   have e1 : (fun l : (AE F E)ˣ => l₁ (e (M.co.rho B.ψ (τ l.1 • incM F v₀) Ψ)) * (ν l : ℂ) * ((absE F E l : ℝ) : ℂ) ^ z) =
       fun l => ∑ i, T i (c l • g i l) := funext fun l => by
+
     rw [h3, map_sum, mul_assoc, Finset.sum_mul]
     exact Finset.sum_congr rfl fun i _ => by rw [hT, map_smul, smul_eq_mul, mul_comm]
   rw [e1]
   refine ⟨integrable_finsetSum _ fun i _ => (hf i (T i)).1, ?_⟩
+
   rw [integral_finsetSum _ fun i _ => (hf i (T i)).1, map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [hT, (hf i (T i)).2]
 

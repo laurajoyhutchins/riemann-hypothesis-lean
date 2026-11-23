@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.EtaleSheaves.InstCommRingR
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.InstCommRingR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -36,6 +79,7 @@ theorem phi_ι (P : Collected q) (h : Inv q E) (V : E ⟶ ofCat (glCat N))
       (P.ι h (N - j) ((a j).cast (by have := j.isLt; omega) (by have := j.isLt; omega))) *
       P.deg1 (inv_of (PB.pr V) h) (c1 q (PB.line V)) ^ (j : ℕ) := by
   unfold Phi
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [term P (PB.pr V) h (inv_of (PB.pr V) h) _ (a j) (N - j) j N (by have := j.isLt; omega)
@@ -88,7 +132,7 @@ theorem LeafChern_of : LeafChern := by
       (∀ j, N < j → c j = 0) ∧ Phi V (ac c) = -cpow q (c1 q (PB.line V)) N) := by
     intro c h0
     unfold IsChern
-    rw [sum_eq P h V c h0, ← P.ι_cpow, ← map_add, map_eq_zero_iff _ (hι _ _), add_eq_zero_iff_neg_eq, eq_comm]
+    rw [sum_eq P h V c h0, ← P.ι_cpow, ← map_add (f := _), map_eq_zero_iff _ (hι _ _), add_eq_zero_iff_neg_eq, eq_comm]
     simp only [h0, true_and]
     exact and_congr_right fun _ => eq_comm
   have uniq : ∀ c c', IsChern P h V c → IsChern P h V c' → c = c' := by
@@ -106,16 +150,16 @@ theorem LeafChern_of : LeafChern := by
   obtain ⟨a, ha⟩ := hB.2 (-cpow q (c1 q (PB.line V)) N)
   have hc0 : P.ι h 0 (mkc a 0) = 1 := by
     dsimp only [mkc]
-    rw [dif_pos rfl]
+    rw [dite_eq_left rfl]
     exact P.ι_one h
   have hac : ac (mkc a) = a := by
     funext j
     dsimp only [ac, mkc]
-    rw [dif_neg (by omega), dif_pos (by omega), ChernPf.cast_cast]
+    rw [dite_eq_right (by omega), dite_eq_left (by omega), ChernPf.cast_cast]
     exact cast_idx a _ _ (Fin.ext (by simp; omega)) _ _
   have hC : IsChern P h V (mkc a) := (char _ hc0).2 ⟨fun j hj => by
     dsimp only [mkc]
-    rw [dif_neg (by omega), dif_neg (by omega)], by rw [hac]; exact ha⟩
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)], by rw [hac]; exact ha⟩
   exact ⟨mkc a, hC, fun c' hc' => uniq _ _ hc' hC⟩
 
 end LateralTheory.E.D2

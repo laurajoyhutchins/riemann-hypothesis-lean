@@ -1,6 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.FormsFiniteness.FormsFiniteAlt
-import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspFinite
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import Formalism.RealPlaceAnalysis.StatementE
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Translation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +66,7 @@ def inc : Matrix (Fin n) (Fin a) R := Matrix.of fun i k => if i = e k then 1 els
 
 theorem inc_tr_mul : (inc e R)ᵀ * inc e R = 1 := by
   ext k l
-  simp [inc, Matrix.mul_apply, Matrix.one_apply, eq_comm]
+  simp [inc, Matrix.mul_apply, Matrix.one_apply, Function.swap, eq_comm]
 
 variable {R}
 
@@ -31,9 +78,6 @@ theorem matrixExtendByZero_mul (X Y : Matrix (Fin a) (Fin a) R) : ext0 e X * ext
 
 theorem matrixExtendByZero_add (X Y : Matrix (Fin a) (Fin a) R) : ext0 e (X + Y) = ext0 e X + ext0 e Y := by
   simp only [ext0, Matrix.mul_add, Matrix.add_mul]
-
-theorem extension_zero_sub (X Y : Matrix (Fin a) (Fin a) R) : ext0 e (X - Y) = ext0 e X - ext0 e Y := by
-  simp only [ext0, Matrix.mul_sub, Matrix.sub_mul]
 
 theorem matrixExtendByZero_zero : ext0 e (0 : Matrix (Fin a) (Fin a) R) = 0 := by simp [ext0]
 
@@ -152,9 +196,8 @@ theorem gen_mem (D : Idem R ι) (l : Matrix (Fin n) (Fin n) R →ₗ[ℝ] A) (τ
     (h : ∀ x, l (Matrix.single i j x) ∈ P) : gen D l τ i j ∈ P := by
   unfold gen
   induction D.e τ with
-  | zero => rw [map_zero]; exact P.zero_mem
   | tmul c x => rw [unitMap_tmul]; exact P.smul_mem c (h x)
-  | add x y hx hy => rw [map_add]; exact P.add_mem hx hy
+  | add x y hx hy => rw [map_add (f := _)]; exact P.add_mem hx hy
 
 theorem gen_inter {m : ℕ} {B : Type} [Ring B] [Algebra ℂ B] [Algebra ℝ B] [IsScalarTower ℝ ℂ B] {N : Type}
     [AddCommGroup N] [Module ℂ N] (D : Idem R ι) (l : Matrix (Fin n) (Fin n) R →ₗ[ℝ] A)
@@ -163,9 +206,8 @@ theorem gen_inter {m : ℕ} {B : Type} [Ring B] [Algebra ℂ B] [Algebra ℝ B] 
     f (gen D l τ i j) = f' (gen D l' τ i' j') := by
   unfold gen
   induction D.e τ with
-  | zero => simp only [map_zero]
   | tmul c x => simp only [unitMap_tmul, map_smul, h]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end Gen
 
@@ -226,16 +268,16 @@ theorem rt_apply (g : AdelicGLn.AdelicGL K n) (φ : archSmooth K n) (x : AdelicG
 
 def Sat (S : Submodule ℂ (archSmooth K n)) : Prop := ∀ k ∈ Reduction.maxCompact (K := K) (n := n), ∀ φ ∈ S, rt k φ ∈ S
 
-variable (K n) in
 
+variable (K n) in
 def NInv (r : ℕ) : Submodule ℂ (archSmooth K n) where
   carrier := {ψ | ∀ (X : UPos n r → AdeleRing (𝓞 K) K) g, ψ.1 (unipGL X * g) = ψ.1 g}
   add_mem' h1 h2 X g := congrArg₂ (· + ·) (h1 X g) (h2 X g)
   zero_mem' _ _ := rfl
   smul_mem' c _ h X g := congrArg (c • ·) (h X g)
 
-variable (K) in
 
+variable (K) in
 def Van (r s : ℕ) : Submodule ℂ (archSmooth K (r + s)) where
   carrier := {ψ | ∀ m₁ m₂, ψ.1 (blk m₁ m₂) = 0}
   add_mem' {x y} h1 h2 m₁ m₂ := by

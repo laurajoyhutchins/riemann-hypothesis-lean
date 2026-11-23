@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.InertKernelTheory.StatementLoc
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.RestEntOf
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementLoc
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.EnInParamKProd
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.FacEmbDomain
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.ExpansionAllPlacesOfPlace
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.KernelProductForm
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NatCastInvMemRp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.DworkExponentialRestrictions
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +73,7 @@ theorem geZ_iff (x : ℂ_[p]) : GeZ x ↔ x ∈ Formalism.L2.G.Pend.OcC p := by
     rw [hk, zpow_natCast]
     exact Subring.mul_mem _ (Subring.pow_mem _ hx b) (Subring.pow_mem _ (natCast_mem _ p) k)
 
-def GeP {τ : Type} (a : MvPolynomial τ ℂ_[p]) : Prop := ∀ n, MvPolynomial.coeff n a ∈ Formalism.L2.G.Pend.OcC p
+def GeP {τ : Type} (a : MvPolynomial τ ℂ_[p]) : Prop := ∀ n, AddMonoidAlgebra.coeff a n ∈ Formalism.L2.G.Pend.OcC p
 
 theorem geP_one {τ : Type} : GeP (1 : MvPolynomial τ ℂ_[p]) := by
   classical
@@ -85,6 +133,7 @@ theorem FC_supp (j : ℕ) (v : X.Pl) : FC X be j v ∈ Gen.SuppOn (en_pi X j) v 
 
 theorem PhB_const (hbe : BeProp p be) (j : ℕ) (v : X.Pl) : MvPowerSeries.constantCoeff (PhB X be j v) = 0 := by
   unfold PhB
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun e _ => by rw [substitution_of_variables]; exact th_ren_const _ (th_be_const hbe)
 
@@ -109,6 +158,7 @@ theorem mapP_PIvS (j : ℕ) (I : X.ColCh j) (i0 : X.Pl → ℕ) (v : X.Pl) :
   rw [RingHom.map_det, AlgHom.map_det]
   congr 1
   ext i i'
+
   simp [en_mapP, RingHom.mapMatrix_apply, AlgHom.mapMatrix_apply, Matrix.map_apply, map_sum]
 
 theorem geP_applyD_prod_FC_mul (j : ℕ) (hLow : ∀ v, LowZC X be j v)
@@ -206,6 +256,7 @@ theorem first_kernel_product_factor (j : ℕ) {Th : MvPowerSeries (X.EA j ⊕ X.
       have a1 : expK (∑ v, (-PhB X be j v) + -(Ph - ∑ v, PhB X be j v)) =
           expK (∑ v, (-PhB X be j v)) * expK (-(Ph - ∑ v, PhB X be j v)) :=
         expK_add (by
+
           rw [map_sum]
           exact Finset.sum_eq_zero fun v _ => by rw [map_neg, PhB_const X be hbe, neg_zero])
           (by rw [map_neg, hc0, neg_zero])
@@ -218,7 +269,7 @@ theorem first_kernel_product_factor (j : ℕ) {Th : MvPowerSeries (X.EA j ⊕ X.
 
 theorem ent_of_K1gen (j : ℕ) (hLow : ∀ v, LowZC X be j v) {Th : MvPowerSeries (X.EA j ⊕ X.EA j) ℂ_[p]}
     (hK : ExtensionGeneratorCondition p ℂ_[p] (Formalism.L2.G.Pend.OcC p) be Th) (I : X.ColCh j) (n : X.FrI j →₀ ℕ) :
-    GeZ (MvPolynomial.coeff n (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j Th))) := by
+    GeZ (AddMonoidAlgebra.coeff (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j Th)) n) := by
   obtain ⟨U1, hU1, rfl⟩ := first_kernel_product_factor X be j hK
   exact (geZ_iff _).2 (geP_applyD_prod_FC_mul X be j hLow U1 hU1 I n)
 
@@ -230,8 +281,8 @@ theorem admissible_third_of_low_kernel_law : Adm3OfK1LowerBound := by
   intro p _ X _ E hfin be T pos F hLow H j hj L0 hL0 La' hL' φ I n
   exact Ent.ent_of_K1gen X be j (hLow j hj) (H j hj L0 hL0 La' hL' φ) I n
 
-open Formalism.L2.G.Pend in
 
+open Formalism.L2.G.Pend in
 theorem low_order_vanishing_of_admissible (D : Formalism.BasicNotions.D7) {p : ℕ} [Fact p.Prime] (X : Sys p) [IsFractionRing X.G.O X.G.Kf]
     (E : CEmbC X.G) (hfin : ∀ j c, (X.Lv.lev j c).FinClasses) (hst : FinStab X.Lv) {g : Formalism.MainNotions.GL3Theta.G1 p}
     (hLT : LTIso g) {T : Type} (pos : (Σ v : X.Pl, Fin (X.G.P.n' v)) ≃ T)
@@ -239,8 +290,8 @@ theorem low_order_vanishing_of_admissible (D : Formalism.BasicNotions.D7) {p : �
     Formalism.MainNotions.FormalGroupSystem.adm11 D X (pendT X E hfin hst hLT pos F) → ∀ j < X.mm, ∀ v, LowZC X (beLT hLT) j v :=
   fun h j hj v => h v j hj
 
-open Formalism.L2.G.Pend in
 
+open Formalism.L2.G.Pend in
 theorem admissible_third_of_second_eleventh (D : Formalism.BasicNotions.D7) {p : ℕ} [Fact p.Prime] (X : Sys p) [IsFractionRing X.G.O X.G.Kf]
     (E : CEmbC X.G) (hfin : ∀ j c, (X.Lv.lev j c).FinClasses) (hst : FinStab X.Lv) {g : Formalism.MainNotions.GL3Theta.G1 p}
     (hLT : LTIso g) {T : Type} (pos : (Σ v : X.Pl, Fin (X.G.P.n' v)) ≃ T)

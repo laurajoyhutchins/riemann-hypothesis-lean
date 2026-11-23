@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.DpOfPre
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.ChooseFac
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsDPMorphismOfFlatAlgebra
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+public import Mathlib.RingTheory.Flat.Basic
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.ChooseFac
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.DpOfPre
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.ExistsLiftAndAug
+import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.PreOfGens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -83,6 +135,7 @@ private theorem dpowSeries_add_arg_eq_mul {R A : Type} [CommRing R] [CommRing A]
         PowerSeries.mk fun n => y ^ n * algebraMap R A (κ.dpow n r') := by
   ext n
   simp only [PowerSeries.coeff_mk, PowerSeries.coeff_mul]
+
   rw [κ.dpow_add hr hr', map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k hk => ?_
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hk
@@ -127,55 +180,7 @@ private theorem dpowSeries_sum_arg_eq_prod {R A : Type} [CommRing R] [CommRing A
 
 theorem flatExt (R A : Type) [CommRing R] [CommRing A] [Algebra R A] [Module.Flat R A] (I : Ideal R)
     (κ : DividedPowers I) : ∃ δ : DividedPowers (I.map (algebraMap R A)), IsDPMorphism κ δ (algebraMap R A) := by
-  classical
-  obtain ⟨γ, hpre, hγ⟩ := pre_of_gens A I (fun i : I => algebraMap R A i)
-    (fun i n => algebraMap R A (κ.dpow n i))
-    (fun i => by simp [κ.dpow_zero i.2])
-    (fun i => by simp [κ.dpow_one i.2])
-    (fun i n hn => Ideal.subset_span ⟨⟨κ.dpow n i, κ.dpow_mem hn i.2⟩, rfl⟩)
-    (fun i m n => by rw [← map_mul, κ.mul_dpow i.2, map_mul, map_natCast])
-    (by
-      intro c hc
-      have hrel : ∑ i : c.support, ((i : I) : R) • c i = 0 := by
-        rw [Finset.sum_coe_sort c.support (fun i => ((i : I) : R) • c i)]
-        simpa [Finsupp.sum, Algebra.smul_def, mul_comm] using hc
-      obtain ⟨k, a, y, hca, hsum⟩ := Module.Flat.isTrivialRelation_of_sum_smul_eq_zero
-        (R := R) (M := A) (f := fun i : c.support => ((i : I) : R)) (x := fun i => c i) hrel
-      rw [Finsupp.prod, ← Finset.prod_coe_sort]
-      calc (∏ i : c.support, PowerSeries.mk fun n =>
-              c i ^ n * algebraMap R A (κ.dpow n ((i : I) : R)))
-          = ∏ i : c.support, ∏ j, PowerSeries.mk fun n =>
-              y j ^ n * algebraMap R A (κ.dpow n (a i j * ((i : I) : R))) := by
-            refine Finset.prod_congr rfl fun i _ => ?_
-            rw [show (c i : A) = ∑ j, a i j • y j from hca i, dpowSeries_sum_base_eq_prod κ (i : I).2]
-            refine Finset.prod_congr rfl fun j _ => ?_
-            rw [Algebra.smul_def, dpowSeries_algebraMap_mul_base_eq_smul_arg κ (i : I).2]
-        _ = ∏ j, ∏ i : c.support, PowerSeries.mk fun n =>
-              y j ^ n * algebraMap R A (κ.dpow n (a i j * ((i : I) : R))) := Finset.prod_comm
-        _ = ∏ j, PowerSeries.mk fun n =>
-              y j ^ n * algebraMap R A (κ.dpow n (∑ i : c.support, a i j * ((i : I) : R))) := by
-            refine Finset.prod_congr rfl fun j _ => ?_
-            exact (dpowSeries_sum_arg_eq_prod κ (y j) Finset.univ (fun i : c.support => a i j * ((i : I) : R))
-              fun i => I.mul_mem_left _ (i : I).2).symm
-        _ = 1 := by
-            refine Finset.prod_eq_one fun j _ => ?_
-            have h0 : ∑ i : c.support, a i j * ((i : I) : R) = 0 := by
-              rw [← hsum j]
-              exact Finset.sum_congr rfl fun i _ => mul_comm _ _
-            rw [h0, dpowSeries_zero_arg_eq_one κ (y j)])
-  have hspan : I.map (algebraMap R A) = Ideal.span (Set.range fun i : I => algebraMap R A i) := by
-    rw [Ideal.map, Set.image_eq_range]
-    rfl
-  obtain ⟨δ, hδ⟩ := dp_of_pre A (I.map (algebraMap R A)) γ (Set.range fun i : I => algebraMap R A i)
-    (hspan ▸ hpre) hspan (by
-      rintro _ ⟨i, rfl⟩ m n hn
-      show γ m (γ n (algebraMap R A i)) = _ * γ (m * n) (algebraMap R A i)
-      rw [hγ i n, hγ ⟨κ.dpow n i, κ.dpow_mem hn i.2⟩ m, hγ i (m * n)]
-      show algebraMap R A (κ.dpow m (κ.dpow n i)) = _
-      rw [κ.dpow_comp hn i.2, map_mul, map_natCast])
-  refine ⟨δ, ⟨le_rfl, fun {n} a ha => ?_⟩⟩
-  rw [hδ]
-  exact hγ ⟨a, ha⟩ n
+  apply GlobalTheory.DPFlat.exists_isDPMorphism_of_flat <;> assumption
 
 theorem exists_std (B : Type) [CommRing B] (J : Ideal B) (δ : DividedPowers J) (Q : PDPoly B) :
     ∃ η : DividedPowers (Q.ext J), Q.IsStd δ η := by

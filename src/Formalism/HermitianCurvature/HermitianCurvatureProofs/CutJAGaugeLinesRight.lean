@@ -1,14 +1,61 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAGaugeLinesCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGRawSmooth
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGQLFam
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSConst
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTConnGaugeA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCAsm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DiagonalTransferAction
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedF
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAGaugeLinesCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliTwoByTwo
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCAsm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTConnGaugeA
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSConst
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSTr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGQLFam
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGRawSmooth
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RightTypeAction
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.QuadraticFormTwoTwo.TopLevelPointwiseIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt NumberField
 open scoped ComplexConjugate Matrix
@@ -20,8 +67,6 @@ noncomputable section
 theorem gauge_right_line_holds : GLRight := by
   intro Wp Wq _ _ _ _ _ _ P Bs e hpl hk he hQQ ζ hζ Fr hFr X hX Y X' hX' ρ
   obtain ⟨hOK, hz, hz', hTz, hTz', -, -⟩ := id hpl
-  have hT : 0 < Tz P.k P.r Bs.z := Bs.T_pos
-  have hT' : 0 < Tz P.k P.r Bs.z' := Bs.T'_pos
   have hζ' : Tz P.k P.r Bs.z * Tz P.k P.r Bs.z' < Complex.normSq ζ := by
     rw [hTz, hTz']; exact hζ
   set c0 : Fin P.r → ℂ := fun _ => 1 with hc0def

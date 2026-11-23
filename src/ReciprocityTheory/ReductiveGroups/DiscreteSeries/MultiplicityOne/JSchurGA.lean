@@ -1,5 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+public import Formalism.HermitianCurvature.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +89,6 @@ theorem PG_mul_apply (k r : ℕ) (M : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r +
   first
     | simp only [Matrix.mul_apply, PG, add_mul, Finset.sum_add_distrib, ite_mul, zero_mul,
         Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-    | simp [Matrix.mul_apply, PG, add_mul, Finset.sum_add_distrib]
 
 theorem val_rev_eq_sub (k r : ℕ) (i : Fin (2 * r + k + 1)) : (Fin.rev i).val = 2 * r + k - i.val := by
   have := i.isLt
@@ -240,10 +286,6 @@ private theorem exists_UJ_umat_eq_of_inUJ {n : ℕ} {ε : Fin n → Bool} (h : M
   have hr : h * (Formalism.REAL.Jm ε * hᴴ * Formalism.REAL.Jm ε) = 1 := by
     first
       | exact mul_eq_one_comm.mp hl
-      | exact Matrix.mul_eq_one_comm.mp hl
-      | exact (mul_eq_one_comm_of_equiv (Equiv.refl _)).mp hl
-      | exact mul_eq_one_symm hl
-      | exact Matrix.mul_eq_one_symm hl
   exact ⟨⟨⟨h, _, hr, hl⟩, hu⟩, rfl⟩
 
 private theorem isClosedEmbedding_umat (k r : ℕ) :
@@ -255,13 +297,11 @@ private theorem isClosedEmbedding_umat (k r : ℕ) :
       (continuous_const.matrix_mul continuous_id.matrix_conjTranspose).matrix_mul continuous_const
     first
       | exact continuous_id.prodMk (MulOpposite.continuous_op.comp h0)
-      | exact continuous_id.prod_mk (MulOpposite.continuous_op.comp h0)
   have hc : Continuous (fun u : Formalism.REAL.UJ (epsG k r) => Formalism.MainNotions.S.umat u) :=
     Units.continuous_val.comp continuous_subtype_val
   have he : IsInducing (fun u : Formalism.REAL.UJ (epsG k r) => Units.embedProduct _ (u : (Mat k r)ˣ)) := by
     first
       | exact Units.isInducing_embedProduct.comp IsInducing.subtypeVal
-      | exact Units.isInducing_embedProduct.comp Topology.IsInducing.subtypeVal
   have hcomp : (fun u : Formalism.REAL.UJ (epsG k r) => Units.embedProduct _ (u : (Mat k r)ˣ)) =
       (fun m : Mat k r => (m, MulOpposite.op (Formalism.REAL.Jm (epsG k r) * mᴴ * Formalism.REAL.Jm (epsG k r)))) ∘
         (fun u : Formalism.REAL.UJ (epsG k r) => Formalism.MainNotions.S.umat u) := by
@@ -364,7 +404,7 @@ private theorem nuG_map_eq_of_psiG_comm {μ : Measure (Mt k r)} (hμ : IsHaarOn 
 theorem nuG_left {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).IsMulLeftInvariant := by
   constructor
   intro u
-  exact nuG_map_eq_of_psiG_comm hμ _ (continuous_mul_left u).measurable (lmulM (psiM k r u)) (measurable_lmulM _)
+  exact nuG_map_eq_of_psiG_comm hμ _ (continuous_const_mul u).measurable (lmulM (psiM k r u)) (measurable_lmulM _)
     (fun x => psiG_mul' u x) (hμ.left _ (psiM_mem u))
 
 theorem nuG_finite {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : IsFiniteMeasureOnCompacts (nuG μ) := by
@@ -403,8 +443,8 @@ private theorem nuG_isOpenPosMeasure {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV
   have h0 := hU.measure_ne_zero (Formalism.REAL.muG (epsG k r)) hne
   first
     | exact smul_ne_zero hc h0
-    | exact mul_ne_zero (ENNReal.coe_ne_zero.2 hc) h0
 
+open scoped Pointwise in
 theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).IsInvInvariant := by
   haveI := nuG_left hμ
   haveI := nuG_finite hμ
@@ -415,7 +455,7 @@ theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).
   haveI hR : (nuG μ).IsMulRightInvariant := by
     constructor
     intro u
-    refine nuG_map_eq_of_psiG_comm hμ _ (continuous_mul_right u).measurable (Formalism.FourierDecayAlt.B.rmulF (psiM k r u)) ?_
+    refine nuG_map_eq_of_psiG_comm hμ _ (continuous_mul_const u).measurable (Formalism.FourierDecayAlt.B.rmulF (psiM k r u)) ?_
       (fun x => ?_) (hμ.right _ (psiM_mem u))
     · apply Continuous.measurable
       unfold Formalism.FourierDecayAlt.B.rmulF
@@ -425,7 +465,6 @@ theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).
   haveI hFi : IsFiniteMeasureOnCompacts (nuG μ).inv := by
     first
       | infer_instance
-      | exact ⟨fun K hK => by rw [Measure.inv_apply]; exact hK.inv.measure_lt_top⟩
   haveI hLi : (nuG μ).inv.IsMulLeftInvariant := by infer_instance
   obtain ⟨c, hc⟩ : ∃ c : ℝ≥0, (nuG μ).inv = c • nuG μ :=
     ⟨_, Measure.isMulLeftInvariant_eq_smul _ _⟩
@@ -451,11 +490,6 @@ theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).
       exact h2.symm
     first
       | exact (ENNReal.mul_left_inj hpos.ne' hfin).1 h3
-      | exact (ENNReal.mul_right_inj hpos.ne' hfin).1 h3
-      | exact ENNReal.mul_right_cancel hpos.ne' hfin h3
-      | exact (ENNReal.mul_eq_mul_left hpos.ne' hfin).1 (by rw [mul_comm, h3, mul_comm])
-      | exact (ENNReal.mul_left_inj hpos.ne' hfin).1 (by rw [mul_comm, h3, mul_comm])
-      | exact (ENNReal.mul_right_inj hpos.ne' hfin).1 (by rw [mul_comm, h3, mul_comm])
   constructor
   rw [hc, ENNReal.coe_eq_one.1 hc1, one_smul]
 
@@ -469,18 +503,22 @@ variable {k r : ℕ} {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H
 theorem sqRep_psiG {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) {σ : Mat k r → (H →L[ℂ] H)}
     (hU : Formalism.MainNotions.S.IsURepOn (GV k r) σ)
     (hS : ∀ v w : H, MemLp (fun g : Mt k r => ⟪w, σ (Matrix.of g) v⟫_ℂ) 2 μ) :
-    Formalism.MainNotions.BridgeCSchur.SqRep (nuG μ) (fun u => σ (psiM k r u)) where
-  one := by rw [psiM_one]; exact hU.1.1
-  mul a b := by rw [psiM_mul]; exact hU.1.2 _ (psiM_mem a) _ (psiM_mem b)
-  iso g v := hU.2.1 _ (psiM_mem g) v
-  cont v := (hU.2.2 v).comp_continuous (continuous_psiM k r) psiM_mem
-  sq v w := by
+    Formalism.MainNotions.BridgeCSchur.SqRep (nuG μ) (fun u => σ (psiM k r u)) := by
+  constructor
+  · rw [psiM_one]
+    exact hU.1.1
+  · intro a b
+    rw [psiM_mul]
+    exact hU.1.2 _ (psiM_mem a) _ (psiM_mem b)
+  · intro g v
+    exact hU.2.1 _ (psiM_mem g) v
+  · intro v
+    exact (hU.2.2 v).comp_continuous (continuous_psiM k r) psiM_mem
+  · intro v w
     have h := hS v w
     rw [← map_nuG hμ] at h
-    have h' := ((measurableEmbedding_psiG k r).memLp_map_measure_iff).mp h
-    convert h' using 1
-    funext u
-    simp only [Function.comp_apply, of_psiG]
+    simpa only [Function.comp_def, of_psiG] using
+      (measurableEmbedding_psiG k r).memLp_map_measure_iff.mp h
 
 theorem irr_psiG {σ : Mat k r → (H →L[ℂ] H)} (hI : Formalism.MainNotions.S.IsIrredOn (GV k r) σ) :
     ∀ S : Submodule ℂ H, IsClosed (S : Set H) →
@@ -512,11 +550,9 @@ theorem schur_GV [CompleteSpace H] [Nontrivial H] {μ : Measure (Mt k r)} (hμ :
   constructor
   · first
       | exact hE.integrable_map_iff.2 hi
-      | simpa [Function.comp_def, of_psiG] using hE.integrable_map_iff.2 hi
   · rw [hE.integral_map]
     first
       | exact he
-      | simpa [of_psiG] using he
 
 end
 

@@ -1,9 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ProdDat
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsDblClosed
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsHeisenbergCombinationSplitPlaceDatum
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSBExtFunEqHalfInd
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteOfPlaces
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCombAt
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSBExtFunEqHalfInd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.LocallyConstant.Algebra
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
@@ -34,36 +71,6 @@ theorem exists_latInd (q : GlobalTheory.FinPl.SplitPt D k) (FS : GlobalTheory.Lo
   exact ⟨⟨(A : Set (Matrix Y Y' k)).indicator 1, (LocallyConstant.charFn ℂ hcl).isLocallyConstant,
       HasCompactSupport.intro hk fun x hx => Set.indicator_of_notMem hx _⟩, Set.indicator_of_mem A.zero_mem _, rfl⟩
 
-theorem exists_locPl {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1)) (q : GlobalTheory.FinPl.SplitPt D k) (hq : q.UnitAA)
-    (FS : GlobalTheory.LocMod.Frame k S.rank Y') (FT : GlobalTheory.LocMod.Frame k T.rank Y) (Φ : SB (Matrix Y Y' k))
-    {M : GlobalTheory.FinPl.Lat S} {M' : GlobalTheory.FinPl.Lat T} (hS : IsSelfDualC S M) (hT : IsSelfDualC T M') :
-    ∃ L : LocPl ψ S T M M', L.q.v = q.v ∧ L.q.e = q.e ∧
-      ∀ x, prodDat (fun _ : Fin 1 => L) ((ofSplit q).up FS FT x) = Φ.1 x := by
-  obtain ⟨O, hO, h0⟩ := GlobalTheory.LocMod.PinModel.exists_isOne (k := k) (Y := Y) (Y' := Y')
-  obtain ⟨Φ₀, h1, h2⟩ := exists_latInd q FS FT hS hT
-  obtain ⟨e, e1, e2⟩ := GlobalTheory.LocComb.exists_comb D k (ofSplit q) Y Y' S T FS FT ψ hψ O Φ (by rintro rfl; simp at h0)
-  obtain ⟨o, o1, o2⟩ := GlobalTheory.LocComb.exists_comb D k (ofSplit q) Y Y' S T FS FT ψ hψ Φ₀ O (by rintro rfl; simp at h1)
-  refine ⟨⟨k, q, hq, Y, Y', FS, FT, Φ, e, ⟨e1, fun Tm hT a b ha hb => ?_⟩, o, o1, fun Tm hT a b hb ha => ?_⟩, rfl, rfl, fun x => ?_⟩
-  · obtain rfl : a = O := Subtype.ext (ha.trans hO.symm)
-    obtain rfl : b = Φ := Subtype.ext hb
-    exact e2 Tm hT
-  · obtain rfl : b = O := Subtype.ext (hb.trans hO.symm)
-    obtain rfl : a = Φ₀ := Subtype.ext (ha.trans h2.symm)
-    exact o2 Tm hT
-  · unfold prodDat
-    rw [Fin.sum_univ_one, Fin.prod_univ_one]
-    exact (if_pos (Witness.up_half (ofSplit q) FS FT x)).trans (congrArg Φ.1 (Witness.down_up (ofSplit q) FS FT x))
-
-attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField in
-
-theorem exists_locPl_off {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1))
-    {M : GlobalTheory.FinPl.Lat S} {M' : GlobalTheory.FinPl.Lat T} (hS : IsSelfDualC S M) (hT : IsSelfDualC T M') (Z : Finset (GlobalTheory.FinPl.Pl D)) :
-    ∃ L : LocPl ψ S T M M', L.q.v ∉ Z ∧ ∃ x, prodDat (fun _ : Fin 1 => L) x = 1 := by
-  obtain ⟨v, p, hv, hP⟩ := GlobalTheory.FinPl.PlacesTest.exists_one_place D Z
-  obtain ⟨O, -, h0⟩ := GlobalTheory.LocMod.PinModel.exists_isOne (k := Fv D.host.F v) (Y := Fin T.rank) (Y' := Fin S.rank)
-  obtain ⟨L, h1, -, h2⟩ := exists_locPl hψ p (hP.unit ()) (Frame.ofGL 1) (Frame.ofGL 1) O hS hT
-  have hpv : v = p.v := by obtain ⟨_, h⟩ := (hP.mem v).1 rfl; first | exact h | exact h.symm
-  exact ⟨L, by rw [h1, ← hpv]; exact hv, _, (h2 0).trans h0⟩
 
 end GlobalTheory.SeeSaw.LocPlInhab
 end

@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.RenameProdMapMul
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.RenameProdMapMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -38,8 +90,9 @@ theorem component_ne_zero_of_mem {p : MvPolynomial σ R} {a : ℕ} (ha : a ∈ w
   classical
   obtain ⟨d, hd, rfl⟩ := mem_weightSet.mp ha
   intro h
-  have := congrArg (coeff d) h
-  rw [coeff_weightedHomogeneousComponent, if_pos rfl, coeff_zero] at this
+  have := congrArg (AddMonoidAlgebra.coeff · d) h
+  rw [coeff_weightedHomogeneousComponent, if_pos rfl] at this
+  change p.coeff d = 0 at this
   exact mem_support_iff.mp hd this
 
 theorem component_mul_of_unique (p q : MvPolynomial σ R) (a b : ℕ)
@@ -49,6 +102,7 @@ theorem component_mul_of_unique (p q : MvPolynomial σ R) (a b : ℕ)
   classical
   conv_lhs => rw [← sum_weightSet_component (w := w) p, ← sum_weightSet_component (w := w) q,
     Finset.sum_mul_sum]
+
   rw [map_sum]
   have hterm : ∀ a' ∈ weightSet w p, ∀ b' ∈ weightSet w q,
       weightedHomogeneousComponent w (a + b)
@@ -65,6 +119,7 @@ theorem component_mul_of_unique (p q : MvPolynomial σ R) (a b : ℕ)
       rw [if_neg]
       rintro ⟨rfl, rfl⟩
       exact hs rfl
+
   rw [Finset.sum_congr rfl fun a' ha' => map_sum _ _ _]
   rw [Finset.sum_congr rfl fun a' ha' => Finset.sum_congr rfl fun b' hb' => hterm a' ha' b' hb']
   by_cases ha : a ∈ weightSet w p

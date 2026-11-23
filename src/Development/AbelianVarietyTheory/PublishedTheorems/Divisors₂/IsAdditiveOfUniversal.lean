@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.ExistsUniqueEqConstMulEllTheta
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHeckeQuotientTriple
-import Development.AbelianVarietyTheory.PublishedTheorems.RelativeAmpleness.RelAmpleAndKTrivIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.ExistsUniqueEqConstMulEllTheta
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHeckeQuotientTriple
+public import Development.AbelianVarietyTheory.PublishedTheorems.RelativeAmpleness.RelAmpleAndKTrivIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -59,7 +102,7 @@ theorem isAdditive_of_universal {M : LB (A ⊗ T).left} (hM : M.IsLB)
   refine (isAdditive_iff hM).2 fun Y a a' t ↦ ?_
   have e := congrArg (CechPic.pull (lift a (lift a' t)).left)
     ((cls_eq_iff (pull_isLB hM _) (isLB_tens (pull_isLB hM _) (pull_isLB hM _))).2 h)
-  rw [cls_tens (pull_isLB hM _) (pull_isLB hM _), map_add, cls_ev hM, cls_ev hM, cls_ev hM] at e
+  rw [cls_tens (pull_isLB hM _) (pull_isLB hM _), map_add (f := _), cls_ev hM, cls_ev hM, cls_ev hM] at e
   simpa only [pull_evc, MonObj.comp_mul, lift_fst, lift_snd_assoc, lift_snd] using e
 
 theorem IsAdditive.evc_one {M : LB (A ⊗ T).left} (hM : M.IsLB) (h : IsAdditive M) (t : Y ⟶ T) :
@@ -68,8 +111,8 @@ theorem IsAdditive.evc_one {M : LB (A ⊗ T).left} (hM : M.IsLB) (h : IsAdditive
   rw [_root_.mul_one] at e
   exact left_eq_add.1 e
 
-variable (A B) in
 
+variable (A B) in
 structure IsDual (P : LB (A ⊗ B).left) : Prop where
   isLB : P.IsLB
   additive : IsAdditive P
@@ -77,8 +120,8 @@ structure IsDual (P : LB (A ⊗ B).left) : Prop where
   univ : ∀ (T : Over S) (M : LB (A ⊗ T).left), M.IsLB → IsAdditive M →
     ∃! x : T ⟶ B, LBIso M (ev P (fst A T) (snd A T ≫ x))
 
-variable (A B) in
 
+variable (A B) in
 structure IsPerfect (P : LB (A ⊗ B).left) : Prop where
   isLB : P.IsLB
   zero_left : Triv (ev P (1 : B ⟶ A) (𝟙 B))
@@ -107,14 +150,14 @@ theorem IsDual.eq_one {P : LB (A ⊗ B).left} (h : IsDual A B P) (x : T ⟶ B)
   · rw [cls_ev h.isLB, cls_ev h.isLB, e, MonObj.comp_one, evc_one_right h.isLB h.zero]
 
 theorem IsDual.isPerfect {P : LB (A ⊗ B).left} (h : IsDual A B P) (h' : IsDual B A (swap P)) :
-    IsPerfect A B P where
+    IsPerfect A B P := {
   isLB := h.isLB
   zero_left := (triv_ev_iff h.isLB _ _).2 (h.additive.evc_one h.isLB _)
   zero_right := h.zero
   ker_left T x hx := h'.eq_one x <| (triv_ev_iff h'.isLB _ _).2 <| by
     have e := congrArg (CechPic.pull (lift (snd B T) (fst B T)).left) ((triv_ev_iff h.isLB _ _).1 hx)
     rwa [pull_evc, map_zero, lift_fst_assoc, lift_snd, ← evc_swap h.isLB h'.isLB] at e
-  ker_right _ := h.eq_one
+  ker_right _ := h.eq_one }
 
 theorem IsPerfect.swap {P : LB (A ⊗ B).left} (h : IsPerfect A B P) : IsPerfect B A (swap P) := by
   have hs : (AbDual.swap P).IsLB := pull_isLB h.isLB _
@@ -228,14 +271,5 @@ theorem isPerfect_ell {R : Type} [CommRing R] (W : WeierstrassCurve R) [W.IsElli
       (abelian₂ _ (WeierstrassCurve.ellPolAV W).L) :=
   haveI := (WeierstrassCurve.ellPolAV W).isAb.comm
   isPerfect_lam (WeierstrassCurve.ellPolAV W).isLB (WeierstrassCurve.ellPolAV W).ktriv
-
-theorem isDual_unit : IsDual (𝟙_ (Over S)) (𝟙_ (Over S)) (LB.triv _) := by
-  have h0 : ∀ (Y : Over S) (a b : Y ⟶ 𝟙_ (Over S)), evc (LB.isLB_triv _) a b = 0 := fun _ _ _ ↦ map_zero _
-  refine ⟨LB.isLB_triv _, (isAdditive_iff (LB.isLB_triv _)).2 fun _ _ _ _ ↦ by simp only [h0, add_zero],
-    (triv_ev_iff (LB.isLB_triv _) _ _).2 (h0 _ _ _), fun T M hM ha ↦ ⟨toUnit T, ?_, fun _ _ ↦ toUnit_unique _ _⟩⟩
-  refine (cls_eq_iff hM (pull_isLB (LB.isLB_triv _) _)).1 ?_
-  have e := ha.evc_one hM (snd (𝟙_ (Over S)) T)
-  rw [toUnit_unique 1 (fst _ T), evc, lift_fst_snd, Over.id_left, pull_id] at e
-  rw [e, cls_ev (LB.isLB_triv _), h0]
 
 end GlobalTheory.AbDual

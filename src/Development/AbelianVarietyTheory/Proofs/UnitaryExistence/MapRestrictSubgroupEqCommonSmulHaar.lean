@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Group.Measure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
+
 open MeasureTheory Topology Matrix
 open scoped ENNReal
 
@@ -70,14 +118,14 @@ theorem map_restrict_subgroup_eq_common_smul_haar : ∀ (G : Type) [Group G] [Me
     obtain ⟨e, α, u, he, hα, hψe, hαα⟩ := hc k k'
     have := hR k
     have h1 : κ k' • ν k' = (κ k • (ν k).map α).map e := by
-      rw [← hκ k', ← Measure.map_smul, ← hκ k, Measure.map_map hα (hψ k),
+      rw [← hκ k', ← Measure.map_smul _ hα.aemeasurable, ← hκ k, Measure.map_map hα (hψ k),
         Measure.map_map e.measurable (hα.comp (hψ k))]
       congr 1
       funext g
       exact hψe g
     have h2 : κ k' • ν k = κ k • (ν k).map α := by
       have := congrArg (Measure.map e.symm) h1
-      rw [Measure.map_smul, (he.symm e).map_eq, MeasurableEquiv.map_symm_map] at this
+      rw [Measure.map_smul _ e.symm.measurable.aemeasurable, (he.symm e).map_eq, MeasurableEquiv.map_symm_map] at this
       exact this
     have h3 : ((ν k).map α).map α = ν k := by
       rw [Measure.map_map hα hα]
@@ -86,7 +134,7 @@ theorem map_restrict_subgroup_eq_common_smul_haar : ∀ (G : Type) [Group G] [Me
         map_mul_left_eq_self, map_mul_right_eq_self]
     have h4 : κ k' • (ν k).map α = κ k • ν k := by
       have := congrArg (Measure.map α) h2
-      rw [Measure.map_smul, Measure.map_smul, h3] at this
+      rw [Measure.map_smul _ hα.aemeasurable, Measure.map_smul _ hα.aemeasurable, h3] at this
       exact this
     have h5 : (κ k' * κ k') • ν k = (κ k * κ k) • ν k := by
       rw [mul_smul, h2, smul_comm, h4, mul_smul]

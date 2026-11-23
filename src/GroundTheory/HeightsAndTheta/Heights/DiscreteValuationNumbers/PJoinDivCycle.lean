@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsJoinDivCycle
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPolynomialLocalizedLength
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PExistsUniqueRelabel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsJoinDivCycle
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPolynomialLocalizedLength
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PExistsUniqueRelabel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -51,11 +95,9 @@ theorem rename_eq_symm_comp_C :
   ext x <;> simp
 
 set_option hygiene false in
-
 local notation "ψ" => joinPolyEquiv (R := R) (ι := ι)
 
 set_option hygiene false in
-
 local notation "ε" => rename (R := R) (liftVar (ι := ι) ptIdx)
 
 theorem joinPolyEquiv_rename (x : MRing ι R) : joinPolyEquiv (ε x) = Polynomial.C x :=
@@ -151,13 +193,13 @@ theorem multAt_map_rename (P Q : Ideal (MRing ι R)) [Q.IsPrime] (hPQ : P ≤ Q)
   rw [hsup, PolynomialLocalizedLength.full (MRing ι R) Q (P ⊔ Ideal.span {f})] at key
   rw [hm P, hm Q, hf]
   unfold ReciprocityTheory.ChartRestriction.G.Geo.multAt
-  rw [dif_pos hQp, dif_pos ‹Q.IsPrime›]
+  rw [dite_eq_left hQp, dite_eq_left ‹Q.IsPrime›]
   exact congrArg ENat.toNat key
 
 end JoinDivCycle
 
-open JoinDivCycle in
 
+open JoinDivCycle in
 theorem JoinDivCycle.proof : JoinDivCycle.Statement := by
   intro R _ _ K _ ι _ P f
   classical
@@ -183,7 +225,7 @@ theorem JoinDivCycle.proof : JoinDivCycle.Statement := by
   ext W
   by_cases hW : ∃ Q : Ideal (MRing ι R), Q.map (rename (R := R) (liftVar (ι := ι) ptIdx)) = W
   · obtain ⟨Q, rfl⟩ := hW
-    rw [Finsupp.mapDomain_apply hinj]
+    rw [Finsupp.mapDomain_apply_of_injective hinj]
     simp only [ReciprocityTheory.ChartRestriction.G.Geo.divCycle, Finsupp.ofSupportFinite_coe]
     by_cases hQ : Q ∈ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P f
     · haveI : Q.IsPrime := hQ.1.1.1

@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.SUnits
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.SPicDefs
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.ValuationTransport
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.SUnits
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.SPicDefs
+import GroundTheory.GlobalFields.KummerTheory.Unramified
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.Ramification
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.ValuationTransport
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -18,16 +67,16 @@ variable {F : Type u} [Field F] [NumberField F] (S : Set (HeightOneSpectrum (�
 variable {K L : Type u} [Field K] [Field L] [NumberField K] [NumberField L] [Algebra F K]
   [Algebra F L] [Algebra K L] [IsScalarTower F K L]
 
-omit [NumberField F] [NumberField L] in
 
+omit [NumberField F] [NumberField L] in
 theorem exists_underPlace_eq (v : HeightOneSpectrum (𝓞 F)) :
     ∃ w : HeightOneSpectrum (𝓞 L), underPlace (F := F) w = v := by
   obtain ⟨⟨Q, hQ, hQv⟩⟩ := (inferInstance : Nonempty (v.asIdeal.primesOver (𝓞 L)))
   exact ⟨⟨Q, hQ, Ideal.ne_bot_of_liesOver_of_ne_bot v.ne_bot Q⟩,
     (liesOver_iff_eq_underPlace.1 hQv).symm⟩
 
-omit [NumberField F] [NumberField K] [NumberField L] in
 
+omit [NumberField F] [NumberField K] [NumberField L] in
 theorem underPlace_underPlace (W : HeightOneSpectrum (𝓞 L)) :
     underPlace (F := F) (underPlace (F := K) W) = underPlace (F := F) W :=
   HeightOneSpectrum.ext (Ideal.under_under (A := 𝓞 F) (B := 𝓞 K) W.asIdeal)
@@ -120,15 +169,20 @@ theorem valuation_eq_of_isSInvariant {M : IntermediateField F Ω} [FiniteDimensi
     apply Units.ext
     apply Subtype.ext
     have h1 := hρ y
-    simp only [Units.coe_map, Units.val_mk0, MonoidHom.coe_coe, Units.val_mul,
+    simp only [Units.coe_map, Units.val_mk0, MonoidHom.coe_ofClass, Units.val_mul,
       coe_galUnitsHom_apply, Units.val_inv_eq_inv_val, IntermediateField.coe_mul,
       IntermediateField.coe_inv, u]
     rw [IntermediateField.coe_inclusion, IntermediateField.coe_div, div_eq_mul_inv]
     congr 1
     exact h1.symm
   have hu : u ∈ sUnitsOf S M := by
-    rw [← map_inclusion_mem_sUnitsMax_iff F Ω S hMle, hmap]
-    exact hx ρ
+    have hmem : Units.map (IntermediateField.inclusion hMle : M →* _) u ∈ sUnitsMax F Ω S :=
+      hmap ▸ hx ρ
+    let f := (IntermediateField.inclusion hMle).restrictScalars (S.integer F)
+    have hf : Function.Injective f := (IntermediateField.inclusion hMle).injective
+    refine ⟨(isIntegral_algHom_iff f hf).1 hmem.1, (isIntegral_algHom_iff f hf).1 ?_⟩
+    have hinv := hmem.2
+    rwa [← map_inv] at hinv
   have hu1 := (mem_sUnitsOf_iff_mem_unit S).1 hu W (fun h => hWS (mem_placesOver_iff.1 h))
   have hu1' : W.valuation M (σ⁻¹ y / y) = 1 := hu1
   rw [map_div₀, div_eq_one_iff_eq ((map_ne_zero _).2 hy0)] at hu1'
@@ -236,8 +290,8 @@ theorem galUnitsHom_mul_inv_eq (σ : galUnramifiedOutside F Ω S) (x y : (maxUnr
   rw [map_mul, mul_inv]
   ac_rfl
 
-variable (Ω) in
 
+variable (Ω) in
 def sInvariantSubgroup : Subgroup (maxUnramifiedOutside F Ω S)ˣ where
   carrier := {x | IsSInvariant S x}
   mul_mem' {x y} hx hy σ := by
@@ -257,8 +311,8 @@ theorem mem_sInvariantSubgroup {x : (maxUnramifiedOutside F Ω S)ˣ} :
     x ∈ sInvariantSubgroup Ω S ↔ IsSInvariant S x :=
   Iff.rfl
 
-omit [IsGalois F Ω] in
 
+omit [IsGalois F Ω] in
 theorem map_algebraMap_mem_sInvariantSubgroup (a : Fˣ) :
     Units.map (algebraMap F (maxUnramifiedOutside F Ω S) : F →* _) a ∈ sInvariantSubgroup Ω S := by
   intro σ
@@ -380,7 +434,14 @@ theorem mem_sUnitsMax_of_divAbove_eq_zero {x : sInvariantSubgroup Ω S}
   have hmap : Units.map (IntermediateField.inclusion hEle : E →* maxUnramifiedOutside F Ω S)
       (Units.mk0 _ hx0) = x := Units.ext rfl
   rw [← hmap]
-  exact (map_inclusion_mem_sUnitsMax_iff F Ω S hEle).2 hmem
+  let f := (IntermediateField.inclusion hEle).restrictScalars (S.integer F)
+  have hf : Function.Injective f := (IntermediateField.inclusion hEle).injective
+  have hmem' : Units.map (IntermediateField.inclusion hEle : E →* _) (Units.mk0 _ hx0) ∈
+      sUnitsMax F Ω S := by
+    refine ⟨(isIntegral_algHom_iff f hf).2 hmem.1, ?_⟩
+    rw [← map_inv]
+    exact (isIntegral_algHom_iff f hf).2 hmem.2
+  exact hmem'
 
 theorem divAbove_algebraMap (a : Fˣ) :
     divAbove S (Additive.ofMul ⟨_, map_algebraMap_mem_sInvariantSubgroup (Ω := Ω) S a⟩) =

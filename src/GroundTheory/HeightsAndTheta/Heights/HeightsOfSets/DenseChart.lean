@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.FiniteSupportHeight
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Points
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -10,8 +59,8 @@ noncomputable section
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι → ℕ}
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem eval₂_scale_of_isWeightedHomogeneous {S : Type*} [CommRing S] [Fintype ι] (w : ι → S)
     (x : Coord n → S) {f : MvPolynomial (Coord n) ℤ} {δ : ι → ℕ}
     (hf : IsWeightedHomogeneous (coordDeg n) f δ) :
@@ -49,8 +98,8 @@ namespace ArithVariety
 
 variable (P : ArithVariety n)
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem exists_chart :
     ∃ c : (k : ι) → Fin (n k + 1), ∀ k, (X ⟨k, c k⟩ : MvPolynomial (Coord n) ℤ) ∉ P.ideal :=
   ⟨fun k ↦ (P.relevant k).choose, fun k ↦ (P.relevant k).choose_spec⟩
@@ -89,8 +138,8 @@ abbrev ChartAlg : Subalgebra ℚ P.FunField := (P.chartMap c).range
 instance : Algebra.FiniteType ℚ (P.ChartAlg c) :=
   Algebra.FiniteType.of_surjective (P.chartMap c).rangeRestrict (AlgHom.rangeRestrict_surjective _)
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem chartMap_map (f : MvPolynomial (Coord n) ℤ) :
     P.chartMap c (map (Int.castRingHom ℚ) f) = eval₂ (Int.castRingHom _) (P.chartCoord c) f := by
   rw [chartMap, aeval_def, eval₂_map]
@@ -114,8 +163,8 @@ theorem chart_homogeneous (hc : ∀ k, (X ⟨k, c k⟩ : MvPolynomial (Coord n) 
 def chartPoint (ψ : P.ChartAlg c →ₐ[ℚ] AlgebraicClosure ℚ) : Cone n (AlgebraicClosure ℚ) :=
   fun k i ↦ ψ ((P.chartMap c).rangeRestrict (X ⟨k, i⟩))
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem evalCone_chartPoint (ψ : P.ChartAlg c →ₐ[ℚ] AlgebraicClosure ℚ)
     (f : MvPolynomial (Coord n) ℤ) :
     evalCone (P.chartPoint c ψ) f =

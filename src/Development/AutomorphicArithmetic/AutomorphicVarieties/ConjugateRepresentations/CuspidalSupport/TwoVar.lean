@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.LFun Formalism.UG Formalism.UG.P Formalism.L2.Host UpperTheory.V.Cj.S
 open GroundTheory.Automorphic.AutomorphicForm (UPos unipGL constantTerm archCompact infEmb isExpLieAlgebra)
@@ -14,9 +61,6 @@ variable {X Y V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Modu
 
 private noncomputable def sl1 (jW : W →ₗ[ℂ] (Y → ℂ)) (y : Y) : V ⊗[ℂ] W →ₗ[ℂ] V :=
   (TensorProduct.rid ℂ V).toLinearMap ∘ₗ LinearMap.lTensor V (LinearMap.proj y ∘ₗ jW)
-
-private noncomputable def sl2 (jV : V →ₗ[ℂ] (X → ℂ)) (x : X) : V ⊗[ℂ] W →ₗ[ℂ] W :=
-  (TensorProduct.lid ℂ W).toLinearMap ∘ₗ LinearMap.rTensor W (LinearMap.proj x ∘ₗ jV)
 
 private theorem slice_first_tmul (jW : W →ₗ[ℂ] (Y → ℂ)) (y : Y) (v : V) (w : W) : sl1 jW y (v ⊗ₜ[ℂ] w) = jW w y • v := by
   simp [sl1]
@@ -51,6 +95,7 @@ private theorem tensor_eq_zero_of_sl1_vanishing {V W Y : Type} [AddCommGroup V] 
     rw [map_zero]
     funext y
     have hy := ht y
+
     simp only [map_sum, UpperTheory.V.Cj.S.slice_first_tmul] at hy
     have := (Fintype.linearIndependent_iff.mp (Module.finBasis ℂ V).linearIndependent) (fun a => jW (m a) y) hy a
     simpa using this
@@ -64,7 +109,7 @@ private theorem exists_vec_of_dual_apply_col {X Y V W : Type} [AddCommGroup V] [
     { carrier := {ψ | ∃ w : W, jW w = fun y => ψ (col y)}
       add_mem' := by
         rintro ψ χ ⟨w1, h1⟩ ⟨w2, h2⟩
-        exact ⟨w1 + w2, by rw [map_add, h1, h2]; rfl⟩
+        exact ⟨w1 + w2, by rw [map_add (f := _), h1, h2]; rfl⟩
       zero_mem' := ⟨0, by rw [map_zero]; rfl⟩
       smul_mem' := by
         rintro c ψ ⟨w, h⟩
@@ -111,6 +156,7 @@ theorem UpperTheory.V.Cj.S.twoVar :
   let z : V ⊗[ℂ] W := ∑ a, bV a ⊗ₜ[ℂ] w a
   have hz : ∀ y, UpperTheory.V.Cj.S.sl1 jW y z = colV y := by
     intro y
+
     simp only [z, map_sum, UpperTheory.V.Cj.S.slice_first_tmul, hw]
     simpa [Module.Basis.coord_apply] using bV.sum_repr (colV y)
   have hFz : ∀ x y, jV (UpperTheory.V.Cj.S.sl1 jW y z) x = F x y := by
@@ -161,6 +207,7 @@ theorem UpperTheory.V.Cj.S.twoVar :
           exact (hjcol y').symm
         have := congrFun hf2 x'
         rw [← this, hf]
+
         simp [map_sum, jV, hA']
       obtain ⟨f', hf'1, hf'2⟩ := h2 x
       have hf' : f' = ((∑ a, jV (A' i (bV a)) x • w a : W) : N) := by
@@ -170,6 +217,7 @@ theorem UpperTheory.V.Cj.S.twoVar :
         rw [hH]
         simp [jW, jV, Finset.sum_apply, mul_comm]
       rw [← hf'2, hf']
+
       simp [z, map_sum, TensorProduct.map_tmul, UpperTheory.V.Cj.S.slice_first_tmul, jV, jW, hB', mul_comm]
     apply hprop σ c ip kp e
     rw [← sub_eq_zero]
@@ -182,6 +230,7 @@ theorem UpperTheory.V.Cj.S.twoVar :
       fun p => key _ _ _ (hAct p) x y
     have hval : jV (UpperTheory.V.Cj.S.sl1 jW y
         (∑ p, c p • TensorProduct.map (A' (ip p)) (B' (kp p)) z - e • z)) x = ∑ p, c p * G p x y - e * F x y := by
+
       simp only [map_sub, map_sum, map_smul, Pi.sub_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, key', hFz]
     rw [hval, hsum, sub_self]
     rfl

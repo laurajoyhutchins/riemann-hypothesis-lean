@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Places
-import GroundTheory.GlobalFields.SemilocalAlgebras.Infinite
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Places
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -17,8 +59,8 @@ section Infinite
 
 variable (v : InfinitePlace K)
 
-open Classical in
 
+open Classical in
 def infiniteAdeleAboveFun (a : (w : v.placesOver L) → w.1.Completion) (w : InfinitePlace L) :
     w.Completion :=
   if h : w ∈ v.placesOver L then a ⟨w, h⟩ else 1
@@ -26,12 +68,12 @@ def infiniteAdeleAboveFun (a : (w : v.placesOver L) → w.1.Completion) (w : Inf
 omit [NumberField K] [NumberField L] in
 theorem infiniteAdeleAboveFun_apply (a : (w : v.placesOver L) → w.1.Completion)
     (w : v.placesOver L) : infiniteAdeleAboveFun v a w.1 = a w := by
-  rw [infiniteAdeleAboveFun, dif_pos w.2]
+  rw [infiniteAdeleAboveFun, dite_eq_left w.2]
 
 omit [NumberField K] [NumberField L] in
 theorem infiniteAdeleAboveFun_apply_of_not (a : (w : v.placesOver L) → w.1.Completion)
     {w : InfinitePlace L} (h : w ∉ v.placesOver L) : infiniteAdeleAboveFun v a w = 1 := by
-  rw [infiniteAdeleAboveFun, dif_neg h]
+  rw [infiniteAdeleAboveFun, dite_eq_right h]
 
 omit [NumberField K] [NumberField L] in
 theorem infiniteAdeleAboveFun_one :
@@ -93,8 +135,8 @@ theorem infiniteProjAbove_infiniteEmbedAbove (y : (w : v.placesOver L) → (w.1.
     infiniteProjAbove v (infiniteEmbedAbove v y) = y :=
   funext fun w ↦ Units.ext (coe_infiniteEmbedAbove_fst v y w)
 
-omit [NumberField K] [NumberField L] in
 
+omit [NumberField K] [NumberField L] in
 theorem comap_mem_placesOver (σ : L ≃ₐ[K] L) (w : v.placesOver L) :
     w.1.comap ((σ : L ≃+* L) : L →+* L) ∈ v.placesOver L := by
   rw [comap_eq_inv_smul]
@@ -106,8 +148,8 @@ theorem mem_placesOver_of_smul_mem (σ : L ≃ₐ[K] L) {w : InfinitePlace L}
   have := (σ⁻¹ • (⟨σ • w, h⟩ : v.placesOver L)).2
   rwa [InfinitePlace.coe_smul_placesOver, inv_smul_smul] at this
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem infiniteProjAbove_smul_congr (σ : L ≃ₐ[K] L) {x y : IdeleGroup L}
     (h : infiniteProjAbove v x = infiniteProjAbove v y) :
     infiniteProjAbove v (σ • x) = infiniteProjAbove v (σ • y) := by
@@ -165,8 +207,8 @@ theorem infiniteEmbedAbove_smul (σ : L ≃ₐ[K] L) (y : (w : v.placesOver L) �
   · rw [coe_infiniteEmbedAbove_snd, coe_smul_idele, smul_snd, coe_infiniteEmbedAbove_snd]
     exact (map_one (finiteCompletionMap _ u)).symm
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem infiniteProjAbove_infiniteEmbedAbove_of_ne {v v' : InfinitePlace K} (h : v' ≠ v)
     (y : (w : v.placesOver L) → (w.1.Completion)ˣ) :
     infiniteProjAbove v' (infiniteEmbedAbove v y) = 1 := by
@@ -179,8 +221,8 @@ theorem infiniteProjAbove_infiniteEmbedAbove_of_ne {v v' : InfinitePlace K} (h :
     rw [← (InfinitePlace.liesOver_iff_comap_eq v' u.1).1 u.2,
       (InfinitePlace.liesOver_iff_comap_eq v u.1).1 hu]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem finiteProjAbove_infiniteEmbedAbove (v' : HeightOneSpectrum (𝓞 K))
     (y : (w : v.placesOver L) → (w.1.Completion)ˣ) :
     finiteProjAbove v' (infiniteEmbedAbove v y) = 1 :=

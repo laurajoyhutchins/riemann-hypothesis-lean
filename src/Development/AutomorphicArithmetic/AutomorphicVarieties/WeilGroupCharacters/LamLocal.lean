@@ -1,8 +1,73 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.Inertia
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiniteCohomology
-import GroundTheory.LocalFields.LocalArtinCompletion
-import GroundTheory.LocalFields.PrincipalUnitsRank
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixingSubgroupEquivBicontinuous
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.Inertia
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiniteCohomology
+public import GroundTheory.LocalFields.LocalArtinMap
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixingSubgroupEquivBicontinuous
+import GroundTheory.LocalFields.Examples
+public import GroundTheory.LocalFields.LocalArtinCompletion
+public import GroundTheory.LocalFields.PrincipalUnitsRank
+import GroundTheory.LocalFields.SeparableClosureValuation
+import GroundTheory.LocalFields.UnitsPowers
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Dimension.Torsion.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Algebra.ProperAction.Basic
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import GroundTheory.LocalFields.ExamplesCharZero
+
+@[expose] public section
 
 open Topology Filter
 
@@ -677,24 +742,24 @@ private theorem loc_field (l : ℕ) [Fact l.Prime] (K Ω : Type) [Field K] [Valu
     have hHo : IsOpen (H : Set Kˣ) := isOpen_range_pow hk0
     haveI : Finite (Kˣ ⧸ H) := finite_quotient_range_pow_of_charZero hk
     have hHmem : H ∈ openFiniteIndex Kˣ := ⟨hHo, Subgroup.finiteIndex_of_finite_quotient⟩
-    haveI := openCompletion.discreteTopology_quotient (⟨H, hHmem⟩ : openFiniteIndex Kˣ)
-    let Ψ : TopologicalAbelianization G →* Kˣ ⧸ H :=
-      (artinCoord K Ω ⟨H, hHmem⟩).comp
+    let L := classField K Ω ⟨H, hHmem⟩
+    letI : FiniteDimensional K (L : IntermediateField K Ω) := L.2.1
+    letI : IsAbelianGalois K (L : IntermediateField K Ω) := L.2.2
+    let ρ := restrictAb (L : IntermediateField K Ω) (le_maximalAbelianExtension _)
+    let Ψ : TopologicalAbelianization G →* ((L : IntermediateField K Ω) ≃ₐ[K] L) :=
+      ρ.comp
         ((topologicalAbelianizationEquiv K Ω).toMulEquiv.toMonoidHom.comp F')
     have hΨc : Continuous Ψ :=
-      (continuous_artinCoord _).comp ((topologicalAbelianizationEquiv K Ω).continuous.comp hF'c)
-    have hΨr : ∀ x : Kˣ, Ψ (r x) = (x : Kˣ ⧸ H) := by
-      intro x
-      have h1 := artinCoord_localArtinMap (Ω := Ω) (⟨H, hHmem⟩ : openFiniteIndex Kˣ) x
-      rw [localArtinMap_apply] at h1
-      simp only [Ψ, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, hrx]
-      exact h1
+      (continuous_restrictAb (L : IntermediateField K Ω) (le_maximalAbelianExtension _)).comp
+        ((topologicalAbelianizationEquiv K Ω).continuous.comp hF'c)
     refine ⟨Ψ ⁻¹' {1}, ((isOpen_discrete _).preimage hΨc).mem_nhds (by simp), ?_⟩
     intro x hx
-    have h1 : (x : Kˣ ⧸ H) = 1 := by
-      rw [← hΨr]
-      exact hx
-    obtain ⟨z, hz⟩ := (QuotientGroup.eq_one_iff x).mp h1
+    have hx' : Ψ (r x) = 1 := hx
+    have hmem : x ∈ (ρ.comp (localArtinMap K Ω)).ker := by
+      simpa only [MonoidHom.mem_ker, Ψ, localArtinMap, MonoidHom.comp_apply, hrx] using hx'
+    change x ∈ ((restrictAb _ _).comp (localArtinMap K Ω)).ker at hmem
+    rw [ker_restrictAb_localArtinMap, range_normUnits_classField] at hmem
+    obtain ⟨z, hz⟩ := hmem
     exact ⟨z, by rw [← hz]; rfl⟩
   have hI1 : ∀ x, o x = 1 → ∃ g ∈ I, (g : TopologicalAbelianization G) = r x := by
     intro x hx

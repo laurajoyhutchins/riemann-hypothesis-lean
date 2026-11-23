@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,20 +49,6 @@ open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalC
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT
 
 variable {p : ℕ} [Fact p.Prime] {D : Datum p} {R : Type} [CommRing R] {S : Scheme.{0}}
-
-theorem wSub_zero (D : Datum p) (w0 : Ideal (𝓞 D.F)) : wSub D w0 0 = ⊤ := by
-  refine eq_top_iff.2 fun z _ => Submodule.subset_span ⟨1, by simp, z, by simp⟩
-
-theorem isEtLev_zero {b : Base D R} {N : ℕ} {s : S ⟶ Sp R} (o : Obj b N s) (w0 : Ideal (𝓞 D.F)) :
-    IsEtLev o w0 0 (fun _ => 1) := by
-  refine ⟨fun _ _ => (mul_one 1).symm, fun c x => ?_, fun _ _ => rfl, ?_⟩
-  · haveI := o.act.hom c
-    exact (MonObj.one_comp _).symm
-  intro k _ _ x
-  refine ⟨fun y _ => by rw [wSub_zero]; trivial, fun g hg => ⟨0, ?_⟩⟩
-  have := hg 1 (by simp)
-  rw [map_one, o.act.one, Category.comp_id] at this
-  rw [this, MonObj.comp_one]
 
 section act
 variable {b : Base D R} {N : ℕ} {s : S ⟶ Sp R} {o : Obj b N s} {w0 : Ideal (𝓞 D.F)} {r : ℕ}
@@ -42,24 +68,6 @@ def liftAct (g : LevGrp D w0 r) (x : D.La) : D.La :=
 theorem mk_liftAct (g : LevGrp D w0 r) (x : D.La) :
     Submodule.Quotient.mk (p := wSub D w0 r) (liftAct g x) = g (Submodule.Quotient.mk x) :=
   (Submodule.Quotient.mk_surjective (wSub D w0 r) (g (Submodule.Quotient.mk x))).choose_spec
-
-theorem IsEtLev.twist (h : IsEtLev o w0 r lv) (g : LevGrp D w0 r) :
-    IsEtLev o w0 r (fun x => lv (liftAct g x)) := by
-  refine ⟨fun x y => ?_, fun c x => ?_, fun x hx => ?_, fun k _ _ pt => ⟨fun y hy => ?_, fun q hq => ?_⟩⟩
-  · rw [← h.1]; apply h.congr_mk
-    simp only [mk_liftAct, Submodule.Quotient.mk_add, map_add]
-  · rw [← h.2.1]; apply h.congr_mk
-    simp only [mk_liftAct, Submodule.Quotient.mk_smul, map_smul]
-  · have : Submodule.Quotient.mk (p := wSub D w0 r) (liftAct g x) = 0 := by
-      rw [mk_liftAct, (Submodule.Quotient.mk_eq_zero _).2 hx, map_zero]
-    exact h.2.2.1 _ ((Submodule.Quotient.mk_eq_zero _).1 this)
-  · have h1 := ((Submodule.Quotient.mk_eq_zero _).2 ((h.2.2.2 k pt).1 _ hy))
-    rw [mk_liftAct, LinearEquiv.map_eq_zero_iff] at h1
-    exact (Submodule.Quotient.mk_eq_zero _).1 h1
-  · obtain ⟨y, hy⟩ := (h.2.2.2 k pt).2 q hq
-    obtain ⟨x, hx⟩ := Submodule.Quotient.mk_surjective (wSub D w0 r) (g.symm (Submodule.Quotient.mk y))
-    refine ⟨x, ?_⟩
-    rw [← hy, h.congr_mk (by rw [mk_liftAct, hx, LinearEquiv.apply_symm_apply])]
 
 end act
 

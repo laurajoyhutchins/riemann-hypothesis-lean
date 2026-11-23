@@ -1,8 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.OneLeftSpMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AppLEBasicOpenIsStandardSmooth
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsDualElements
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DerivationVanishingConstants
+module
+
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SpecMapCompAppLE
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.OneLeftSpMap
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AppLEBasicOpenIsStandardSmooth
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DerivationVanishingConstants
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsDualElements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat Filter Topology Metric
 
@@ -16,24 +66,7 @@ variable {R C D : Type} [CommRing R] [CommRing C] [CommRing D]
 
 theorem surj_fstC (q : Sp (DualNumber C)) :
     ∃ p : Sp C, spMap (TrivSqZeroExt.fstHom C C C).toRingHom p = q := by
-  refine ⟨PrimeSpectrum.comap (algebraMap C (DualNumber C)) q, ?_⟩
-  show PrimeSpectrum.comap (TrivSqZeroExt.fstHom C C C).toRingHom
-    (PrimeSpectrum.comap (algebraMap C (DualNumber C)) q) = q
-  apply PrimeSpectrum.ext
-  ext x
-  have hn : TrivSqZeroExt.inr x.snd ∈ q.asIdeal := by
-    have h2 : (TrivSqZeroExt.inr x.snd : DualNumber C) * TrivSqZeroExt.inr x.snd = 0 := by simp
-    have : (TrivSqZeroExt.inr x.snd : DualNumber C) * TrivSqZeroExt.inr x.snd ∈ q.asIdeal := by
-      rw [h2]; exact zero_mem _
-    exact (q.isPrime.mem_or_mem this).elim id id
-  have hx : x = algebraMap C (DualNumber C) x.fst + TrivSqZeroExt.inr x.snd := by
-    ext <;> simp [TrivSqZeroExt.algebraMap_eq_inl]
-  show algebraMap C (DualNumber C) x.fst ∈ q.asIdeal ↔ x ∈ q.asIdeal
-  constructor
-  · intro h; rw [hx]; exact add_mem h hn
-  · intro h
-    have : algebraMap C (DualNumber C) x.fst = x - TrivSqZeroExt.inr x.snd := eq_sub_of_add_eq hx.symm
-    rw [this]; exact sub_mem h hn
+  apply GlobalTheory.CompanionTheory.Ar.InvDer.surj_fst <;> assumption
 
 theorem le_dual {X : Scheme.{0}} {v : Sp (DualNumber C) ⟶ X} {x : Sp C ⟶ X}
     (h : spMap (TrivSqZeroExt.fstHom C C C).toRingHom ≫ v = x) {U : X.Opens} (hx : ⊤ ≤ x ⁻¹ᵁ U) : ⊤ ≤ v ⁻¹ᵁ U := by

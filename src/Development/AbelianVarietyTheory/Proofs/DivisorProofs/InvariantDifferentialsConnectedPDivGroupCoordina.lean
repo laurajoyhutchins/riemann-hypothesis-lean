@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobKerIdealLeAugIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CounitCotangentClassPowerSeriesEvalAtNilpotentStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FunctionsEqSeriesInChartStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CounitCotangentClassPowerSeriesEvalAtNilpotentStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FunctionsEqSeriesInChartStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,38 +64,38 @@ theorem coeff_eq_zero_of_mem_sq {g : MvPowerSeries (Fin d) k}
   · rw [coeff_mul]
     refine Finset.sum_eq_zero fun q hq => ?_
     rw [Finset.HasAntidiagonal.mem_antidiagonal] at hq
-    have hdeg : q.1.degree + q.2.degree < 2 := by rw [← map_add, hq]; exact hα
+    have hdeg : q.1.degree + q.2.degree < 2 := by rw [← map_add (f := _), hq]; exact hα
     rw [RingHom.mem_ker] at ha hb
     rcases Nat.lt_or_ge q.1.degree 1 with h | h
     · have : q.1 = 0 := (Finsupp.degree_eq_zero_iff _).1 (by omega)
       rw [this, coeff_zero_eq_constantCoeff_apply, ha, zero_mul]
     · have : q.2 = 0 := (Finsupp.degree_eq_zero_iff _).1 (by omega)
       rw [this, coeff_zero_eq_constantCoeff_apply, hb, mul_zero]
-  · rw [map_add, ha, hb, add_zero]
+  · rw [map_add (f := _), ha, hb, add_zero]
 
 variable {A : Type} [CommRing A] [Bialgebra k A] (x : Fin d → A) (hx : ∀ i, IsNilpotent (x i))
   (haug : ∀ i, Coalgebra.counit (R := k) (x i) = 0)
 
-include haug in
 
+include haug in
 theorem exists_eq_sum (hsurj : Function.Surjective (evA k x hx)) (u : Cot k A) :
-    ∃ w : Fin d → k, u = ∑ i, w i • dUnit k (x i) := by
+    ∃ w : Fin d → k, u = ∑ i, w i • dUnit (R := k) (x i) := by
   obtain ⟨a, rfl⟩ := AugCot.d_surjective _ u
   obtain ⟨f, rfl⟩ := hsurj a
   exact ⟨lin f, (GlobalTheory.T.counit_cotangentClass_powerSeriesEvalAtNilpotent k d A x hx haug f).2⟩
 
-include haug in
 
+include haug in
 theorem eq_zero_of_sum (hsurj : Function.Surjective (evA k x hx))
     (hker : ∀ f, evA k x hx f = 0 → ∀ α : Fin d →₀ ℕ, α.degree < 2 → coeff α f = 0)
-    (w : Fin d → k) (hw : ∑ i, w i • dUnit k (x i) = 0) : w = 0 := by
+    (w : Fin d → k) (hw : ∑ i, w i • dUnit (R := k) (x i) = 0) : w = 0 := by
   set f : MvPowerSeries (Fin d) k := ∑ i, w i • X i with hf
   have hlin : lin f = w := by
     funext i
     simp [f, lin, coeff_X, Finsupp.single_eq_single_iff]
   have hcc : constantCoeff f = 0 := by simp [f]
   obtain ⟨h1, h2⟩ := GlobalTheory.T.counit_cotangentClass_powerSeriesEvalAtNilpotent k d A x hx haug f
-  have hd : dUnit k (evA k x hx f) = 0 := by rw [h2, hlin, hw]
+  have hd : dUnit (R := k) (evA k x hx f) = 0 := by rw [h2, hlin, hw]
   have hε : ∀ g, Bialgebra.counitAlgHom k A (evA k x hx g) = constantCoeff g := fun g =>
     (GlobalTheory.T.counit_cotangentClass_powerSeriesEvalAtNilpotent k d A x hx haug g).1
   rw [dUnit, AugCot.d_eq_zero_iff, hε, hcc, map_zero, sub_zero] at hd
@@ -85,12 +126,13 @@ end GlobalTheory.OmegaCoord
 namespace GlobalTheory.OmegaCoord
 
 theorem omega_coord : ∀ (p : ℕ) (k : Type) [CommRing k] (d : ℕ) (G : PDivGroup p k)
-    (c : Chart G d), (∀ w : Fin d → k, (fun n => ∑ i, w i • dUnit k (c.x n i)) ∈ G.omegaSub) ∧
-      ∀ u : G.omega, ∃! w : Fin d → k, ∀ n, u.1 n = ∑ i, w i • dUnit k (c.x n i) := by
+    (c : Chart G d), (∀ w : Fin d → k, (fun n => ∑ i, w i • dUnit (R := k) (c.x n i)) ∈ G.omegaSub) ∧
+      ∀ u : G.omega, ∃! w : Fin d → k, ∀ n, u.1 n = ∑ i, w i • dUnit (R := k) (c.x n i) := by
   intro p k _ d G c
-  have hres : ∀ n (w : Fin d → k), cotMap (G.res n) (∑ i, w i • dUnit k (c.x (n + 1) i)) =
-      ∑ i, w i • dUnit k (c.x n i) := by
+  have hres : ∀ n (w : Fin d → k), cotMap (G.res n) (∑ i, w i • dUnit (R := k) (c.x (n + 1) i)) =
+      ∑ i, w i • dUnit (R := k) (c.x n i) := by
     intro n w
+
     simp only [map_sum, map_smul, cotMap_d, c.res]
   refine ⟨fun w n => hres n w, fun u => ?_⟩
   have hu : ∀ n, cotMap (G.res n) (u.1 (n + 1)) = u.1 n := u.2
@@ -105,27 +147,27 @@ theorem omega_coord : ∀ (p : ℕ) (k : Type) [CommRing k] (d : ℕ) (G : PDivG
       refine ih f ?_
       rw [← hone (n0 + j) f]
       exact (congrArg (G.res (n0 + j)) hf).trans (map_zero _)
-  have hind : ∀ j (v w : Fin d → k), ∑ i, v i • dUnit k (c.x (n0 + j) i) =
-      ∑ i, w i • dUnit k (c.x (n0 + j) i) → v = w := by
+  have hind : ∀ j (v w : Fin d → k), ∑ i, v i • dUnit (R := k) (c.x (n0 + j) i) =
+      ∑ i, w i • dUnit (R := k) (c.x (n0 + j) i) → v = w := by
     intro j v w h
     have := eq_zero_of_sum (c.x (n0 + j)) (c.nil _) (c.aug _) (c.presents.1 _) (hker j) (v - w)
       (by simp only [Pi.sub_apply, sub_smul, Finset.sum_sub_distrib, h, sub_self])
     exact sub_eq_zero.1 this
-  have hspan : ∀ n, ∃ w : Fin d → k, u.1 n = ∑ i, w i • dUnit k (c.x n i) := fun n =>
+  have hspan : ∀ n, ∃ w : Fin d → k, u.1 n = ∑ i, w i • dUnit (R := k) (c.x n i) := fun n =>
     exists_eq_sum (c.x n) (c.nil n) (c.aug n) (c.presents.1 n) (u.1 n)
   obtain ⟨w, hw⟩ := hspan n0
-  have hup : ∀ j, u.1 (n0 + j) = ∑ i, w i • dUnit k (c.x (n0 + j) i) := by
+  have hup : ∀ j, u.1 (n0 + j) = ∑ i, w i • dUnit (R := k) (c.x (n0 + j) i) := by
     intro j
     induction j with
     | zero => exact hw
     | succ j ih =>
       obtain ⟨v, hv⟩ := hspan (n0 + j + 1)
-      have h1 : ∑ i, v i • dUnit k (c.x (n0 + j) i) = ∑ i, w i • dUnit k (c.x (n0 + j) i) := by
+      have h1 : ∑ i, v i • dUnit (R := k) (c.x (n0 + j) i) = ∑ i, w i • dUnit (R := k) (c.x (n0 + j) i) := by
         rw [← hres, ← hv, hu, ih]
       rw [← hind j v w h1]
       exact hv
-  have hdown : ∀ n j, u.1 (n + j) = ∑ i, w i • dUnit k (c.x (n + j) i) →
-      u.1 n = ∑ i, w i • dUnit k (c.x n i) := by
+  have hdown : ∀ n j, u.1 (n + j) = ∑ i, w i • dUnit (R := k) (c.x (n + j) i) →
+      u.1 n = ∑ i, w i • dUnit (R := k) (c.x n i) := by
     intro n j
     induction j with
     | zero => exact id

@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.GroupTheory.Coset.Defs
+public import Mathlib.LinearAlgebra.LinearIndependent.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Basis.Basic
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+
+@[expose] public section
 
 noncomputable section
 
@@ -6,9 +61,11 @@ namespace GlobalTheory.PlaceModel
 
 variable {G : Type} [AddCommGroup G]
 
-open Classical in
 
-def ind (L : AddSubgroup G) (t : G) : ℂ := if t ∈ L then 1 else 0
+open Classical in
+def ind (L : AddSubgroup G) (t : G) : ℂ := by
+  classical
+  exact if t ∈ L then 1 else 0
 
 def wave (χ : G → G → ℂ) (L : AddSubgroup G) (x y : G) : G → ℂ := fun t => χ (t + x) y * ind L (t + x)
 
@@ -20,17 +77,6 @@ structure IsBichar (χ : G → G → ℂ) : Prop where
   right : ∀ a y z, χ a (y + z) = χ a y * χ a z
   zero_left : ∀ y, χ 0 y = 1
   zero_right : ∀ a, χ a 0 = 1
-
-theorem isBichar_one : IsBichar (fun _ _ : G => (1 : ℂ)) := by
-  refine ⟨?_, ?_, ?_, ?_⟩ <;> intros <;> simp
-
-theorem isBichar_neg_one_zpow : IsBichar (fun a b : ℤ => (-1 : ℂ) ^ (a * b)) := by
-  have h0 : (-1 : ℂ) ≠ 0 := by norm_num
-  refine ⟨fun a b y => ?_, fun a y z => ?_, fun y => ?_, fun a => ?_⟩
-  · rw [add_mul, zpow_add₀ h0]
-  · rw [mul_add, zpow_add₀ h0]
-  · simp
-  · simp
 
 variable {χ : G → G → ℂ} {X Y L L' : AddSubgroup G}
 
@@ -348,8 +394,7 @@ theorem mem_of_finite_cosets {K : AddSubgroup G} (hK : ind K ∈ waveSpan χ X Y
       have hsum := add_mem hΨ (Submodule.smul_mem _ (Φ (s + u0)) htr)
       convert hsum using 1
       funext t
-      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-      ring
+      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, sub_add_cancel]
     · push Not at hex
       refine ih Φ hΦX hinv fun t ht => ?_
       obtain ⟨s', hs', u, hu, rfl⟩ := hP t ht
@@ -387,7 +432,7 @@ theorem exists_intertwiner {V : Type} [AddCommGroup V] [Module ℂ V] (h : IsBic
     | add Φ₁ Φ₂ _ _ h₁ h₂ =>
       have e : (fun t => (Φ₁ + Φ₂) (t + x)) = (fun t => Φ₁ (t + x)) + (fun t => Φ₂ (t + x)) := rfl
       rw [e]
-      simp only [map_add, h₁, h₂]
+      simp only [map_add (f := _), h₁, h₂]
     | smul a Φ₁ _ h₁ =>
       have e : (fun t => (a • Φ₁) (t + x)) = a • (fun t => Φ₁ (t + x)) := rfl
       rw [e]
@@ -413,7 +458,7 @@ theorem exists_intertwiner {V : Type} [AddCommGroup V] [Module ℂ V] (h : IsBic
         funext t
         simp [mul_add]
       rw [e]
-      simp only [map_add, h₁, h₂]
+      simp only [map_add (f := _), h₁, h₂]
     | smul a Φ₁ _ h₁ =>
       have e : (fun t => χ t y * (a • Φ₁) t) = a • (fun t => χ t y * Φ₁ t) := by
         funext t

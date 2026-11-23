@@ -1,6 +1,63 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import GroundTheory.Brauer.TensorSimple
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
 import Development.AbelianVarietyTheory.Definitions.Divisors.PointsNonemptyUnitaryRankOne
-import GroundTheory.Brauer.TensorSimple
+import Development.AbelianVarietyTheory.Definitions.Divisors.TwOrbMEqTwOrbUOfNormal
+
+@[expose] public section
+
 open Matrix NumberField GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKCount GlobalTheory.LKCx
 open scoped TensorProduct Classical
 
@@ -13,7 +70,7 @@ open Matrix NumberField in
 open scoped TensorProduct Classical in
 variable {p : ℕ} [Fact p.Prime] in
 private theorem mem_span_infinitePlace_embedding (K : Type) [Field K] [NumberField K]
-    [IsTotallyComplex K] (w : InfinitePlace K → ℂ) :
+    [_root_.NumberField.IsTotallyComplex K] (w : InfinitePlace K → ℂ) :
     w ∈ Submodule.span ℝ (Set.range fun (f : K) (u : InfinitePlace K) => u.embedding f) := by
   have hc : ∀ u : InfinitePlace K, u.IsComplex := fun u => IsTotallyComplex.isComplex u
   let P : mixedEmbedding.mixedSpace K →ₗ[ℝ] (InfinitePlace K → ℂ) :=
@@ -92,13 +149,13 @@ private theorem mem_span_range_psi {p : ℕ} [Fact p.Prime] (G : _root_.GlobalTh
     rw [hφ]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨c, rfl⟩)
   | add x y hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem _ hx hy
+
 
 open Matrix NumberField in
 open scoped TensorProduct Classical in
 variable {p : ℕ} [Fact p.Prime] in
-
 theorem _root_.GlobalTheory.CoordArch.coord_bound : ∀ (p : ℕ) [Fact p.Prime] (G : _root_.GlobalTheory.LKTrip.HTGroup p), ∃ R : ℝ, ∀ (c : G.C) (i : Fin (Module.finrank ℚ G.C)),
     |((Module.finBasis ℚ G.C).repr c i : ℝ)| ≤ R * ∑ w : InfinitePlace G.F, ∑ a : Fin G.n, ∑ b : Fin G.n, ‖G.psi w c a b‖ := by
   intro p _ G
@@ -111,6 +168,7 @@ theorem _root_.GlobalTheory.CoordArch.coord_bound : ∀ (p : ℕ) [Fact p.Prime]
     intro c
     funext u a b
     have h := congrArg (fun x => G.psi u x a b) (B.sum_repr c)
+
     simp only [map_sum, Matrix.sum_apply, map_rat_smul] at h
     simp only [L, Φ, Fintype.linearCombination_apply, Finset.sum_apply, Matrix.sum_apply]
     rw [← h]
@@ -138,8 +196,7 @@ theorem _root_.GlobalTheory.CoordArch.coord_bound : ∀ (p : ℕ) [Fact p.Prime]
     | smul r x _ hx =>
       convert Submodule.smul_mem _ r hx using 1
       funext u
-      simp only [Pi.smul_apply]
-      exact smul_assoc _ _ _
+      simpa only [Pi.smul_apply] using (smul_assoc r (x u) (G.psi u c))
   have hspan : ∀ y : InfinitePlace G.F → Matrix (Fin G.n) (Fin G.n) ℂ,
       y ∈ Submodule.span ℝ (Set.range Φ) := by
     intro y

@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.PAdicHodge.GaloisOnCp
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import GroundTheory.PAdicHodge.GaloisOnCp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.PAdicHodge
@@ -52,10 +100,12 @@ variable (R : PadicAlgCl p → PadicAlgCl p)
 def extendOnClosure : closureInCp E → ℂ_[p] :=
   (isDenseInducing_toClosureInCp E).extend fun y : E => ((R y : PadicAlgCl p) : ℂ_[p])
 
-open Classical in
 
+open Classical in
 def extendToClosure (x : ℂ_[p]) : ℂ_[p] :=
-  if hx : x ∈ closureInCp E then extendOnClosure E R ⟨x, hx⟩ else 0
+  by
+    classical
+    exact if hx : x ∈ closureInCp E then extendOnClosure E R ⟨x, hx⟩ else 0
 
 variable {E R}
 
@@ -129,8 +179,8 @@ theorem extendToClosure_induction {P : ℂ_[p] → ℂ_[p] → Prop}
   rw [extendOnClosure_toClosureInCp hadd hbound]
   exact h y y.2
 
-omit hadd hbound in
 
+omit hadd hbound in
 theorem sub_mem_closureInCp {x x' : ℂ_[p]} (hx : x ∈ closureInCp E) (hx' : x' ∈ closureInCp E) :
     x - x' ∈ closureInCp E :=
   map_mem_closure₂ continuous_sub hx hx' (by
@@ -193,33 +243,38 @@ variable {k : IntermediateField ℚ_[p] (PadicAlgCl p)} [FiniteDimensional ℚ_[
   (hkE : k ≤ E) (hmaps : ∀ y ∈ E, R y ∈ k) (hfix : ∀ a ∈ k, R a = a)
   (hmul : ∀ a ∈ k, ∀ y ∈ E, R (a * y) = a * R y)
 
-include hmaps in
+include hkE hmaps hfix hmul
 
+omit hkE hfix hmul in
+include hmaps in
 theorem extendToClosure_mem {x : ℂ_[p]} (hx : x ∈ closureInCp E) :
     extendToClosure E R x ∈ ((↑) : PadicAlgCl p → ℂ_[p]) '' (k : Set (PadicAlgCl p)) :=
   extendToClosure_induction hadd hbound
     (P := fun _ v => v ∈ ((↑) : PadicAlgCl p → ℂ_[p]) '' (k : Set (PadicAlgCl p)))
     ((isClosed_image_coe k).preimage continuous_snd) (fun y hy => ⟨R y, hmaps y hy, rfl⟩) x hx
 
+
+omit [FiniteDimensional ℚ_[p] k] hmaps hmul in
 omit [FiniteDimensional ℚ_[p] k] in
 include hkE hfix in
-
 theorem extendToClosure_coe_of_mem {a : PadicAlgCl p} (ha : a ∈ k) :
     extendToClosure E R (a : ℂ_[p]) = a := by
   rw [extendToClosure_coe hadd hbound (hkE ha), hfix a ha]
 
+
+omit hadd hbound [FiniteDimensional ℚ_[p] k] hmaps hfix hmul in
 omit hadd hbound [FiniteDimensional ℚ_[p] k] in
 include hkE in
-
 theorem mul_mem_closureInCp {a : PadicAlgCl p} (ha : a ∈ k) {x : ℂ_[p]}
     (hx : x ∈ closureInCp E) : (a : ℂ_[p]) * x ∈ closureInCp E :=
   map_mem_closure (continuous_const.mul continuous_id) hx (by
     rintro _ ⟨y, hy, rfl⟩
     exact ⟨a * y, mul_mem (hkE ha) hy, UniformSpace.Completion.coe_mul a y⟩)
 
+
+omit [FiniteDimensional ℚ_[p] k] hmaps hfix in
 omit [FiniteDimensional ℚ_[p] k] in
 include hkE hmul in
-
 theorem extendToClosure_mul {a : PadicAlgCl p} (ha : a ∈ k) {x : ℂ_[p]}
     (hx : x ∈ closureInCp E) :
     extendToClosure E R ((a : ℂ_[p]) * x) = (a : ℂ_[p]) * extendToClosure E R x := by
@@ -246,8 +301,8 @@ section Galois
 
 variable {K₀ : IntermediateField ℚ_[p] (PadicAlgCl p)}
 
-omit hadd hbound in
 
+omit hadd hbound in
 theorem smul_mem_closureInCp (σ : Gal(PadicAlgCl p/K₀)) (hσ : ∀ y ∈ E, σ y ∈ E) {x : ℂ_[p]}
     (hx : x ∈ closureInCp E) : σ • x ∈ closureInCp E :=
   map_mem_closure (continuous_const_smul σ) hx (by
@@ -273,11 +328,6 @@ theorem extendToClosure_smul (σ : Gal(PadicAlgCl p/K₀)) (hσ : ∀ y ∈ E, �
   change ((R (σ y) : PadicAlgCl p) : ℂ_[p]) = _
   rw [hσR y y.2, gal_smul_coe]
 
-omit hadd hbound in
-variable (E R) in
-
-def kernelInCp : Set ℂ_[p] :=
-  closureInCp E ∩ extendToClosure E R ⁻¹' {0}
 
 variable {k : IntermediateField ℚ_[p] (PadicAlgCl p)}
   (hkE : k ≤ E) (hmaps : ∀ y ∈ E, R y ∈ k) (hfix : ∀ a ∈ k, R a = a)

@@ -1,5 +1,46 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.CongruenceReduction.LevLocAlt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocEqOneOfMemGam
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.CongruenceReduction.LevLocAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocEqOneOfMemGam
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.DefU Formalism.L2.Host GlobalTheory.HeckeGal
 open GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKGeo GlobalTheory.LKDef
@@ -72,7 +113,7 @@ private theorem split_at {E : Type} [Field E] [NumberField E] (w u : Plc E) (a b
   have : algebraMap (𝓞 E) (u.adicCompletion E) a * (algebraMap (𝓞 E) (u.adicCompletion E) α * (y / algebraMap (𝓞 E) (u.adicCompletion E) e)) +
       algebraMap (𝓞 E) (u.adicCompletion E) b * (algebraMap (𝓞 E) (u.adicCompletion E) β * (y / algebraMap (𝓞 E) (u.adicCompletion E) e)) =
       algebraMap (𝓞 E) (u.adicCompletion E) (α * a + β * b) * (y / algebraMap (𝓞 E) (u.adicCompletion E) e) := by
-    rw [map_add, map_mul, map_mul]; ring
+    rw [map_add (f := _), map_mul, map_mul]; ring
   rw [this, hαβ, mul_div_cancel₀ _ he']
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {A : Arith E} {n p : ℕ} [Fact p.Prime] {S : Setup A n p}
@@ -98,7 +139,7 @@ private theorem mem_idHat (F : Frame S) (w : Plc E) {v} (hv : v ∈ LaHat S.D)
   have hv' : v = mulF S.D a v₁ + mulF S.D b v₂ := by
     rw [← sub_eq_zero]
     refine F.vec_inj _ fun u hu => ?_
-    rw [map_sub, map_add, F.vec_mul u hu, F.vec_mul u hu, h₁ u hu, h₂ u hu]
+    rw [map_sub, map_add (f := _), F.vec_mul u hu, F.vec_mul u hu, h₁ u hu, h₂ u hu]
     funext k
     simp only [Pi.sub_apply, Pi.add_apply, Pi.smul_apply, Pi.zero_apply, smul_eq_mul, dif_pos hu, e u hu k, sub_self]
   rw [hv']
@@ -184,7 +225,7 @@ private theorem card_core (F : Frame S) (w : Plc E) (hp : (p : 𝓞 E) ∉ w.asI
     AddMonoidHom.mk' (fun v j => IsLocalRing.residue (w.adicCompletionIntegers E)
       ⟨c v.1 (Fin.castLE hi j), c_int v.1 v.2 _⟩) (fun v v' => by
         funext j
-        rw [Pi.add_apply, ← map_add]
+        rw [Pi.add_apply, ← map_add (f := _)]
         congr 1
         apply Subtype.ext
         simp [c_add])

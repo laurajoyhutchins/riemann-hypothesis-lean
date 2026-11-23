@@ -1,4 +1,61 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusConjugationRule.WColOther
+module
+
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusConjugationRule.WColOther
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.Q Filter Topology
 open scoped ContDiff
@@ -96,15 +153,6 @@ lemma inv_conj_single (x : Fin (2 * r + k + 1)) :
 
 def dz (l : Fin r) (κ κ' : ℂ) : Mx k r :=
   diagonal (fun p => if p = eI k r l then κ else if p = esI k r l then κ' else 0)
-
-lemma half_eq : (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) := by
-  push_cast
-  ring
-
-lemma quarter_eq : (1 / (2 * Complex.I) : ℂ) = ((-1 / 2 : ℝ) : ℂ) * Complex.I := by
-  rw [one_div, mul_inv, Complex.inv_I]
-  push_cast
-  ring
 
 lemma X1_eq (l : Fin r) : hpart1 (Hpk k r) (single (eI k r l) (eI k r l) 1) =
     dz l ((1 / 2 : ℝ) : ℂ) (-((1 / 2 : ℝ) : ℂ)) := by
@@ -313,49 +361,6 @@ lemma lin_single {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] (l : Fin 
       simp only [Pi.add_apply, Pi.smul_apply, Pi.single_eq_same, Complex.real_smul, mul_one]
       exact (Complex.re_add_im z).symm
     · simp [hi]
-  rw [h, map_add, map_smul, map_smul, Complex.coe_smul, Complex.coe_smul]
-
-theorem ruleTorus : RuleTorus := by
-  intro E _ _ k r l D f hD hf c hcO g₁ hg₁ hcD
-  have hc : c l ≠ 0 := hcO l
-  constructor
-  · show RdV _ f _ + Complex.I • RdV _ f _ = _
-    rw [X1_eq, depthNumbers_threshold_eq, rdV_dz' l D f hf c hc g₁ hg₁ hcD ((1 / 2 : ℝ) : ℂ) (-((1 / 2 : ℝ) : ℂ)) (by simp),
-      rdV_dz' l D f hf c hc g₁ hg₁ hcD (((-1 / 2 : ℝ) : ℂ) * Complex.I) (((-1 / 2 : ℝ) : ℂ) * Complex.I)
-        (by simp)]
-    unfold pOp wirt
-    rw [if_pos hcO]
-    generalize fderiv ℝ (fun c' : Fin r → ℂ => f (w1 k r l (c' l) * g₁)) c = L'
-    rw [lin_single l L' (c l * ((1 / 2 : ℝ) : ℂ)),
-      lin_single l L' (c l * (((-1 / 2 : ℝ) : ℂ) * Complex.I))]
-    generalize hA : L' (Pi.single l (1 : ℂ)) = A
-    generalize hB : L' (Pi.single l Complex.I) = B
-    simp only [Complex.mul_re, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, Complex.I_re,
-      Complex.I_im, Complex.neg_re, Complex.neg_im]
-    push_cast
-    conv_rhs => rw [← Complex.re_add_im (c l)]
-    try simp only [Complex.star_def, map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
-    generalize (c l).re = a
-    generalize (c l).im = b
-    match_scalars <;> ring_nf <;> (try simp only [Complex.I_sq]) <;> ring_nf
-  · show RdV _ f _ + Complex.I • RdV _ f _ = _
-    rw [first_hermitian_part_diagonal, second_hermitian_part_diagonal, rdV_dz' l D f hf c hc g₁ hg₁ hcD (-((1 / 2 : ℝ) : ℂ)) ((1 / 2 : ℝ) : ℂ) (by simp),
-      rdV_dz' l D f hf c hc g₁ hg₁ hcD (((-1 / 2 : ℝ) : ℂ) * Complex.I) (((-1 / 2 : ℝ) : ℂ) * Complex.I)
-        (by simp)]
-    unfold pbOp wirtBar
-    rw [if_pos hcO]
-    generalize fderiv ℝ (fun c' : Fin r → ℂ => f (w1 k r l (c' l) * g₁)) c = L'
-    rw [lin_single l L' (c l * -((1 / 2 : ℝ) : ℂ)),
-      lin_single l L' (c l * (((-1 / 2 : ℝ) : ℂ) * Complex.I))]
-    generalize hA : L' (Pi.single l (1 : ℂ)) = A
-    generalize hB : L' (Pi.single l Complex.I) = B
-    simp only [Complex.mul_re, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, Complex.I_re,
-      Complex.I_im, Complex.neg_re, Complex.neg_im]
-    push_cast
-    conv_rhs => rw [← Complex.re_add_im (c l)]
-    try simp only [Complex.star_def, map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
-    generalize (c l).re = a
-    generalize (c l).im = b
-    match_scalars <;> ring_nf <;> (try simp only [Complex.I_sq]) <;> ring_nf
+  rw [h, map_add (f := _), map_smul, map_smul, Complex.coe_smul, Complex.coe_smul]
 
 end PI.QnRT

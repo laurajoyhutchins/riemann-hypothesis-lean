@@ -1,9 +1,45 @@
-import Formalism.SharpRestriction.ParConsts
-import Formalism.LocalRingCardinality.DataParamsS
-import Formalism.SharpRestriction.GlobalSchurBounds.Chosen
-import Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal
-import Formalism.SharpRestriction.ParamsHeightRankConstant
-import Formalism.SharpRestriction.LevelLetterCocycles.LocsCoverTw
+module
+
+public import Formalism.LocalRingCardinality.DataParamsS
+public import Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocsCoverTw
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,26 +49,14 @@ open NumberField Formalism.BasicNotions
 
 def condE (D : D7) : ℝ := (D.host.QS : ℝ) * D.host.q * D.host.d
 
-def Vbound (D : D7) (C : ℝ) : ℝ := C * Real.exp (C * Real.log ((D.R.n : ℝ) * (D.R.t : ℝ) * condE D) ^ 2)
-
-def LinkV_at (D : D7) (C : ℝ) : Prop :=
-  ∀ S : Finset ℕ, (∀ l ∈ S, l.Prime) →
-    ∑ l ∈ S, Real.log l * (∑ e ∈ Finset.Ico 1 D.R.t, (D.what₂.shaLen l e : ℝ)) ≤ Vbound D C
-
-def LinkV {eps : ℝ} (Fm : FamP eps) (C : ℝ) : Prop :=
-  ∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, LinkV_at (Fm.D x i) C
-
 def ShaFinOdd (D : D7) : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (e : ℕ), 0 < e → e < D.R.t → Formalism.GaloisCohomology.shaLen (D.nd.ldat p) (e : ℤ) ≠ ⊤
-
-def LinkShaFin {eps : ℝ} (Fm : FamP eps) : Prop :=
-  ∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, ShaFinOdd (Fm.D x i)
 
 def vvTerm (D : D7) (l : ℕ) : ℝ :=
   if l.Prime then ((∑ e ∈ Finset.Ico 1 D.R.t, D.what₂.shaLen l e : ℚ) : ℝ) * Real.log l else 0
 
-open Classical in
 
+open Classical in
 def etaSum {D : D7} (L : SizeData₂ D) (j : ℕ) : ℝ :=
   ∑ w ∈ L.supp.filter (fun w => D.what₂.muAt w ≠ D.what₂.mu0),
     SizeData₂.lwP w * (D.what₂.places.ramIdx w : ℝ) * (D.what₂.etaJ j w : ℝ)

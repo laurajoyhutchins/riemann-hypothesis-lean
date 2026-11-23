@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import GroundTheory.GlobalFields.GlobalArtinMap.Kernel
-import GroundTheory.GlobalFields.ClassFieldConsequences.RayClassFieldLocal
+module
+
+import CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import GroundTheory.GlobalFields.GlobalArtinMap.ArtinMap
+public import Mathlib.RingTheory.PicardGroup
+public import Development.WeilBound.CoreStatements.PlaceConnectedComponents.ArtinA
+public import Development.WeilBound.CoreStatements.PlaceConnectedComponents.ArtinKer
+public import GroundTheory.GlobalFields.ClassFieldConsequences.RayClassFieldLocal
+public import GroundTheory.GlobalFields.GlobalArtinMap.Kernel
 import GroundTheory.GlobalFields.GlobalReciprocity.Frobenius
 import GroundTheory.GlobalFields.GlobalReciprocity.LocalSurjective
-import Development.WeilBound.CoreStatements.PlaceConnectedComponents.ArtinA
-import Development.WeilBound.CoreStatements.PlaceConnectedComponents.ArtinKer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,33 +110,7 @@ theorem continuous_toAb : Continuous (toAb E Ω) := QuotientGroup.continuous_mk
 theorem mem_of_forall_res {H : Subgroup (Gab E Ω)} (hH : IsClosed (H : Set (Gab E Ω))) {g : Gab E Ω}
     (h : ∀ (L : IntermediateField E Ω) [FiniteDimensional E L] [IsAbelianGalois E L], H ≤ (res L).ker →
       res L g = 1) : g ∈ H := by
-  obtain ⟨σ, rfl⟩ := toAb_surjective g
-  let H' : ClosedSubgroup (Ω ≃ₐ[E] Ω) := ⟨H.comap (toAb E Ω), hH.preimage continuous_toAb⟩
-  have hfix := InfiniteGalois.fixingSubgroup_fixedField H'
-  have : σ ∈ (IntermediateField.fixedField H'.1).fixingSubgroup := by
-    rw [IntermediateField.mem_fixingSubgroup_iff]
-    intro y hy
-    have hab : y ∈ maximalAbelianExtension E Ω := by
-      refine IntermediateField.fixedField_le (fun τ hτ => ?_) hy
-      show toAb E Ω τ ∈ H
-      rw [show toAb E Ω τ = 1 from (QuotientGroup.eq_one_iff τ).2 hτ]
-      exact H.one_mem
-    obtain ⟨L0, _, _, hL0⟩ := exists_finite_abelian_mem hab
-    let L : IntermediateField E Ω := L0 ⊓ IntermediateField.fixedField H'.1
-    have : FiniteDimensional E L :=
-      FiniteDimensional.of_injective (IntermediateField.inclusion (inf_le_left : L ≤ L0)).toLinearMap
-        (IntermediateField.inclusion (inf_le_left : L ≤ L0)).injective
-    have : IsAbelianGalois E L := IsAbelianGalois.of_algHom (IntermediateField.inclusion (inf_le_left : L ≤ L0))
-    have h1 := h L fun a ha => by
-      obtain ⟨τ, rfl⟩ := toAb_surjective a
-      rw [MonoidHom.mem_ker, res_toAb, ← MonoidHom.mem_ker, L.restrictNormalHom_ker,
-        IntermediateField.mem_fixingSubgroup_iff]
-      intro z hz
-      exact (IntermediateField.mem_fixedField_iff _ z).1 hz.2 τ ha
-    rw [res_toAb, ← MonoidHom.mem_ker, L.restrictNormalHom_ker, IntermediateField.mem_fixingSubgroup_iff] at h1
-    exact h1 y ⟨hL0, hy⟩
-  rw [hfix] at this
-  exact this
+  apply CompanionTheory.FamInh.mem_of_forall_res <;> assumption
 
 theorem eq_of_forall_res {H H' : Subgroup (Gab E Ω)} (hH : IsClosed (H : Set (Gab E Ω)))
     (hH' : IsClosed (H' : Set (Gab E Ω)))
@@ -207,20 +229,20 @@ theorem art0_unif_iff (hA : IsPlaceOver A v) (g : Gab E Ω) :
     · rw [map_mul, map_mul, map_inv, map_inv, e]
       group
 
-theorem isGlobalArtin_inv : IsGlobalArtin (art0 E Ω)⁻¹ where
-  quot := (Homeomorph.inv (Gab E Ω)).isOpenQuotientMap.comp (isOpenQuotientMap_art0 E Ω)
-  ker := by
-    rw [← ker_art0 E Ω]
+theorem isGlobalArtin_inv : IsGlobalArtin (art0 E Ω)⁻¹ := by
+  refine ⟨(Homeomorph.inv (Gab E Ω)).isOpenQuotientMap.comp (isOpenQuotientMap_art0 E Ω),
+    ?_, ?_, ?_, ?_⟩
+  · rw [← ker_art0 E Ω]
     ext x
     simp only [MonoidHom.mem_ker, MonoidHom.inv_apply, inv_eq_one]
-  ine v A hA g := by
+  · intro v A hA g
     simp only [MonoidHom.inv_apply, inv_eq_iff_eq_inv]
     rw [art0_unit_iff hA, Subgroup.inv_mem_iff]
     rfl
-  frob v A hA g := by
+  · intro v A hA g
     simp only [MonoidHom.inv_apply, map_inv, inv_eq_iff_eq_inv]
     exact art0_unif_iff hA _
-  dec v A hA := by
+  · intro v A hA
     rw [← closure_range_eq hA]
     congr 1
     ext g
@@ -229,9 +251,6 @@ theorem isGlobalArtin_inv : IsGlobalArtin (art0 E Ω)⁻¹ where
       exact ⟨x⁻¹, by simp⟩
     · rintro ⟨x, rfl⟩
       exact ⟨x⁻¹, by simp⟩
-
-theorem globalArtin : GlobalTheory.Published.GlobalArtinReciprocity := fun E Ω _ _ _ _ _ =>
-  ⟨(art0 E Ω)⁻¹, isGlobalArtin_inv⟩
 
 end PositivityTheory.FamInh
 

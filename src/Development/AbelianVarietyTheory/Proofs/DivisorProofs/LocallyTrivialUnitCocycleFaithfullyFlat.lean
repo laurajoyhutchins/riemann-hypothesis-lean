@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsUniqueBaseChangeEqOfMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsUniqueBaseChangeEqOfMem
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.RingHom.FaithfullyFlat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TensorProduct
 
@@ -11,18 +60,18 @@ section Tensor
 
 variable {R B : Type} [CommRing R] [CommRing B] [Algebra R B]
 
-variable (R B) in
 
+variable (R B) in
 noncomputable def m₁₂ : B ⊗[R] B →ₐ[R] B ⊗[R] (B ⊗[R] B) :=
   Algebra.TensorProduct.map (AlgHom.id R B) Algebra.TensorProduct.includeLeft
 
-variable (R B) in
 
+variable (R B) in
 noncomputable def m₁₃ : B ⊗[R] B →ₐ[R] B ⊗[R] (B ⊗[R] B) :=
   Algebra.TensorProduct.map (AlgHom.id R B) Algebra.TensorProduct.includeRight
 
-variable (R B) in
 
+variable (R B) in
 noncomputable def m₂₃ : B ⊗[R] B →ₐ[R] B ⊗[R] (B ⊗[R] B) :=
   Algebra.TensorProduct.includeRight
 
@@ -46,25 +95,25 @@ theorem lmul'_eq_one {c : B ⊗[R] B} (hu : IsUnit c)
   exact (hu.map μ).mul_left_cancel (by rw [mul_one]; exact h'.symm)
 
 theorem isDescentDatum {c : B ⊗[R] B} (hu : IsUnit c)
-    (h : m₁₃ R B c = m₁₂ R B c * m₂₃ R B c) : FlatDescent.IsDescentDatum (datum c) := by
-  have ha : ∀ z : B ⊗[R] B, FlatDescent.act R B B z = Algebra.TensorProduct.lmul' R z := by
+    (h : m₁₃ R B c = m₁₂ R B c * m₂₃ R B c) : GlobalTheory.FlatDescent.IsDescentDatum (datum c) := by
+  have ha : ∀ z : B ⊗[R] B, GlobalTheory.FlatDescent.act (A := R) (B := B) (N := B) z = Algebra.TensorProduct.lmul' R z := by
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul b m => simp
   have h1 : ∀ z : B ⊗[R] B,
       ((datum c).restrictScalars R).lTensor B z = m₁₂ R B z * m₂₃ R B c := by
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy, add_mul]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, add_mul]
     | tmul b m => simp [datum_apply, m₁₂, m₂₃, mul_comm]
   have h2 : ∀ z : B ⊗[R] B, (TensorProduct.mk R B B 1).lTensor B z = m₁₃ R B z := by
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul b m => simp [m₁₃]
   constructor
   · intro n
@@ -80,7 +129,7 @@ theorem exists_local_tensor [Module.FaithfullyFlat R B] {c : B ⊗[R] B} (hu : I
       (1 : B) ⊗ₜ[R] x = c * (x ⊗ₜ[R] (1 : B)) := by
   have hd := isDescentDatum hu h
   have hI := hd.invertible_invariants
-  let I := FlatDescent.invariants (datum c)
+  let I := GlobalTheory.FlatDescent.invariants (datum c)
   obtain ⟨φ, m, hm⟩ : ∃ (φ : Module.Dual R I) (m : I), φ m ∉ P := by
     by_contra hcon
     push_neg at hcon
@@ -91,7 +140,7 @@ theorem exists_local_tensor [Module.FaithfullyFlat R B] {c : B ⊗[R] B} (hu : I
     clear hz
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add]; exact P.add_mem hx hy
+    | add x y hx hy => rw [map_add (f := _)]; exact P.add_mem hx hy
     | tmul b m => simpa using hcon b m
   let e := LinearEquiv.ofBijective _ hd.bijective_extend
   let Φ : B →ₗ[B] B :=
@@ -103,7 +152,7 @@ theorem exists_local_tensor [Module.FaithfullyFlat R B] {c : B ⊗[R] B} (hu : I
   · rw [← smul_eq_mul, ← map_smul, smul_eq_mul, mul_one]
     simp [Φ, h1, Algebra.algebraMap_eq_smul_one]
   · rw [← datum_apply]
-    exact (FlatDescent.mem_invariants.1 m.2).symm
+    exact (GlobalTheory.FlatDescent.mem_invariants.1 m.2).symm
 
 end Tensor
 

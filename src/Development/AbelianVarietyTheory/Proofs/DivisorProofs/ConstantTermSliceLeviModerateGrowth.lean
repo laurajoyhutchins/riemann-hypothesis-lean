@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CentralNilGL
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlkEquivInl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlkGLOneCorner
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantTermModerateGrowth
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlkGLOneCorner
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantTermModerateGrowth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField MeasureTheory GlobalTheory.CuspRep
 
 noncomputable section
@@ -11,15 +49,15 @@ open NumberField MeasureTheory GlobalTheory.CuspRep GlobalTheory.LeviGA
 
 namespace GlobalTheory.SliceTwo.Growth
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem height_inv {a : ℕ} (y : GL (Fin a) (Cinf E)) : height y⁻¹ = height y := by
   unfold height; rw [inv_inv]; ring
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem height_mul_right_le {a : ℕ} (c : GL (Fin a) (Cinf E)) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ y, height (y * c) ≤ B * height y := by
   obtain ⟨B, hB, h⟩ := GlobalTheory.ConstTermGrowth.height_mul_left_le (E := E) (isCompact_singleton (x := c⁻¹))
@@ -27,8 +65,8 @@ theorem height_mul_right_le {a : ℕ} (c : GL (Fin a) (Cinf E)) :
   have := h _ rfl y⁻¹
   rwa [← _root_.mul_inv_rev, height_inv, height_inv] at this
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem norm_toL_blkGL_one_le {a r : ℕ} (hr : r ≤ a) (y : GL (Fin (a - r)) (Cinf E)) :
     ‖toL (blkGL hr (1, y)).val‖ ≤ 1 + ‖toL y.val‖ := by
   have h0 : (0 : ℝ) ≤ 1 + ‖toL y.val‖ := by positivity
@@ -51,8 +89,8 @@ theorem norm_toL_blkGL_one_le {a r : ℕ} (hr : r ≤ a) (y : GL (Fin (a - r)) (
     exact ((norm_le_pi_norm (toL y.val i) j).trans (norm_le_pi_norm (toL y.val) i)).trans
       (by linarith)
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem height_blkGL_one_le {a r : ℕ} (hr : r ≤ a) (y : GL (Fin (a - r)) (Cinf E)) :
     height (blkGL hr (1, y)) ≤ 3 * height y := by
   have e : (blkGL hr (1, y))⁻¹ = blkGL hr (1, y⁻¹) := by
@@ -67,9 +105,9 @@ theorem height_blkGL_one_le {a r : ℕ} (hr : r ≤ a) (y : GL (Fin (a - r)) (Ci
 
 end GlobalTheory.SliceTwo.Growth
 
-open GlobalTheory.SliceTwo.Growth in
 
-theorem GlobalTheory.SliceTwo.Growth.norm_slice_le : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a r : ℕ)
+open GlobalTheory.SliceTwo.Growth in
+theorem GlobalTheory.SliceTwo.Growth.norm_slice_le : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a r : ℕ)
     (hr : r ≤ a) [MeasurableSpace (BlockIx a r → Ad E)] [BorelSpace (BlockIx a r → Ad E)]
     (μ : Measure (BlockIx a r → Ad E)) (𝓕 : Set (BlockIx a r → Ad E)), μ.IsAddHaarMeasure →
     IsAddFundamentalDomain (ratN E a r) 𝓕 μ → μ 𝓕 = 1 → ∀ φ : Sm E a, IsAutForm φ →

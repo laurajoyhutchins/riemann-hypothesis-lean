@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.PAdicHodge.FundamentalSeqSurj
+module
+
+public import GroundTheory.PAdicHodge.FundamentalSeqSurj
+public import GroundTheory.PAdicHodge.BCrisPlusInvariants
+import GroundTheory.PAdicHodge.ACrisFrobFixed
+import GroundTheory.PAdicHodge.FontaineLemma
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -13,9 +65,6 @@ namespace ACris
 variable {p : ℕ} [hp : Fact p.Prime]
 
 local notation "𝒪" => normInteger ℂ_[p]
-local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
-local notation "𝔭" => Ideal.span {(p : ACris ℂ_[p] p)}
-local notation "θdR" => IsPerfectoidField.thetaBDeRhamPlusField (K := ℂ_[p]) p
 
 section Residue
 
@@ -26,7 +75,7 @@ theorem prod_range_X_sub_C_zmod :
   have hr : (X ^ p - X : (ZMod p)[X]).roots = Finset.univ.val := by
     simpa [ZMod.card] using FiniteField.roots_X_pow_card_sub_X (ZMod p)
   have hdeg : (X ^ p - X : (ZMod p)[X]).natDegree = p :=
-    FiniteField.X_pow_card_sub_X_natDegree_eq (ZMod p) hp.out.one_lt
+    Polynomial.natDegree_X_pow_sub_X (R := (ZMod p)) hp.out.one_lt
   have h := prod_multiset_X_sub_C_of_monic_of_roots_card_eq hmon (by
     rw [hr, hdeg, Finset.card_val, Finset.card_univ, ZMod.card])
   rw [hr, ← Finset.prod_eq_multiset_prod] at h
@@ -41,7 +90,7 @@ theorem C_dvd_of_map_eq_zero {F : ℤ[X]} (h : F.map (Int.castRingHom (ZMod p)) 
   rw [C_dvd_iff_dvd_coeff]
   intro i
   have h1 : (F.coeff i : ZMod p) = 0 := by
-    have := congrArg (fun f => Polynomial.coeff f i) h
+    have := congrArg (fun f => _root_.AddMonoidAlgebra.coeff (M := ℕ) f i) h
     simpa only [coeff_map, eq_intCast, coeff_zero] using this
   exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ p).1 h1
 
@@ -92,7 +141,7 @@ theorem natCast_p_ne_zero' : (p : 𝒪) ≠ 0 := fun h => by
   simp only [SubringClass.coe_natCast, ZeroMemClass.coe_zero, Nat.cast_eq_zero] at this
   exact hp.out.ne_zero this
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_natCast_dvd_sub_of_dvd_pow_sub {v : 𝒪} (hv : (p : 𝒪) ∣ v ^ p - v) :
     ∃ a : ℕ, a < p ∧ (p : 𝒪) ∣ v - a := by
@@ -128,7 +177,7 @@ end Residue
 
 section Approx
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_int_dvd_sub (m : ℕ) : ∀ v : 𝒪, (∃ c : ℕ → 𝒪, ∀ k : ℕ,
     (p : 𝒪) ^ m ∣ v - ∑ i ∈ Finset.range m, (p : 𝒪) ^ i * c i ^ p ^ k) →
@@ -217,9 +266,10 @@ theorem norm_algebraMap_padic (q : ℚ_[p]) : ‖algebraMap ℚ_[p] ℂ_[p] q‖
   exact PadicComplex.norm_extends' p q
 
 theorem isClosed_range_algebraMap_padic : IsClosed (Set.range (algebraMap ℚ_[p] ℂ_[p])) :=
-  (AddMonoidHomClass.isometry_of_norm _ norm_algebraMap_padic).isUniformInducing.isComplete_range.isClosed
+  (AddMonoidHomClass.isometry_of_norm (algebraMap ℚ_[p] ℂ_[p])
+    norm_algebraMap_padic).isUniformInducing.isComplete_range.isClosed
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem theta_mem_range_of_phi_eq {y : ACris ℂ_[p] p} (hy : phi ℂ_[p] p y = y) :
     ∃ q : ℚ_[p], ((theta ℂ_[p] p y : 𝒪) : ℂ_[p]) = algebraMap ℚ_[p] ℂ_[p] q := by
@@ -256,6 +306,9 @@ end Approx
 
 section Plus
 
+local notation "𝔭" => Ideal.span {(p : ACris ℂ_[p] p)}
+local notation "θdR" => IsPerfectoidField.thetaBDeRhamPlusField (K := ℂ_[p]) p
+
 theorem mem_pow_of_p_pow_mul_phi_eq {a : ACris ℂ_[p] p} {m : ℕ} (hm : 1 ≤ m)
     (ha : (p : ACris ℂ_[p] p) ^ m * phi ℂ_[p] p a = a) (j : ℕ) : a ∈ 𝔭 ^ j := by
   induction j with
@@ -270,26 +323,38 @@ theorem mem_pow_of_p_pow_mul_phi_eq {a : ACris ℂ_[p] p} {m : ℕ} (hm : 1 ≤ 
     simp only [Nat.add_sub_cancel]
     ring
 
-set_option maxHeartbeats 1600000 in
+private theorem exists_mul_p_pow_eq_algebraMap (y : BCrisPlus ℂ_[p] p) :
+    ∃ (k : ℕ) (a : ACris ℂ_[p] p), y * (p : BCrisPlus ℂ_[p] p) ^ k =
+      algebraMap (ACris ℂ_[p] p) (BCrisPlus ℂ_[p] p) a := by
+  simpa only [map_natCast (algebraMap (ACris ℂ_[p] p) (BCrisPlus ℂ_[p] p))] using
+    IsLocalization.Away.surj (p : ACris ℂ_[p] p) y
+
+private theorem map_mul_natCast_pow {R S : Type*} [CommRing R] [CommRing S]
+    (f : R →+* S) (y : R) (n k : ℕ) :
+    f (y * (n : R) ^ k) = f y * (n : S) ^ k := by
+  rw [map_mul f, map_pow f, map_natCast f]
+
+private theorem eq_zero_of_localized_eigenvector {R S : Type*} [CommRing R] [CommRing S]
+    (F : R →+* S) (f : R →+* R) (g : S →+* S) (n : ℕ)
+    (hF : Function.Injective F) (hfg : ∀ a, g (F a) = F (f a))
+    {y : S} {a : R} {k m : ℕ} (hunit : IsUnit ((n : S) ^ k))
+    (ha : y * (n : S) ^ k = F a) (hy : (n : S) ^ m * g y = y)
+    (hzero : (n : R) ^ m * f a = a → a = 0) : y = 0 := by
+  have hnum : g y * (n : S) ^ k = F (f a) :=
+    (map_mul_natCast_pow g y n k).symm.trans ((congrArg g ha).trans (hfg a))
+  have he : (n : R) ^ m * f a = a := hF (by
+    rw [map_mul F, map_pow F, map_natCast F, ← hnum, ← mul_assoc, hy, ha])
+  rw [hzero he, map_zero F] at ha
+  exact hunit.mul_left_eq_zero.1 ha
 
 theorem eq_zero_of_p_pow_mul_phiPlus_eq {y : BCrisPlus ℂ_[p] p} {m : ℕ} (hm : 1 ≤ m)
     (hy : (p : BCrisPlus ℂ_[p] p) ^ m * phiPlus ℂ_[p] p y = y) : y = 0 := by
-  obtain ⟨⟨a, s⟩, hs⟩ := IsLocalization.surj (Submonoid.powers (p : ACris ℂ_[p] p)) y
-  obtain ⟨k, hk⟩ := s.2
-  simp only at hs
-  rw [← hk, map_pow, map_natCast] at hs
-  have h1 := congrArg (phiPlus ℂ_[p] p) hs
-  rw [map_mul, map_pow, map_natCast, phiPlus_algebraMap] at h1
-  have ha : (p : ACris ℂ_[p] p) ^ m * phi ℂ_[p] p a = a := by
-    apply algebraMap_aCris_injective
-    rw [map_mul, map_pow, map_natCast, ← h1, ← hs]
-    conv_rhs => rw [← hy]
-    ring
-  have ha0 : a = 0 := IsHausdorff.haus' (I := 𝔭) a fun j => by
-    rw [SModEq.zero, smul_eq_mul, Ideal.mul_top]
-    exact mem_pow_of_p_pow_mul_phi_eq hm ha j
-  rw [ha0, map_zero] at hs
-  exact (isUnit_p_bCrisPlus.pow k).mul_left_eq_zero.1 hs
+  obtain ⟨k, a, ha⟩ := exists_mul_p_pow_eq_algebraMap y
+  exact eq_zero_of_localized_eigenvector
+    (algebraMap (ACris ℂ_[p] p) (BCrisPlus ℂ_[p] p)) (phi ℂ_[p] p) (phiPlus ℂ_[p] p) p
+    algebraMap_aCris_injective (phiPlus_algebraMap (K := ℂ_[p]) (p := p))
+    (isUnit_p_bCrisPlus.pow k) ha hy fun he => IsHausdorff.haus' (I := 𝔭) a fun j => by
+      simpa only [SModEq.zero, smul_eq_mul, Ideal.mul_top] using mem_pow_of_p_pow_mul_phi_eq hm he j
 
 variable {ε : PreTilt (normInteger ℂ_[p]) p} (hε : PreTilt.untilt ε = 1)
   (hζ : PreTilt.untilt ((_root_.frobeniusEquiv (PreTilt (normInteger ℂ_[p]) p) p).symm ε) ≠ 1)
@@ -299,66 +364,113 @@ theorem iotaPlus_periodTPlus_ne_zero : iotaPlus ℂ_[p] p (periodTPlus hε) ≠ 
   rw [iotaPlus_periodTPlus]
   exact fontaineT_ne_zero hε hζ
 
+
 include hζ in
-
 theorem periodTPlus_mul_left_cancel {a b : BCrisPlus ℂ_[p] p}
-    (h : periodTPlus hε * a = periodTPlus hε * b) : a = b :=
-  iotaPlus_injective (K := ℂ_[p]) (p := p) (mul_left_cancel₀ (iotaPlus_periodTPlus_ne_zero hε hζ)
-    (by rw [← map_mul, ← map_mul, h]))
+    (h : periodTPlus hε * a = periodTPlus hε * b) : a = b := by
+  let ι := iotaPlus ℂ_[p] p
+  exact iotaPlus_injective (K := ℂ_[p]) (p := p) <|
+    mul_left_cancel₀ (iotaPlus_periodTPlus_ne_zero hε hζ) <|
+      (map_mul ι (periodTPlus hε) a).symm.trans <|
+        (congrArg ι h).trans (map_mul ι (periodTPlus hε) b)
 
-set_option maxHeartbeats 1600000 in
+private theorem iterate_eq_pow_mul_of_map_eq {R : Type*} [CommRing R] (f : R →+* R)
+    {a y : R} (ha : f a = a) (hy : f y = a * y) (k : ℕ) :
+    f^[k] y = a ^ k * y := by
+  induction k with
+  | zero => rw [Function.iterate_zero_apply, pow_zero, one_mul]
+  | succ k ih => rw [Function.iterate_succ_apply', ih, map_mul f, map_pow f, ha, hy, ← mul_assoc, ← pow_succ]
+
 theorem iterate_phiPlus_eq_pow_mul {y : BCrisPlus ℂ_[p] p} {n : ℕ}
     (hy : phiPlus ℂ_[p] p y = (p : BCrisPlus ℂ_[p] p) ^ n * y) (k : ℕ) :
     (phiPlus ℂ_[p] p)^[k] y = ((p : BCrisPlus ℂ_[p] p) ^ n) ^ k * y := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [Function.iterate_succ_apply', ih, map_mul, map_pow, map_pow, map_natCast, hy]
-    ring
+  let f := phiPlus ℂ_[p] p
+  exact iterate_eq_pow_mul_of_map_eq f
+    ((map_pow f (p : BCrisPlus ℂ_[p] p) n).trans (congrArg (· ^ n) (map_natCast f p))) hy k
+
+private theorem eq_map_div_natCast_pow_of_mul_eq {F K : Type*} [Field F] [Field K]
+    (f : F →+* K) {x : K} {q : F} {n k : ℕ} (hn : (n : K) ≠ 0)
+    (h : x * (n : K) ^ k = f q) : x = f (q / (n : F) ^ k) := by
+  rw [map_div₀ f, map_pow f, map_natCast f]
+  exact (eq_div_iff (pow_ne_zero k hn)).2 h
+
+private theorem map_period_factor {R : Type*} [CommRing R] (f : R →+* R) {u t v y a : R}
+    (ht : f t = u * t) (htc : Function.Injective (fun x : R => t * x))
+    (hv : y = t * v) (hy : f y = a * y) : u * f v = a * v := by
+  apply htc
+  calc
+    t * (u * f v) = f (t * v) := by rw [map_mul f, ht, mul_assoc, mul_left_comm t u]
+    _ = a * (t * v) := by rw [← hv, hy]
+    _ = t * (a * v) := mul_left_comm _ _ _
 
 include hε hζ in
-set_option maxHeartbeats 1600000 in
 
 theorem exists_eq_algebraMap_of_phiPlus_eq {y : BCrisPlus ℂ_[p] p}
     (hy : phiPlus ℂ_[p] p y = y) : ∃ q : ℚ_[p], y = algebraMap ℚ_[p] (BCrisPlus ℂ_[p] p) q := by
-  obtain ⟨⟨a, s⟩, hs⟩ := IsLocalization.surj (Submonoid.powers (p : ACris ℂ_[p] p)) y
-  obtain ⟨k, hk⟩ := s.2
-  simp only at hs
-  rw [← hk, map_pow, map_natCast] at hs
+  let f := phiPlus ℂ_[p] p
+  let A := algebraMap (ACris ℂ_[p] p) (BCrisPlus ℂ_[p] p)
+  let P := algebraMap ℚ_[p] (BCrisPlus ℂ_[p] p)
+  let θ := (θdR).comp (iotaPlus ℂ_[p] p)
+  obtain ⟨k, a, hs⟩ := exists_mul_p_pow_eq_algebraMap y
   have hφa : phi ℂ_[p] p a = a := by
     apply algebraMap_aCris_injective
-    have h1 := congrArg (phiPlus ℂ_[p] p) hs
-    rw [map_mul, map_pow, map_natCast, phiPlus_algebraMap, hy, hs] at h1
-    exact h1.symm
+    calc
+      A (phi ℂ_[p] p a) = f (A a) := (phiPlus_algebraMap (K := ℂ_[p]) (p := p) a).symm
+      _ = f (y * (p : BCrisPlus ℂ_[p] p) ^ k) := congrArg f hs.symm
+      _ = f y * (p : BCrisPlus ℂ_[p] p) ^ k := map_mul_natCast_pow f y p k
+      _ = y * (p : BCrisPlus ℂ_[p] p) ^ k := congrArg (· * (p : BCrisPlus ℂ_[p] p) ^ k) hy
+      _ = A a := hs
   obtain ⟨q0, hq0⟩ := theta_mem_range_of_phi_eq hφa
-  refine ⟨q0 / (p : ℚ_[p]) ^ k, ?_⟩
-  set y' := y - algebraMap ℚ_[p] (BCrisPlus ℂ_[p] p) (q0 / (p : ℚ_[p]) ^ k) with hy'_def
-  have hy' : phiPlus ℂ_[p] p y' = y' := by rw [hy'_def, map_sub, hy, phiPlus_algebraMap_padic]
-  have hθ : θdR (iotaPlus ℂ_[p] p y') = 0 := by
-    have h1 := congrArg (fun z => θdR (iotaPlus ℂ_[p] p z)) hs
-    simp only [map_mul, map_pow, map_natCast, thetaField_iotaPlus_algebraMap, hq0] at h1
-    rw [hy'_def, map_sub, map_sub, iotaPlus_algebraMap_padic, thetaBDeRhamPlusField_algebraMap,
-      sub_eq_zero]
-    have hp0 : (p : ℂ_[p]) ^ k ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.2 hp.out.ne_zero)
-    apply mul_right_cancel₀ hp0
-    rw [h1, map_div₀, map_pow, map_natCast, div_mul_cancel₀ _ hp0]
-  have hall : ∀ n, θdR (iotaPlus ℂ_[p] p ((phiPlus ℂ_[p] p)^[n] y')) = 0 := fun n => by
-    rw [Function.iterate_fixed hy' n, hθ]
-  have hmem := phiPlus_mem_span_periodT hε hζ hall
-  rw [hy'] at hmem
-  obtain ⟨y'', hy''⟩ := Ideal.mem_span_singleton'.1 hmem
-  have h2 : (p : BCrisPlus ℂ_[p] p) ^ 1 * phiPlus ℂ_[p] p y'' = y'' := by
-    apply periodTPlus_mul_left_cancel hε hζ
-    have h3 := congrArg (phiPlus ℂ_[p] p) hy''
-    rw [map_mul, phiPlus_periodTPlus, hy', ← hy''] at h3
-    rw [pow_one]
-    linear_combination h3
-  have h4 := eq_zero_of_p_pow_mul_phiPlus_eq le_rfl h2
-  rw [h4, zero_mul] at hy''
-  rw [← sub_eq_zero, ← hy'_def, ← hy'']
+  let q : ℚ_[p] := q0 / (p : ℚ_[p]) ^ k
+  let y' := y - P q
+  have hy' : f y' = y' := (map_sub f y (P q)).trans
+    (congrArg₂ (· - ·) hy (phiPlus_algebraMap_padic q))
+  have hθq : θ (P q) = algebraMap ℚ_[p] ℂ_[p] q :=
+    (congrArg θdR (iotaPlus_algebraMap_padic q)).trans (thetaBDeRhamPlusField_algebraMap p q)
+  have hθy : θ y = algebraMap ℚ_[p] ℂ_[p] q := by
+    apply eq_map_div_natCast_pow_of_mul_eq (algebraMap ℚ_[p] ℂ_[p]) (q := q0) (n := p) (k := k)
+      (Nat.cast_ne_zero.2 hp.out.ne_zero)
+    exact (map_mul_natCast_pow θ y p k).symm.trans <|
+      (congrArg θ hs).trans <| (thetaField_iotaPlus_algebraMap (K := ℂ_[p]) (p := p) a).trans hq0
+  have hθ : θ y' = 0 := (map_sub θ y (P q)).trans (sub_eq_zero.mpr (hθy.trans hθq.symm))
+  have hall : ∀ n, θ (f^[n] y') = 0 := fun n =>
+    (congrArg θ (Function.iterate_fixed hy' n)).trans hθ
+  let t := periodTPlus hε
+  have hmem : y' ∈ Ideal.span {t} := hy' ▸ phiPlus_mem_span_periodT hε hζ hall
+  obtain ⟨v, hv⟩ := Ideal.mem_span_singleton'.1 hmem
+  have hyt : y' = t * v := hv.symm.trans (mul_comm v t)
+  have h2 : (p : BCrisPlus ℂ_[p] p) ^ 1 * f v = v := by
+    have hf : f y' = 1 * y' := hy'.trans (one_mul y').symm
+    simpa only [pow_one, one_mul] using
+      map_period_factor f (phiPlus_periodTPlus hε) (fun {_ _} h => periodTPlus_mul_left_cancel hε hζ h) hyt hf
+  have hv0 : v = 0 := eq_zero_of_p_pow_mul_phiPlus_eq le_rfl h2
+  exact ⟨q, sub_eq_zero.mp (hyt.trans ((congrArg (t * ·) hv0).trans (mul_zero t)))⟩
+
+private theorem exists_period_factor {R : Type*} [CommRing R] (f : R →+* R) {u t y w : R}
+    {n : ℕ} (hu : IsUnit u) (ht : f t = u * t) (htc : Function.Injective (fun x : R => t * x))
+    (hy : f y = u ^ (n + 1) * y) (hw : w * t = f y) :
+    ∃ v, y = t * v ∧ f v = u ^ n * v := by
+  let d := Ring.inverse u ^ (n + 1)
+  have hd : d * u ^ (n + 1) = 1 := by
+    dsimp only [d]
+    rw [← mul_pow, Ring.inverse_mul_cancel _ hu, one_pow]
+  have hv : y = t * (d * w) := calc
+    y = d * (u ^ (n + 1) * y) := by rw [← mul_assoc, hd, one_mul]
+    _ = d * (w * t) := by rw [hw, hy]
+    _ = t * (d * w) := (mul_rotate' t d w).symm
+  refine ⟨d * w, hv, hu.mul_left_cancel ?_⟩
+  rw [← mul_assoc, ← pow_succ']
+  exact map_period_factor f ht htc hv hy
+
+private theorem mem_span_pow_of_mul_mem_span_pow_succ {R : Type*} [CommRing R]
+    {t x : R} {n : ℕ} (ht : Function.Injective (fun a : R => t * a))
+    (h : t * x ∈ Ideal.span {t ^ (n + 1)}) : x ∈ Ideal.span {t ^ n} := by
+  rw [Ideal.mem_span_singleton, pow_succ'] at h
+  obtain ⟨a, ha⟩ := h
+  exact Ideal.mem_span_singleton.2 ⟨a, ht (ha.trans (mul_assoc _ _ _))⟩
+
 
 include hζ in
-set_option maxHeartbeats 1600000 in
 
 theorem exists_eq_algebraMap_mul_pow_of_phiPlus_eq (n : ℕ) : ∀ {y : BCrisPlus ℂ_[p] p},
     phiPlus ℂ_[p] p y = (p : BCrisPlus ℂ_[p] p) ^ n * y →
@@ -371,40 +483,29 @@ theorem exists_eq_algebraMap_mul_pow_of_phiPlus_eq (n : ℕ) : ∀ {y : BCrisPlu
     exact ⟨q, by rw [hq, pow_zero, mul_one]⟩
   | succ n ih =>
     intro y hy hι
-    have hθ0 : θdR (iotaPlus ℂ_[p] p y) = 0 := by
+    let f := phiPlus ℂ_[p] p
+    let ι := iotaPlus ℂ_[p] p
+    let θ := (θdR).comp ι
+    let t := periodTPlus hε
+    have hθ0 : θ y = 0 := by
       have hT : fontaineT ε hε ^ (n + 1) ∈ RingHom.ker θdR := by
         rw [← IsPerfectoidField.maximalIdeal_bDeRhamPlus, maximalIdeal_eq_span_fontaineT hε hζ]
         exact Ideal.pow_mem_of_mem _ (Ideal.mem_span_singleton_self _) _ n.succ_pos
-      obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.1 hι
-      rw [← hd, map_mul, RingHom.mem_ker.1 hT, mul_zero]
-    have hall : ∀ k, θdR (iotaPlus ℂ_[p] p ((phiPlus ℂ_[p] p)^[k] y)) = 0 := fun k => by
-      rw [iterate_phiPlus_eq_pow_mul hy k, map_mul, map_mul, hθ0, mul_zero]
-    obtain ⟨w, hw⟩ := Ideal.mem_span_singleton'.1 (phiPlus_mem_span_periodT hε hζ hall)
-    set y1 := Ring.inverse (p : BCrisPlus ℂ_[p] p) ^ (n + 1) * w with hy1_def
-    have hinv : Ring.inverse (p : BCrisPlus ℂ_[p] p) ^ (n + 1) * (p : BCrisPlus ℂ_[p] p) ^ (n + 1) =
-        1 := by
-      rw [← mul_pow, Ring.inverse_mul_cancel _ isUnit_p_bCrisPlus, one_pow]
-    have hyt : y = periodTPlus hε * y1 := by
-      calc y = Ring.inverse (p : BCrisPlus ℂ_[p] p) ^ (n + 1) * ((p : BCrisPlus ℂ_[p] p) ^ (n + 1) * y) := by
-            rw [← mul_assoc, hinv, one_mul]
-        _ = Ring.inverse (p : BCrisPlus ℂ_[p] p) ^ (n + 1) * (w * periodTPlus hε) := by rw [← hy, hw]
-        _ = periodTPlus hε * y1 := by rw [hy1_def]; ring
-    have hy1 : phiPlus ℂ_[p] p y1 = (p : BCrisPlus ℂ_[p] p) ^ n * y1 := by
-      apply isUnit_p_bCrisPlus.mul_left_cancel
-      apply periodTPlus_mul_left_cancel hε hζ
-      have h3 := congrArg (phiPlus ℂ_[p] p) hyt
-      rw [map_mul, phiPlus_periodTPlus, hy] at h3
-      rw [hyt] at h3
-      linear_combination -h3
-    have hι1 : iotaPlus ℂ_[p] p y1 ∈ Ideal.span {fontaineT ε hε ^ n} := by
-      obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.1 hι
-      rw [hyt, map_mul, iotaPlus_periodTPlus] at hd
-      rw [Ideal.mem_span_singleton']
-      refine ⟨d, mul_left_cancel₀ (fontaineT_ne_zero hε hζ) ?_⟩
-      rw [← hd]
-      ring
+      exact RingHom.mem_ker.1 ((Ideal.span_singleton_le_iff_mem (RingHom.ker θdR)).2 hT hι)
+    have hall : ∀ k, θ (f^[k] y) = 0 := fun k =>
+      (congrArg θ (iterate_phiPlus_eq_pow_mul hy k)).trans <|
+        (map_mul θ _ y).trans ((congrArg (θ _ * ·) hθ0).trans (mul_zero _))
+    have hmem : f y ∈ Ideal.span {t} := phiPlus_mem_span_periodT hε hζ hall
+    obtain ⟨w, hw⟩ := Ideal.mem_span_singleton'.1 hmem
+    obtain ⟨y1, hyt, hy1⟩ := exists_period_factor f isUnit_p_bCrisPlus
+      (phiPlus_periodTPlus hε) (fun {_ _} h => periodTPlus_mul_left_cancel hε hζ h) hy hw
+    have hιy : ι y = fontaineT ε hε * ι y1 := (congrArg ι hyt).trans <|
+      (map_mul ι t y1).trans (congrArg (· * ι y1) (iotaPlus_periodTPlus hε))
+    have hι1 : ι y1 ∈ Ideal.span {fontaineT ε hε ^ n} :=
+      mem_span_pow_of_mul_mem_span_pow_succ (fun {_ _} h => mul_left_cancel₀ (fontaineT_ne_zero hε hζ) h)
+        (hιy ▸ hι)
     obtain ⟨q, hq⟩ := ih hy1 hι1
-    exact ⟨q, by rw [hyt, hq]; ring⟩
+    exact ⟨q, by rw [hyt, hq, mul_left_comm, ← pow_succ' t n]⟩
 
 end Plus
 

@@ -1,20 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToGAdMat
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsGenericIffIsGenericFor
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeviBlockSizesSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WittRankLeSkewSignature
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeasureFundDomLtTop
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TripSizesSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsBlockEmb
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplMapSplitProj
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsBlockEmb
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsConstAlongSingleton
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsFurtherExtra
-open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SmGL GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.LeviBlockExponent GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
-  GlobalTheory.UAut GlobalTheory.SiegelSet GlobalTheory.ThK.SquareIntegrability GlobalTheory.CuspBlock GlobalTheory.LFun.SplitTie
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplMapSplitProj
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsFurtherExtra
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToGAdMat
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
+
+@[expose] public section
+
+open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SmGL GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
+  GlobalTheory.UAut GlobalTheory.SiegelSet GlobalTheory.ThK.SquareIntegrability GlobalTheory.LFun.SplitTie
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
 open Formalism.UG (cT bc)
@@ -94,7 +134,7 @@ open GlobalTheory.CuspRep (Ad Cinf sInf infEq continuous_infEq infGL toL)
 
 section Entries
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 theorem exists_bound_sInf (f : Ad E →+* ℂ) (hf : Continuous f) :
     ∃ L : ℝ, 0 ≤ L ∧ ∀ z : Cinf E, ‖f (sInf E z)‖ ≤ L * ‖z‖ := by
@@ -126,7 +166,7 @@ theorem exists_entry_bound (f : Ad E →+* ℂ) (hf : Continuous f) (d : ℕ) :
   have h3 : ‖y.1 a b‖ ≤ ‖toL y.val‖ :=
     (norm_le_pi_norm (toL y.val a) b).trans (norm_le_pi_norm (toL y.val) a)
   have h4 : 0 ≤ ‖toL (y⁻¹).val‖ := norm_nonneg _
-  rw [e, map_add, map_sub]
+  rw [e, map_add (f := _), map_sub]
   calc ‖f ((1 : Matrix (Fin d) (Fin d) (Ad E)) a b) - f (sInf E ((1 : Matrix (Fin d) (Fin d) (Cinf E)) a b)) +
         f (sInf E (y.1 a b))‖
       ≤ 1 + L * 1 + L * ‖toL y.val‖ := by
@@ -151,13 +191,13 @@ open GlobalTheory.BlockForms.LeviLoc (gl_entry fin_symm compFin_eq_zero compFin_
 
 section Block
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [IsTotallyComplex E] [Algebra F E]
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Algebra F E]
 
 theorem map_one_add_two_rank_perturbation {R T : Type} [CommRing R] [CommRing T] (p : R →+* T) {n d : ℕ}
     (A C : Matrix (Fin n) (Fin d) R) (B D : Matrix (Fin d) (Fin n) R) (P Q : Matrix (Fin d) (Fin d) R) :
     (1 + A * (P - 1) * B + C * (Q - 1) * D).map p =
       1 + A.map p * (P.map p - 1) * B.map p + C.map p * (Q.map p - 1) * D.map p := by
-  simp [Matrix.map_add, Matrix.map_mul, Matrix.map_sub, Matrix.map_one]
+  simp [Matrix.map_add (f := _), Matrix.map_mul, Matrix.map_sub, Matrix.map_one]
 
 variable {Φ : AF F ⊗[F] E ≃+* AdeleRing (𝓞 E) E} {j : Ainf F ⊗[F] E ≃+* InfiniteAdeleRing E}
   (hΦ : ∀ z, Φ z = (j (GlobalTheory.LFun.infTens F E z), GlobalTheory.LFun.finAdEquiv F E (GlobalTheory.LFun.finTens F E z)))
@@ -191,7 +231,7 @@ open GlobalTheory.BlockForms.LeviLoc (gl_entry fin_symm compFin_eq_zero compFin_
 
 section Emb
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [IsTotallyComplex E] [Algebra F E]
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Algebra F E]
   {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} {r : ℕ} {Xf Yf : Matrix (Fin n) (Fin r) E} {l d : ℕ}
   {h : l + d ≤ r} {ι : GlobalTheory.CuspRep.GA E d →* GAd σ J}
 
@@ -222,7 +262,7 @@ open GlobalTheory.CuspRep (Ad Cinf sInf infEq continuous_infEq infGL toL pFin_in
 
 section Inf
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [IsTotallyComplex E] [Algebra F E]
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Algebra F E]
   {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} {r : ℕ} {Xf Yf : Matrix (Fin n) (Fin r) E} {l d : ℕ}
   {h : l + d ≤ r} {ι : GlobalTheory.CuspRep.GA E d →* GAd σ J}
 
@@ -300,7 +340,7 @@ open GlobalTheory.CuspRep (Ad Cinf sInf infEq continuous_infEq infGL toL pFin_in
 
 section Ht
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [IsTotallyComplex E] [Algebra F E]
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Algebra F E]
   {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} {r : ℕ} {Xf Yf : Matrix (Fin n) (Fin r) E} {l d : ℕ}
   {h : l + d ≤ r} {ι : GlobalTheory.CuspRep.GA E d →* GAd σ J}
 
@@ -348,7 +388,7 @@ theorem exists_height_blockEmb_infGL_le (hι : IsBlockEmb σ J Xf Yf h ι) :
   rw [e, NNReal.coe_prod]
   calc ∏ w, (htInf F w (bc (compInf F E w) (matHom (AF F) σ J (ι (infGL E d y)))) : ℝ)
       ≤ ∏ w, (c w * GlobalTheory.CuspRep.height y) :=
-        Finset.prod_le_prod (fun w _ => NNReal.coe_nonneg _) fun w _ => hc w y
+        Finset.prod_le_prod₀ (fun w _ => NNReal.coe_nonneg _) fun w _ => hc w y
     _ = (∏ w, c w) * GlobalTheory.CuspRep.height y ^ Fintype.card (InfinitePlace F) := by
         rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ]
 
@@ -356,9 +396,9 @@ end Ht
 
 end GlobalTheory.BlockForms.CuspGrowth
 
-open GlobalTheory.BlockForms.CuspGrowth in
 
-theorem GlobalTheory.BlockForms.growth_comp_blockEmb : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [IsTotallyComplex E] [Algebra F E]
+open GlobalTheory.BlockForms.CuspGrowth in
+theorem GlobalTheory.BlockForms.growth_comp_blockEmb : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Algebra F E]
     (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (n : ℕ) (J : Matrix (Fin n) (Fin n) E), IsHermND σ J →
     ∀ (r : ℕ) (Xf Yf : Matrix (Fin n) (Fin r) E), IsWittFrame σ J Xf Yf → ∀ (K : Subgroup (GAd σ J)), IsMaxCpt σ J K →
     ∀ (S : Finset (Fin r)) (l d : ℕ) (h : l + d ≤ r) (ι : GlobalTheory.CuspRep.GA E d →* GAd σ J), GlobalTheory.BlockForms.IsBlockEmb σ J Xf Yf h ι →

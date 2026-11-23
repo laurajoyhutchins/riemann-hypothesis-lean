@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevOpMemFixed
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexNeZeroOfIsOpen
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevOpMemFixed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexNeZeroOfIsOpen
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -100,7 +144,7 @@ theorem isHecke_conj {K K' : Subgroup G} (hle : K' ≤ K) (hn : (K'.subgroupOf K
 theorem trace_of_not_finite {W : Type} [AddCommGroup W] [Module ℂ W] (hW : ¬ Module.Finite ℂ W)
     (L : W →ₗ[ℂ] W) : LinearMap.trace ℂ W L = 0 := by
   unfold LinearMap.trace
-  rw [dif_neg]
+  rw [dite_eq_right]
   · simp
   · rintro ⟨s, ⟨b⟩⟩
     exact hW (Module.Finite.of_basis b)
@@ -280,7 +324,7 @@ theorem conjAvg_gen (K : Subgroup G) (hKo : IsOpen (K : Set G)) (hKc : IsCompact
 
 end Main
 
-theorem conjAvg : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (w : Pl E) (V : Type) [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ (GLw n w) V) (K' : Subgroup (GLw n w)), IsOpen (K' : Set (GLw n w)) → K' ≤ GlobalTheory.LFun.KGL w n → (K'.subgroupOf (GlobalTheory.LFun.KGL w n)).Normal → ∀ f, IsHecke K' f → IsHecke K' (fun g => avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * g * k)) ∧ (∀ k ∈ GlobalTheory.LFun.KGL w n, ∀ g, (fun g => avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * g * k)) (k⁻¹ * g * k) = (fun g => avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * g * k)) g) ∧ (∀ g, avg (fun k : GlobalTheory.LFun.KGL w n => (fun g => avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * g * k)) ((k : GLw n w)⁻¹ * g * k)) = (fun g => avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * g * k)) g) ∧ twTr ρ (GlobalTheory.LFun.KGL w n) K' (fun g => avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * g * k)) LinearMap.id = twTr ρ (GlobalTheory.LFun.KGL w n) K' f LinearMap.id := by
+theorem conjAvg : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (w : Pl E) (V : Type) [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ (GLw n w) V) (K' : Subgroup (GLw n w)), IsOpen (K' : Set (GLw n w)) → K' ≤ GlobalTheory.LFun.KGL w (n := n) → (K'.subgroupOf (GlobalTheory.LFun.KGL w (n := n))).Normal → ∀ f, IsHecke K' f → IsHecke K' (fun g => avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * g * k)) ∧ (∀ k ∈ GlobalTheory.LFun.KGL w (n := n), ∀ g, (fun g => avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * g * k)) (k⁻¹ * g * k) = (fun g => avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * g * k)) g) ∧ (∀ g, avg (fun k : GlobalTheory.LFun.KGL w (n := n) => (fun g => avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * g * k)) ((k : GLw n w)⁻¹ * g * k)) = (fun g => avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * g * k)) g) ∧ twTr ρ (GlobalTheory.LFun.KGL w (n := n)) K' (fun g => avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * g * k)) LinearMap.id = twTr ρ (GlobalTheory.LFun.KGL w (n := n)) K' f LinearMap.id := by
   intro E _ _ _ n w V _ _ ρ K' hK'o hle hn f hf
   obtain ⟨hKo, hKc⟩ := GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL (E := E) w n
   exact conjAvg_gen _ hKo hKc ρ K' hK'o hle hn f hf

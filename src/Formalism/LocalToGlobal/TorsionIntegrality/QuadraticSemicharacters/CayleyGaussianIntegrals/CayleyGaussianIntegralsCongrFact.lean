@@ -1,4 +1,58 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactTer
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactAltForm
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.MatrixFormFourfoldBlock
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.Th0CharMulOpUTh0HalfPeriodEq
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactTer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -74,21 +128,6 @@ theorem uu_norm : uu * conj uu = 1 := by
   rw [this, h]; norm_num
 
 theorem uu_ne : uu ≠ 0 := fun h => by have := uu_norm; rw [h] at this; simp at this
-
-theorem th_im : th.im = Real.sqrt 7 / 2 := by
-  simp [th, cmTheta]
-
-theorem uu_ne_one : uu ≠ 1 := by
-  intro h
-  have h2 : th ^ 2 = 2 := by
-    have := congrArg (· * 2) h
-    simp only [uu] at this
-    linear_combination this
-  have h4 : th = 4 := by linear_combination h2 - th_rel.1
-  have h5 := congrArg Complex.im h4
-  rw [th_im] at h5
-  have : (0 : ℝ) < Real.sqrt 7 := Real.sqrt_pos.2 (by norm_num)
-  norm_num at h5
 
 theorem th_stable {x : ℂ} (hx : x ∈ L7.lattice) : th * x ∈ L7.lattice := by
   rw [mem7] at hx ⊢
@@ -192,8 +231,8 @@ theorem stdData_seven :
     StdData L7 1 (((Formalism.L2.Th1.F.area L7 : ℝ) : ℂ)⁻¹ • (1 : Matrix n n ℂ)) (stdLat L7 n)
       (alphaQ (Real.sqrt (7 : ℕ) / 2) (matH (((Formalism.L2.Th1.F.area L7 : ℝ) : ℂ)⁻¹ • (1 : Matrix n n ℂ))))
       (alphaQ (Real.sqrt (7 : ℕ) / 2) (stdH L7 (Fin 4 × n))) (gU n) := by
-  have h := CmData.stdData_cm 1 1 2 7 one_pos (by norm_num) 1 one_ne_zero (by norm_num) (by decide) (by norm_num)
-    _ _ _ (gU_isom n) (stdSelfDual L7 n) (fun x hx => th_stable_std hx)
+  have h := Formalism.L2.Th1.H.stdDataCm 1 1 2 7 one_pos (by norm_num) 1 one_ne_zero (by norm_num) (by decide) (by norm_num)
+    _ _ _ (gU n) (gU_isom n) (stdSelfDual L7 n) (fun x hx => th_stable_std hx)
     (by rw [fourth_power_standard_lattice]; exact idxU₁ _) (by rw [fourth_power_standard_lattice]; exact idxU₂ _)
   have e : (1 : ℂ) * ((1 : ℕ) : ℂ) = 1 := by norm_num
   rw [e] at h
@@ -203,21 +242,5 @@ theorem seven_nontrivial [Nonempty n] :
     imgLat (gU n : (Fin 4 × n → ℂ) →ₗ[ℂ] (Fin 4 × n → ℂ)) (pow4 (stdLat L7 n)) ≠ stdLat L7 (Fin 4 × n) := by
   rw [fourth_power_standard_lattice]
   exact smulU_ne (Fin 4 × n)
-
-def alpha7 (m : Type) [Fintype m] [DecidableEq m] : (m → ℂ) → ℂ := alphaQ (Real.sqrt (7 : ℕ) / 2) (stdH L7 m)
-
-theorem one_sub_inv_uu_ne : (1 : ℂ) - uu⁻¹ ≠ 0 := by
-  intro h
-  apply uu_ne_one
-  have : uu⁻¹ = 1 := by linear_combination -h
-  exact inv_eq_one.1 this
-
-def AeU (m : Type) : (m → ℂ) ≃ₗ[ℂ] (m → ℂ) := LinearEquiv.smulOfNeZero ℂ _ (1 - uu⁻¹) one_sub_inv_uu_ne
-
-def w3 : ℂ := Complex.exp (2 * Real.pi * Complex.I / ((3 : ℕ) : ℂ))
-
-def phi3 (x : ZMod 3) : ℂ := w3 ^ (x.val ^ 2)
-
-def b3 (x y : ZMod 3) : ℂ := w3 ^ (2 * x.val * y.val)
 
 end Formalism.L2.Th1.H.Inh

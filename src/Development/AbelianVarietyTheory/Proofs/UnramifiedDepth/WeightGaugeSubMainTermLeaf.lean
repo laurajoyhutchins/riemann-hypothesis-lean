@@ -1,14 +1,63 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.LatticeInclusionFormsInjective
-import Formalism.LocalToGlobal.CharacterGerms.CartesianBoundOnCurves
-import Formalism.LocalToGlobal.CharacterGerms.CoeffIterateZero
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TwoMulChainStartIndexAddOneOfOdd
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.FactorizationLeFourFifteenths
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.WeightSubstNonneg
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.CoeffLeafGaugeSubMainTermEqZeroOnFirstAxisStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.PderivLeafGaugeEqPairingAddIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.HPullWUpGTwoGroupEmbeddingEqRenameStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LinearSubstCoordinateWeightNonnegRadiusStatement
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.LatticeInclusionFormsInjective
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TwoMulChainStartIndexAddOneOfOdd
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.WeightSubstNonneg
+public import Mathlib.RingTheory.MvPowerSeries.Derivative
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.CoeffLeafGaugeSubMainTermEqZeroOnFirstAxisStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.FactorizationLeFourFifteenths
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.HPullWUpGTwoGroupEmbeddingEqRenameStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LinearSubstCoordinateWeightNonnegRadiusStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.PderivLeafGaugeEqPairingAddIntegralStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.L2.FormalSeriesBounds Formalism.IncomingBounds GlobalTheory.MainTerm Classical
 
@@ -38,12 +87,13 @@ theorem wtNonneg_rename (v : AddValuation C (WithTop ℝ)) {σ τ : Type} [Finit
 theorem wtNonneg_add (v : AddValuation C (WithTop ℝ)) {τ : Type} (ρ : τ → ℝ) {F G : MvPowerSeries τ C}
     (hF : WtNonneg v ρ F) (hG : WtNonneg v ρ G) : WtNonneg v ρ (F + G) := by
   intro α
-  rw [map_add]
+  rw [map_add (f := _)]
   exact v.map_le_add (hF α) (hG α)
 
 theorem wtNonneg_sum (v : AddValuation C (WithTop ℝ)) {τ ι : Type} (ρ : τ → ℝ) (s : Finset ι)
     {F : ι → MvPowerSeries τ C} (hF : ∀ i ∈ s, WtNonneg v ρ (F i)) : WtNonneg v ρ (∑ i ∈ s, F i) := by
   intro α
+
   rw [map_sum]
   exact v.map_le_sum fun i hi => hF i hi α
 
@@ -80,20 +130,24 @@ theorem constantCoeff_linPull {σ ι : Type} [Fintype σ] [Fintype ι] (e : ι �
   have h0 : ∀ x : σ, MvPowerSeries.constantCoeff
       (∑ c : ι, e c x • (MvPowerSeries.X c : MvPowerSeries ι C)) = 0 := by
     intro x
+
     simp [map_sum]
   exact MvPowerSeries.constantCoeff_subst_eq_zero (MvPowerSeries.hasSubst_of_constantCoeff_zero h0) h0 hF
 
 theorem pderiv_mainM (V : VF C) (i : ℕ) {ι ι' : Type} [Fintype ι] [Fintype ι'] (Φ : ι' → ι → C) (b : ι') :
-    MvPowerSeries.pderiv C (Sum.inr b) (mainM V i Φ) =
+    MvPowerSeries.pderiv (R := C) (Sum.inr b) (mainM V i Φ) =
       ((V.l : C) ^ expE V.l i)⁻¹ • ∑ c : ι,
         Φ b c • (MvPowerSeries.X (Sum.inl c) : MvPowerSeries (ι ⊕ ι') C) ^ (V.l ^ i) := by
   unfold mainM
+
   rw [Derivation.map_smul, map_sum, Finset.sum_eq_single b]
+
   · rw [map_sum]
     congr 1
     refine Finset.sum_congr rfl fun c _ => ?_
     simp [Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X]
   · intro b' _ hb
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun c _ => ?_
     simp [Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X, hb]
@@ -131,7 +185,7 @@ theorem weight_gauge_sub_main : ∀ (C : Type) [Field C] (V : VF C) (d : ℕ) [N
       rw [le_add_coe_iff, radius_one _ _ hl0, zero_sub] at this
       exact this
     obtain ⟨γ, hγ, hd⟩ := GlobalTheory.T.pderiv_leafGauge_eq_pairing_add_integral C V d I J X hA g a i hi hid S t ht (Fin N) (Fin M) e v' he hv hv' b
-    have hE : MvPowerSeries.pderiv C (Sum.inr b)
+    have hE : MvPowerSeries.pderiv (R := C) (Sum.inr b)
         (X.hM g a i e v' - mainM V i (fun b c => ∑ κ : J g, ∑ k : I (1 - g), Φt c κ * X.pair g κ k * v' b k)) =
         MvPowerSeries.subst (fun w : WV I => hPullW (upG w.1 (t w.1 w.2)) (fun c => toW g (e c))
           (fun b => toW (1 - g) (v' b))) γ + ∑ κ : J g, (∑ k, X.pair g κ k * v' b k) •
@@ -140,8 +194,9 @@ theorem weight_gauge_sub_main : ∀ (C : Type) [Field C] (V : VF C) (d : ℕ) [N
               Φt δ κ • (MvPowerSeries.X δ : MvPowerSeries (Fin N) C) ^ (V.l ^ i)) := by
       rw [map_sub, hd, pderiv_mainM, add_sub_assoc]
       congr 1
+
       simp only [hpull.1, map_sub, smul_sub, Finset.sum_sub_distrib, map_smul, map_sum, map_pow,
-        MvPowerSeries.rename_X]
+      MvPowerSeries.rename_X]
       congr 1
       simp only [Finset.smul_sum, smul_smul]
       conv_rhs => rw [Finset.sum_comm]

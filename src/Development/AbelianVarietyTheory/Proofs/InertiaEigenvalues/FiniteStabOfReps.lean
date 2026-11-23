@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.IntegralHeckeForms
-import Formalism.LocalToGlobal.IndefiniteReal.Bridge
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,23 +51,8 @@ namespace GlobalTheory.ClassTrace
 variable {O Γ Hf P : Type} [CommRing O] [Group Γ] [Group Hf] [AddCommGroup P] [Module O P]
   (ι : Γ →* Hf) (J : Subgroup Hf) (lam : J →* Oˣ) (ρ : Representation O Γ P)
 
-def intForms (LL : Hf → Submodule O P) : Submodule O (Hf → P) where
-  carrier := {f | (∀ (γ : Γ) (h : Hf) (k : J), f (ι γ * h * k) = (lam k : O) • ρ γ (f h)) ∧ ∀ h, f h ∈ LL h}
-  add_mem' := fun {f g} hf hg =>
-    ⟨fun γ h k => by simp only [Pi.add_apply, hf.1 γ h k, hg.1 γ h k, map_add, smul_add],
-      fun h => Submodule.add_mem _ (hf.2 h) (hg.2 h)⟩
-  zero_mem' := ⟨fun γ h k => by simp, fun h => Submodule.zero_mem _⟩
-  smul_mem' := fun a f hf =>
-    ⟨fun γ h k => by simp only [Pi.smul_apply, hf.1 γ h k, map_smul]; rw [smul_comm],
-      fun h => Submodule.smul_mem _ _ (hf.2 h)⟩
-
-def LatticeLaw (LL : Hf → Submodule O P) : Prop :=
-  (∀ γ h, (LL h).map (ρ γ) = LL (ι γ * h)) ∧ ∀ h (k : J), LL (h * k) = LL h
-
-def tr (h : Hf) (p : P) : P := ∑ᶠ γ : stab ι J h, (lam (stabK ι γ) : O) • ρ (γ : Γ) p
 
 open Classical in
-
 def lamExt (x : Hf) : O := if hx : x ∈ J then (lam ⟨x, hx⟩ : O) else 0
 
 theorem lamExt_coe (k : J) : lamExt J lam (k : Hf) = (lam k : O) := by
@@ -40,7 +65,7 @@ theorem lamExt_mul (x : Hf) (k : J) : lamExt J lam (x * k) = lamExt J lam x * (l
   by_cases hx : x ∈ J
   · have hxk : x * (k : Hf) ∈ J := J.mul_mem hx k.2
     unfold lamExt
-    rw [dif_pos hxk, dif_pos hx, ← Units.val_mul, ← map_mul]
+    rw [dite_eq_left hxk, dite_eq_left hx, ← Units.val_mul, ← map_mul]
     rfl
   · have hxk : x * (k : Hf) ∉ J := fun hm => hx (by simpa using J.mul_mem hm (J.inv_mem k.2))
     rw [lamExt_of_not_mem J lam hx, lamExt_of_not_mem J lam hxk, zero_mul]

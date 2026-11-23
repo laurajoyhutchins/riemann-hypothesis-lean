@@ -1,4 +1,51 @@
-import Formalism.YangianSpanCharacter.StatementY
+module
+
+public import Formalism.YangianSpanCharacter.StatementY
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.YangianSpanCharacter.P
 
@@ -74,23 +121,6 @@ theorem y1'_alg {a b ai bi X Y : A} {c : 𝕜} (hc : c ≠ 0)
   rw [hbX, haX, hc'']
   abel
 
-theorem commutator_eq_of_shift_relations {a b ai bi lu lv η : A} (hxy : a * lu * (b * lv) = b * lv * (a * lu))
-    (h1 : lv * a = a * (lv + η)) (h2 : lu * b = b * (lu + η)) (hab : a * b = b * a)
-    (ha2 : ai * a = 1) (hb2 : bi * b = 1) : lu * lv - lv * lu = η * (lu - lv) := by
-  have e : a * (b * ((lu + η) * lv)) = a * (b * ((lv + η) * lu)) := by
-    calc a * (b * ((lu + η) * lv)) = a * (lu * b) * lv := by rw [h2]; simp only [mul_assoc]
-      _ = a * lu * (b * lv) := by simp only [mul_assoc]
-      _ = b * lv * (a * lu) := hxy
-      _ = b * (lv * a) * lu := by simp only [mul_assoc]
-      _ = b * (a * ((lv + η) * lu)) := by rw [h1]; simp only [mul_assoc]
-      _ = a * (b * ((lv + η) * lu)) := by rw [← mul_assoc b a, ← hab, mul_assoc a b]
-  have e3 := left_cancel hb2 (left_cancel ha2 e)
-  rw [add_mul, add_mul] at e3
-  rw [mul_sub, ← sub_eq_zero]
-  have e4 : lu * lv - lv * lu - (η * lu - η * lv) = (lu * lv + η * lv) - (lv * lu + η * lu) := by
-    abel
-  rw [e4, e3, sub_self]
-
 theorem qdet_alg {x00 x01 x10 τ τi τ' τ'i z : A} {k : 𝕜}
     (e1 : -(x01 * z) + x00 * τ' = k • 1) (e2 : -(τ * z) + x10 * τ' = 0)
     (h2 : τi * τ = 1) (h3 : τ' * τ'i = 1) : x00 - x01 * τi * x10 = k • τ'i := by
@@ -158,33 +188,9 @@ theorem y1'_mod (H : ModHyp t τinv q S) {u v : 𝕜} (hu : u ∈ S) (hv : v ∈
     (by rw [neg_sub]; exact H.1 v u 1 1 0 1)
     (H.2.2.2.1 v hv).1 (H.2.2.2.1 v hv).2 (H.2.2.2.1 u hu).1 (H.2.2.2.2.1 u v).eq
 
-theorem eta_symm (u v : 𝕜) : eta t τinv v u = eta t τinv u v := by
-  simp only [eta]
-  rw [← neg_sub u v, inv_neg, neg_smul, ← smul_neg, neg_sub]
-
 theorem mu_symm (u v : 𝕜) : mu t τinv v u = mu t τinv u v := by
   simp only [mu]
   rw [← neg_sub u v, inv_neg, neg_smul, ← smul_neg, neg_sub]
-
-theorem commutator_eq_eta_mul_sub (H : ModHyp t τinv q S) {u v : 𝕜} (hu : u ∈ S) (hv : v ∈ S) (huv : u ≠ v) :
-    lf t τinv u * lf t τinv v - lf t τinv v * lf t τinv u =
-      eta t τinv u v * (lf t τinv u - lf t τinv v) := by
-  have hinvu := H.2.2.2.1 u hu
-  have hinvv := H.2.2.2.1 v hv
-  have hal : t u 1 1 * lf t τinv u = t u 1 0 := by
-    simp only [lf]; rw [← mul_assoc, hinvu.1, one_mul]
-  have hbl : t v 1 1 * lf t τinv v = t v 1 0 := by
-    simp only [lf]; rw [← mul_assoc, hinvv.1, one_mul]
-  have hxy : t u 1 1 * lf t τinv u * (t v 1 1 * lf t τinv v) =
-      t v 1 1 * lf t τinv v * (t u 1 1 * lf t τinv u) := by
-    rw [hal, hbl]; exact (H.2.2.2.2.2 u v).eq
-  have h1 : lf t τinv v * t u 1 1 = t u 1 1 * (lf t τinv v + eta t τinv u v) :=
-    from_comm (commutator_of_modular_relation H hu hv huv)
-  have h2 : lf t τinv u * t v 1 1 = t v 1 1 * (lf t τinv u + eta t τinv u v) := by
-    have h := commutator_of_modular_relation H hv hu (Ne.symm huv)
-    rw [eta_symm] at h
-    exact from_comm h
-  exact commutator_eq_of_shift_relations hxy h1 h2 (H.2.2.2.2.1 u v).eq hinvu.2 hinvv.2
 
 theorem qdet_mod (H : ModHyp t τinv q S) {Y : 𝕜} (hY : Y ∈ S) (hY1 : Y + 1 ∈ S) :
     t Y 0 0 - t Y 0 1 * τinv Y * t Y 1 0 = q Y • τinv (Y + 1) := by
@@ -241,14 +247,6 @@ end Mod
 theorem wedgeMapInLieAlgebra : Formalism.YangianSpanCharacter.Y.Y1 := by
   intro 𝕜 A _ _ _ t τinv q S H u v hu hv huv
   exact commutator_of_modular_relation H hu hv huv
-
-theorem yangian_relation_first_alt_holds : Formalism.YangianSpanCharacter.Y.Y1' := by
-  intro 𝕜 A _ _ _ t τinv q S H u v hu hv huv
-  exact y1'_mod H hu hv huv
-
-theorem shift_commutator_relation_holds : Formalism.YangianSpanCharacter.Y.Y2 := by
-  intro 𝕜 A _ _ _ t τinv q S H u v hu hv huv
-  exact commutator_eq_eta_mul_sub H hu hv huv
 
 theorem yangian_relation_three_holds : Formalism.YangianSpanCharacter.Y.Y3 := by
   intro 𝕜 A _ _ _ t τinv q S H u v hu hu1 hum hv hv1 huv

@@ -1,6 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+module
+
+public import Mathlib.AlgebraicGeometry.AffineScheme
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.RingTheory.Nakayama
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +60,7 @@ def Reg (V : Z.Opens) : Subring (Fn Z) where
   carrier := {F | ∃ a : Γ(Z, V), ∀ z (hz : z ∈ V), (Z.presheaf.germ V z hz).hom a = F z}
   mul_mem' := fun ⟨a, ha⟩ ⟨b, hb⟩ => ⟨a * b, fun z hz => by rw [map_mul, ha, hb]; rfl⟩
   one_mem' := ⟨1, fun z hz => by rw [map_one]; rfl⟩
-  add_mem' := fun ⟨a, ha⟩ ⟨b, hb⟩ => ⟨a + b, fun z hz => by rw [map_add, ha, hb]; rfl⟩
+  add_mem' := fun ⟨a, ha⟩ ⟨b, hb⟩ => ⟨a + b, fun z hz => by rw [map_add (f := _), ha, hb]; rfl⟩
   zero_mem' := ⟨0, fun z hz => by rw [map_zero]; rfl⟩
   neg_mem' := fun ⟨a, ha⟩ => ⟨-a, fun z hz => by rw [map_neg, ha]; rfl⟩
 
@@ -76,13 +120,6 @@ theorem IsLoc.eq_basicOpen {D W : Z.Opens} {F : Fn Z} (h : IsLoc D W F) {a : Γ(
     (ha : ∀ z (hz : z ∈ W), (Z.presheaf.germ W z hz).hom a = F z) : D = Z.basicOpen a := by
   ext z
   refine (h z).trans ⟨fun ⟨hz, hu⟩ => (Z.mem_basicOpen a z hz).2 (by rw [← ha z hz] at hu; exact hu), fun hz => ?_⟩
-  have hw := Z.basicOpen_le a hz
-  exact ⟨hw, by rw [← ha z hw]; exact (Z.mem_basicOpen a z hw).1 hz⟩
-
-theorem exists_loc {W : Z.Opens} {F : Fn Z} (hF : F ∈ Reg W) : ∃ D, IsLoc D W F := by
-  obtain ⟨a, ha⟩ := hF
-  refine ⟨Z.basicOpen a, fun z => ⟨fun hz => ?_, fun ⟨hz, hu⟩ =>
-    (Z.mem_basicOpen a z hz).2 (by rw [← ha z hz] at hu; exact hu)⟩⟩
   have hw := Z.basicOpen_le a hz
   exact ⟨hw, by rw [← ha z hw]; exact (Z.mem_basicOpen a z hw).1 hz⟩
 
@@ -172,7 +209,7 @@ theorem local_global {W : Z.Opens} (B : Subring (Fn Z)) (hB : B ≤ Reg W) {T : 
       map_one' := sec_ext fun z hz => by rw [hr, map_one]; rfl
       map_mul' := fun a b => sec_ext fun z hz => by rw [map_mul, hr, hr, hr]; rfl
       map_zero' := sec_ext fun z hz => by rw [hr, map_zero]; rfl
-      map_add' := fun a b => sec_ext fun z hz => by rw [map_add, hr, hr, hr]; rfl }
+      map_add' := fun a b => sec_ext fun z hz => by rw [map_add (f := _), hr, hr, hr]; rfl }
   have hW : IsAffineOpen W := by
     refine isAffineOpen_of_isAffineOpen_basicOpen W (Set.range fun t => ρ (w t)) ?_ ?_
     · have := congrArg (Ideal.map ρ) hw
@@ -302,13 +339,6 @@ theorem Sc.zero (W : Z.Opens) (n : ℕ) : Sc U G W n 0 := fun i => by rw [mul_ze
 
 variable (hU : ∀ z, ∃ i, z ∈ U i) (hG : ∀ i z, IsUnit (G i z))
 include hU hG
-
-theorem Sc.exists_loc {W : Z.Opens} {n : ℕ} {F : Fn Z} (h : Sc U G W n F) : ∃ D, IsLoc D W F := by
-  choose D hD using fun i => AmpleLocal.exists_loc (h i)
-  refine ⟨⨆ i, D i, fun z => Opens.mem_iSup.trans ⟨fun ⟨i, hi⟩ => ?_, fun ⟨hz, hu⟩ => ?_⟩⟩
-  · exact ⟨((hD i).le hi).1, isUnit_of_mul_isUnit_right ((hD i).unit hi)⟩
-  · obtain ⟨i, hi⟩ := hU z
-    exact ⟨i, (hD i z).2 ⟨⟨hz, hi⟩, ((hG i z).pow n).mul hu⟩⟩
 
 theorem Sc.ratio {D W : Z.Opens} {n : ℕ} {F σ : Fn Z} (h : Sc U G W n F) (hσ : Sc U G W n σ) (hD : IsLoc D W σ) :
     F * inv σ ∈ Reg D := by

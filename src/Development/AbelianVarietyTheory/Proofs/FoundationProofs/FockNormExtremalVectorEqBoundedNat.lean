@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSelfDualE
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairingNondegenerateHolds
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
-import Formalism.GradedWeylDivisibility.StatementE
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntMvPolynomialCoeffAbsSumEqSumOfSupportSubset
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MfactLeFactorialPow
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Formalism.QuotientMetricDivisors.ReductionLemmaZero
-import Formalism.QuotientMetricDivisors.ProdFormula
+public import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsSelfDualE
 import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LeafBounds.MeanMaxLeaf.LeafMMFree
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntMvPolynomialCoeffAbsSumEqSumOfSupportSubset
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MfactLeFactorialPow
+import Formalism.QuotientMetricDivisors.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MvPolynomial Formalism.BasicNotions Formalism.L2.DIV Formalism.DivisionValues GlobalTheory.TestLat Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open scoped Matrix ComplexOrder
 
@@ -29,18 +72,18 @@ theorem fockS_extremal_eq_nat : ∀ (n : ℕ) (lam : DomWeight n) (R : ℕ), (�
   have hmem : IsWeightedHomogeneous (Formalism.GradedWeylDivisibility.colW n n) f lam.natW :=
     (Formalism.GradedWeylDivisibility.hwMem ℤ n n le_rfl _ hanti).1
   have hne : f ≠ 0 := Formalism.GradedWeylDivisibility.hwNe ℤ n n le_rfl _
-  have hl1 : ∑ mo ∈ f.support, (coeff mo f).natAbs ≤ (n.factorial) ^ R :=
+  have hl1 : ∑ mo ∈ f.support, (AddMonoidAlgebra.coeff f mo).natAbs ≤ (n.factorial) ^ R :=
     GlobalTheory.IntMvPolynomialCoeffAbsSum.highestWeightVector_coeff_natAbs_sum_le_factorial_pow n lam.natW R hanti hR
-  refine ⟨∑ mo ∈ f.support, (coeff mo f).natAbs ^ 2 * mfact mo, ?_, ?_, ?_⟩
+  refine ⟨∑ mo ∈ f.support, (AddMonoidAlgebra.coeff f mo).natAbs ^ 2 * mfact mo, ?_, ?_, ?_⟩
   · refine Finset.sum_pos (fun mo hmo => ?_) (support_nonempty.mpr hne)
-    have h1 : 0 < (coeff mo f).natAbs := Int.natAbs_pos.mpr (mem_support_iff.mp hmo)
+    have h1 : 0 < (AddMonoidAlgebra.coeff f mo).natAbs := Int.natAbs_pos.mpr (mem_support_iff.mp hmo)
     have h2 : 0 < mfact mo := Finset.prod_pos fun k _ => Nat.factorial_pos _
     positivity
-  · calc ∑ mo ∈ f.support, (coeff mo f).natAbs ^ 2 * mfact mo
-        ≤ ∑ mo ∈ f.support, (coeff mo f).natAbs * (n.factorial ^ R * R.factorial ^ n) := by
+  · calc ∑ mo ∈ f.support, (AddMonoidAlgebra.coeff f mo).natAbs ^ 2 * mfact mo
+        ≤ ∑ mo ∈ f.support, (AddMonoidAlgebra.coeff f mo).natAbs * (n.factorial ^ R * R.factorial ^ n) := by
           refine Finset.sum_le_sum fun mo hmo => ?_
-          have h1 : (coeff mo f).natAbs ≤ n.factorial ^ R :=
-            (Finset.single_le_sum (f := fun mo => (coeff mo f).natAbs)
+          have h1 : (AddMonoidAlgebra.coeff f mo).natAbs ≤ n.factorial ^ R :=
+            (Finset.single_le_sum (f := fun mo => (AddMonoidAlgebra.coeff f mo).natAbs)
               (fun _ _ => Nat.zero_le _) hmo).trans hl1
           have h2 : mfact mo ≤ R.factorial ^ n := by
             refine GlobalTheory.TestLat.mfact_le_factorial_pow n lam.natW R hR mo fun t => ?_
@@ -57,7 +100,7 @@ theorem fockS_extremal_eq_nat : ∀ (n : ℕ) (lam : DomWeight n) (R : ℕ), (�
     unfold fockS
     rw [support_map_of_injective _ hinj, Nat.cast_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
-    have h : (((coeff m f).natAbs ^ 2 : ℕ) : K) = ((coeff m f : ℤ) : K) * ((coeff m f : ℤ) : K) := by
+    have h : (((AddMonoidAlgebra.coeff f m).natAbs ^ 2 : ℕ) : K) = ((AddMonoidAlgebra.coeff f m : ℤ) : K) * ((AddMonoidAlgebra.coeff f m : ℤ) : K) := by
       rw [← Int.cast_natCast, Nat.cast_pow, Int.natAbs_sq, pow_two, Int.cast_mul]
     rw [Nat.cast_mul, h]
     simp only [coeff_map, eq_intCast, star_intCast]

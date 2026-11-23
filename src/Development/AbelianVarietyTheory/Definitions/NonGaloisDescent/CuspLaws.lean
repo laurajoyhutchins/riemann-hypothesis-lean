@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Langlands
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsSelfDualFor
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Langlands
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +54,7 @@ section Dual
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-def DualCl (x y : IrrGL k) : Prop :=
+def DualCl (x y : IrrGL (k := k)) : Prop :=
   ∃ (n : ℕ) (π π' : IrrRep (GL (Fin n) k)), x = cls π ∧ y = cls π' ∧ Nonempty (π'.ρ.Equiv (contra π.ρ))
 
 def SegDual (Δ Δ' : Segment k) : Prop :=
@@ -27,26 +65,8 @@ end Dual
 variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
   {A : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 E)} {h : IsPlaceOver A w}
 
-structure CuspLaws (a : Weil h →* (w.adicCompletion E)ˣ) (ha : IsLocalArtin h a)
-    (e : AddChar (w.adicCompletion E) Circle → WD h → ℂˣ) (r : IrrGL (w.adicCompletion E) → WD h) : Prop where
-
-  bij : Set.BijOn r {x | x.IsCusp} {y | IsIrrWD y}
-
-  dim : ∀ x, x.IsCusp → (r x).lpDim = x.1
-
-  twist : ∀ x, x.IsCusp → ∀ χ hχ, r (x.tw χ hχ) = (r x).lpTwist (χ.comp a) (ha.smooth hχ)
-
-  central : ∀ x : IrrGL (w.adicCompletion E), x.IsCusp → ∀ ω, HasCentralChar x.rep ω →
-    ∀ σ, ((r x).eig σ).prod = (ω (a σ) : ℂ)
-
-  dual : ∀ x y, x.IsCusp → y.IsCusp → DualCl x y → r y = (r x).lpDual
-
-  eps : ∀ ψ : AddChar (w.adicCompletion E) Circle, Continuous ψ → ψ ≠ 1 →
-    ∀ x y : IrrGL (w.adicCompletion E), x.IsCusp → y.IsCusp → y.1 < x.1 →
-      HasPairGamma ψ x.rep y.rep (e ψ ((r x).lpChar (r y)))
-
-def IsLExt (r rc : IrrGL (w.adicCompletion E) → WD h) : Prop :=
-  ∀ (l : List (Segment (w.adicCompletion E))) (x : IrrGL (w.adicCompletion E)),
+def IsLExt (r rc : IrrGL (k := w.adicCompletion E) → WD h) : Prop :=
+  ∀ (l : List (Segment (w.adicCompletion E))) (x : IrrGL (k := w.adicCompletion E)),
     IsL (l : Multiset (Segment (w.adicCompletion E))) x.rep → rc x = segSum r l
 
 end GlobalTheory.LocLanglands

@@ -1,5 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MultiplicativeLargeSieve
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.Data.Nat.Totient
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MultiplicativeLargeSieve
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SumIntervalIntegralLeOfSpaced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.Harmonic.Bounds
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Order.Chebyshev
+
+@[expose] public section
+
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory Filter Topology
 
 namespace GlobalTheory
@@ -10,7 +69,7 @@ private lemma squarefree_prod_of_prime (s : Finset ℕ) (h : ∀ p ∈ s, p.Prim
   intro x hx hxx
   have hmem : ∀ t ⊆ s, x ∣ ∏ p ∈ t, p → x ∈ t := by
     intro t ht hdvd
-    obtain ⟨p, hp, hxp⟩ := (Prime.dvd_finset_prod_iff hx.prime _).1 hdvd
+    obtain ⟨p, hp, hxp⟩ := (Prime.dvd_finsetProd_iff hx.prime _).1 hdvd
     rw [(Nat.prime_dvd_prime_iff_eq hx (h p (ht hp))).1 hxp]; exact hp
   have hxs : x ∈ s := hmem s subset_rfl (dvd_trans (dvd_mul_right x x) hxx)
   rw [← Finset.mul_prod_erase s (fun p => p) hxs] at hxx
@@ -108,7 +167,6 @@ private lemma sum_inv_le_mul_sum_squarefree_inv_totient (Q q : ℕ) (hq : 1 ≤ 
     · apply dvd_mul_of_dvd_left
       rw [← hn.2]
       exact Finset.dvd_prod_of_mem _ (Finset.mem_filter.2 ⟨hp.mem_primeFactors hpn (by omega), hpq⟩)
-  have hf0' : (f:ℝ) ≠ 0 := by exact_mod_cast hf0.ne'
   calc ∑ n ∈ (Finset.Icc 1 Q).filter (fun n => g n = f), (1:ℝ) / n
       = ∑ m ∈ ((Finset.Icc 1 Q).filter (fun n => g n = f)).image (· / f), (1:ℝ) / (f * m) := by
         rw [Finset.sum_image]
@@ -130,12 +188,8 @@ private lemma sum_inv_le_mul_sum_squarefree_inv_totient (Q q : ℕ) (hq : 1 ≤ 
         rw [hN, mul_pow, ArithmeticFunction.isMultiplicative_sigma.map_mul_of_coprime hcop]
         have hA := totient_mul_sigma_pow_le_pow_succ Q f hf0
         have hB := totient_mul_sigma_pow_le_pow_succ Q q hq0
-        have hφf : (0:ℝ) < f.totient := by exact_mod_cast Nat.totient_pos.2 hf0
-        have hφq : (0:ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.2 hq0
         have hA' : (f.totient : ℝ) * ArithmeticFunction.sigma 1 (f ^ Q) ≤ (f:ℝ) ^ (Q + 1) := by exact_mod_cast hA
         have hB' : (q.totient : ℝ) * ArithmeticFunction.sigma 1 (q ^ Q) ≤ (q:ℝ) ^ (Q + 1) := by exact_mod_cast hB
-        have hfpos : (0:ℝ) < f := by exact_mod_cast hf0
-        have hqpos : (0:ℝ) < q := by exact_mod_cast hq0
         push_cast
         rw [one_div_mul_eq_div, div_div, div_le_iff₀ (by positivity)]
         have hprod := mul_le_mul hA' hB' (by positivity) (by positivity)
@@ -172,7 +226,7 @@ private lemma sum_coprime_range_mul_eq_sum_sum (d p : ℕ) (hd : 0 < d) (hp : p.
       (x.1 * p + x.2 * d) % (d * p) ∈ (Finset.range (d * p)).filter (d * p).Coprime := by
     intro x hx
     simp only [Finset.mem_product, Finset.mem_filter, Finset.mem_range] at hx ⊢
-    refine ⟨Nat.mod_lt _ (Nat.mul_pos hd hp0), Nat.Coprime.mul ?_ ?_⟩
+    refine ⟨Nat.mod_lt _ (Nat.mul_pos hd hp0), Nat.Coprime.mul_left ?_ ?_⟩
     · rw [coprime_mod_mul_iff, coprime_mul_add_mul_iff _ _ _ _ hcop]; exact hx.1.2
     · rw [mul_comm d p, coprime_mod_mul_iff, add_comm, coprime_mul_add_mul_iff _ _ _ _ hcop.symm]
       exact hx.2.2
@@ -297,6 +351,7 @@ private lemma sum_norm_sq_exp_sum_eq_mul_sum_residues (d : ℕ) (hd : 0 < d) (S 
   apply Complex.ofReal_injective
   push_cast
   rw [Finset.mul_sum]
+
   simp_rw [hgroup, hsq, map_sum, map_mul, Finset.sum_mul_sum]
   have horth : ∀ r ∈ Finset.range d, ∀ s ∈ Finset.range d,
       ∑ a ∈ Finset.range d, B r * cexp (2 * ↑Real.pi * I * r * a / d) *
@@ -319,8 +374,6 @@ private lemma sum_norm_sq_exp_sum_eq_mul_sum_residues (d : ℕ) (hd : 0 < d) (S 
           · have : ¬ (d:ℤ) ∣ ((r:ℤ) - s) := by
               intro ⟨j, hj⟩
               apply hrs
-              have h1 : (r:ℤ) - s < d := by omega
-              have h2 : -(d:ℤ) < (r:ℤ) - s := by omega
               have : j = 0 := by
                 rcases lt_trichotomy j 0 with h | h | h
                 · nlinarith
@@ -333,6 +386,7 @@ private lemma sum_norm_sq_exp_sum_eq_mul_sum_residues (d : ℕ) (hd : 0 < d) (S 
   rw [Finset.sum_comm, Finset.sum_congr rfl fun s hs => horth r hr s hs, Finset.sum_ite_eq]
   simp only [hr, if_true]
   rw [hB]
+
   simp [map_sum, Finset.sum_mul_sum]
 
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory Filter Topology in
@@ -369,7 +423,6 @@ private lemma norm_sum_sq_le_pred_mul_of_avoids_class (p : ℕ) (hp : p.Prime) (
           · have : (1:ℝ) ≤ p := by exact_mod_cast hp.one_le
             linarith
           · exact Finset.erase_subset _ _
-  have hp1 : (1:ℝ) < p := by exact_mod_cast hp.one_lt
   have hB' : ∑ r ∈ Finset.range p, B r ^ 2 = ∑ r ∈ Finset.range p, ‖∑ n ∈ S.filter (fun n => n % p = r), b n‖ ^ 2 := rfl
   rw [← hB'] at hpar
   nlinarith [hcs, hpar, sq_nonneg ‖∑ n ∈ S, b n‖]
@@ -422,8 +475,8 @@ private lemma norm_sum_sq_le_totient_mul_of_avoids_classes (S : Finset ℕ) :
     _ = _ := by
         rw [← Finset.mul_sum]; push_cast [Nat.cast_sub hp.one_le]; ring
 
-open Complex DirichletCharacter ArithmeticFunction MeasureTheory Filter Topology in
 
+open Complex DirichletCharacter ArithmeticFunction MeasureTheory Filter Topology in
 theorem _root_.GlobalTheory.arithmetic_large_sieve_one_class : ∀ (M N Q q : ℕ) (S : Finset ℕ), 1 ≤ Q → 1 ≤ q →
     S ⊆ Finset.Ioc M (M + N) →
     (∀ p : ℕ, p.Prime → p ≤ Q → ¬ p ∣ q → ∃ c : ℕ, ∀ n ∈ S, ¬ n ≡ c [MOD p]) →
@@ -434,8 +487,6 @@ theorem _root_.GlobalTheory.arithmetic_large_sieve_one_class : ∀ (M N Q q : �
   have hZ0 : 0 ≤ Z := Nat.cast_nonneg _
   have hRHS : 0 ≤ (Q : ℝ) ^ 2 + 2 * Real.pi * N := by positivity
 
-  have hφq : (0:ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.2 hq
-  have hqpos : (0:ℝ) < q := by exact_mod_cast hq
   have hlog : Real.log Q ≤ ∑ n ∈ Finset.Icc 1 Q, (1:ℝ) / n := by
     have h1 := log_add_one_le_harmonic Q
     rw [harmonic_eq_sum_Icc] at h1
@@ -496,7 +547,6 @@ theorem _root_.GlobalTheory.arithmetic_large_sieve_one_class : ∀ (M N Q q : �
       obtain ⟨-, u2, u3, -⟩ := hmemP u hu
       obtain ⟨-, v2, v3, -⟩ := hmemP v hv
       exact _root_.GlobalTheory.MultSieve.farey_spaced Q u.1 v.1 u.2 v.2 u2 v2 u3 v3 hxy k
-    have hQpos : (0:ℝ) < Q := by exact_mod_cast hQ
     have h := _root_.GlobalTheory.additive_large_sieve M N (fun n => if n ∈ S then (1:ℂ) else 0) T (1 / (Q:ℝ) ^ 2)
       (by positivity) (by rw [div_le_one (by positivity)]; exact one_le_pow₀ (by exact_mod_cast hQ)) hspaced
     rw [one_div_one_div, ← hsumU] at h

@@ -1,9 +1,48 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.SConjSpaceC
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalComponentsThetaPull
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedFactorEqProductAbove
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivOfIsSubquotient
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.SConjSpaceC
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedFactorEqProductAbove
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivOfIsSubquotient
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalComponentsThetaPull
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -85,7 +124,7 @@ theorem hasSatGL_comp {w1 w2 : HeightOneSpectrum (𝓞 E)} (κ : w1.adicCompleti
   have hO : ∀ x, x ∈ Formalism.UG.Ov E w1 ↔ κ x ∈ Formalism.UG.Ov E w2 := fun x => by
     change x ∈ w1.adicCompletionIntegers E ↔ κ x ∈ w2.adicCompletionIntegers E
     rw [HeightOneSpectrum.mem_adicCompletionIntegers, HeightOneSpectrum.mem_adicCompletionIntegers, hv]
-  have hK : ∀ g, g ∈ GlobalTheory.LFun.KGL w1 n ↔ glEquiv (n := n) κ hκ g ∈ GlobalTheory.LFun.KGL w2 n := fun g =>
+  have hK : ∀ g, g ∈ GlobalTheory.LFun.KGL w1 (n := n) ↔ glEquiv (n := n) κ hκ g ∈ GlobalTheory.LFun.KGL w2 (n := n) := fun g =>
     ⟨fun hg => mem_GLint_map κ (fun x hx => (hO x).1 hx) hg, fun hg => by
       have := mem_GLint_map (RingEquiv.ofBijective κ hκ).symm.toRingHom (fun x hx => (hO _).2 (by
         rwa [show κ ((RingEquiv.ofBijective κ hκ).symm.toRingHom x) = x from
@@ -98,8 +137,8 @@ theorem hasSatGL_comp {w1 w2 : HeightOneSpectrum (𝓞 E)} (κ : w1.adicCompleti
     MonoidHom.ext fun g => show ρ (glEquiv (n := n) κ hκ ((glEquiv (n := n) κ hκ).symm g)) = ρ g by
       rw [MulEquiv.apply_symm_apply]
   rw [hcomp]
-  have hfix : ∀ x, x ∈ GlobalTheory.PRep.fixed (ρ.comp (glEquiv (n := n) κ hκ).toMonoidHom) (GlobalTheory.LFun.KGL w1 n) ↔
-      x ∈ GlobalTheory.PRep.fixed ρ (GlobalTheory.LFun.KGL w2 n) := fun x => by
+  have hfix : ∀ x, x ∈ GlobalTheory.PRep.fixed (ρ.comp (glEquiv (n := n) κ hκ).toMonoidHom) (GlobalTheory.LFun.KGL w1 (n := n)) ↔
+      x ∈ GlobalTheory.PRep.fixed ρ (GlobalTheory.LFun.KGL w2 (n := n)) := fun x => by
     have := GlobalTheory.LFun.mem_fixed_comp_symm (ρ := ρ.comp (glEquiv (n := n) κ hκ).toMonoidHom) (x := x)
       (glEquiv (n := n) κ hκ) hK
     rw [hρ] at this
@@ -167,7 +206,7 @@ theorem map_s_finGL (c : M ≃+* M) (s : Ad M ≃+* Ad M) (hs : ∀ x, (s x).2 =
       sFin M ((k : Matrix (Fin a) (Fin a) (Af M)) i j)) =
     (1 : Matrix (Fin a) (Fin a) (Ad M)) i j - sFin M ((1 : Matrix (Fin a) (Fin a) (Af M)) i j) +
       sFin M (conjFin c ((k : Matrix (Fin a) (Fin a) (Af M)) i j))
-  rw [map_add, map_sub, s_sFin c s hs, s_sFin c s hs]
+  rw [map_add (f := _), map_sub, s_sFin c s hs, s_sFin c s hs]
   by_cases h : i = j
   · subst h
     simp

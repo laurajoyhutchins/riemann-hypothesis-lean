@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyValExtOfOverLa
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.NuAlgLeOfCharts
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsExpEqOfSubstLg
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.GermLinearPartCoordinatePointZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.TangentEqLcZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyValExtOfOverLa
+public import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
+public import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.AdditionLawSecondIdentity
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsoIntegralModelsMatchingLieBasesStatement
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalBiextensionsRelatedOfTripleMapOverIdStatement
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalCompApplyEqMvPowerSeriesSubst
+import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.PushChartStatement
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.SurjectiveAppTopIntegralModelSquareStatement
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.UniversalJetCoordinatesDimUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsExpEqOfSubstLg
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.GermLinearPartCoordinatePointZero
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralChartFormalBiext
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UniversalStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.TangentEqLcZero
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -30,6 +80,7 @@ theorem exp_eq_of_log_hom {d : ℕ} (G G' : LogFGL v d) (Φ : Fin d → MvPowerS
   have key : (fun j => subst (fun e => (subst (fun f => (subst w' (expOf G' f) : MvPowerSeries τ C)) (Φ e) :
       MvPowerSeries τ C)) (G.lg j)) = w := by
     funext j
+
     rw [← subst_comp_subst_apply (hasSubst_of_constantCoeff_zero h0) s2, hl, hw, ← coe_substAlgHom s2, map_sum]
     refine Finset.sum_congr rfl fun f _ => ?_
     rw [map_smul, coe_substAlgHom,
@@ -115,8 +166,8 @@ theorem logOf_comp_hom (G G' : FGLaw C d) (φ : Pt C 1 d) (hφ : GP φ)
   rw [germComp_matrixLinearMap_apply _ _ b0]
   simp only [MvPowerSeries.smul_eq_C_mul]
 
-open ReciprocityTheory.PGsh GlobalTheory.FGDepth in
 
+open ReciprocityTheory.PGsh GlobalTheory.FGDepth in
 theorem detDepth_le_of_transF {R : Type} [CommRing R] (v : AddValuation C (WithTop ℝ)) (j : R →+* C)
     (hj : ∀ r, IsIntV v (j r)) (F F' : Fin d → PS R 2 d) (hF : ∀ a, constantCoeff (F a) = 0)
     (φ φi : Pt R 1 d) (hi : IsInvPair φ φi)
@@ -153,6 +204,7 @@ theorem detDepth_le_of_transF {R : Type} [CommRing R] (v : AddValuation C (WithT
       ∑ f, _ • subst (oneVar C d) (GlobalTheory.FormalLog.logOf L' f)
     rw [subst_oneVar _ cc_oneVar _ hψ]
     refine (congrArg (subst (oneVar C d)) (congrFun e3 a)).trans ?_
+
     rw [← coe_substAlgHom hs_oneVar, map_sum]
     simp only [map_smul]
   · funext e

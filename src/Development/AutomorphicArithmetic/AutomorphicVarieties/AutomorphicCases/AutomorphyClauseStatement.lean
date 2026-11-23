@@ -1,5 +1,43 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.FiniteResidue
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Bridge
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Bridge
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsHostFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,32 +52,6 @@ structure BPrime (K : Type) [Field K] [NumberField K] [IsCMField K] {Ω : Type} 
   opens : ∀ U : Subgroup (G ℚ Ω), IsOpen (U : Set (G ℚ Ω)) → U ≤ (eta4 Ω).ker → MatIrr U a
   cyc : MatIrr ((eta4 Ω).ker ⊓ (cycZ ℚ Ω l).ker) a
   aut : Af.AutOn K ι (-1) a
-
-def LiftRingStatement : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsCMField K], IsQi K →
-  ∀ (Ω : Type) [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (c : Coef l)
-    (N : ℕ) [NeZero N] (e : ℕ) (ψ : DirichletCharacter c.O N) (o₁ : ℕ), HostData l e ψ o₁ →
-  ∀ (S : Finset Pl) (A : S → ValuationSubring Ω) (F : Frame c.O (G ℚ Ω) (Gam Ω S) S), IsHostFrame Ω c e ψ S A F →
-  ∃ g₁ : Gam Ω S, F.Marked g₁ ∧
-    ∀ (R : Type) [CommRing R] [Algebra c.O R] [IsCO c.O R] (u : Gam Ω S →* GG 3 R), F.IsUniv g₁ u →
-      Module.Finite c.O (wpart c.O u 0) ∧
-      ∀ (ξ : Sring c.O u →ₐ[c.O] PadicAlgCl l) (r : Gam Ω S →* GG 3 (PadicAlgCl l)), IsPtHom u ξ r → TypeI F.η r →
-        BPrime K ι fun s => (r (toGS Ω _ s)).mat
-
-def AutomorphyClauseStatement : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsCMField K], IsQi K →
-  ∀ (Ω : Type) [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (c : Coef l)
-    (N : ℕ) [NeZero N] (e : ℕ) (ψ : DirichletCharacter c.O N) (o₁ : ℕ), HostData l e ψ o₁ →
-  ∀ (S : Finset Pl) (A : S → ValuationSubring Ω) (F : Frame c.O (G ℚ Ω) (Gam Ω S) S), IsHostFrame Ω c e ψ S A F →
-  ∃ g₁ : Gam Ω S, F.Marked g₁ ∧
-    ∀ (R : Type) [CommRing R] [Algebra c.O R] [IsCO c.O R] (u : Gam Ω S →* GG 3 R), F.IsUniv g₁ u →
-      Module.Finite c.O (wpart c.O u 0) ∧
-      ∀ (ξ : Sring c.O u →ₐ[c.O] PadicAlgCl l) (r : Gam Ω S →* GG 3 (PadicAlgCl l)), IsPtHom u ξ r → TypeI F.η r →
-        Af.AutOn K ι (-1) fun s => (r (toGS Ω _ s)).mat
-
-theorem LiftRingStatement.core (h : LiftRingStatement) : AutomorphyClauseStatement := fun K _ _ _ hK Ω _ _ _ l _ ι c N _ e ψ o₁ hd S A F hF => by
-  obtain ⟨g₁, hg, H⟩ := h K hK Ω l ι c N e ψ o₁ hd S A F hF
-  exact ⟨g₁, hg, fun R _ _ _ u hu => ⟨(H R u hu).1, fun ξ r h1 h2 => ((H R u hu).2 ξ r h1 h2).aut⟩⟩
 
 end UpperTheory.V.Aut
 

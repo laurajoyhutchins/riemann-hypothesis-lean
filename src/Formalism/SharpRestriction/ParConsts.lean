@@ -1,14 +1,48 @@
-import Formalism.SharpRestriction.FamCore
-import Formalism.SharpRestriction.ElevenLe
-import Formalism.LocalRingCardinality.DataParams
-import Formalism.LocalRingCardinality.DataDIV
-import Formalism.LocalRingCardinality.DataTies
-import Formalism.LocalRingCardinality.DataParamsT
-import Formalism.LocalRingCardinality.KernelPlaceMeanBound
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataDIVDefs
-import Formalism.LocalRingCardinality.DataGatTies
-import Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero
+module
+
+public import Formalism.SharpRestriction.FamCore
+public import Formalism.SharpRestriction.ElevenLe
+public import Formalism.LocalRingCardinality.DataTies
+public import Formalism.LocalRingCardinality.DataParamsT
+public import Formalism.LocalRingCardinality.KernelPlaceMeanBound
+public import Formalism.LocalRingCardinality.DataExtra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,8 +129,6 @@ structure FamP (eps : ℝ) extends FamCore eps where
     (Gx x i).off j (false, t) = (Gx x i').off j (false, t')
   kapI_eq : ∀ x (i i' : Ix x), (Gx x i).kapI = (Gx x i').kapI
   ep_eq : ∀ x (i i' : Ix x), (Gx x i).ep = (Gx x i').ep
-
-def DFamP : Type 1 := ∀ ε : ℝ, 0 < ε → ε < 1 / 52 → FamP ε
 
 end Formalism.MainNotions
 

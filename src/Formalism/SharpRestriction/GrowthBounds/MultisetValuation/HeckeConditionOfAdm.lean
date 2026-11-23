@@ -1,5 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.HkEsymmSmul
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.PrimeCastNeZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.CoupledSumOfEntries
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.HeckeValueEstimateOfRecordValue
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.HkEsymmSmul
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.PrimeCastNeZero
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.SmulUpdate
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.TheoremOfAlternateForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,6 +73,7 @@ theorem hk_point (Y : Pend X) (hC : CountLoc) (hT : RestTmFQ X)
       ∑ L1 ∈ EE (X.Pj (j + 1)) (X.vJ (j + 1) v) i (L' (X.vJ (j + 1) v)),
         X.Kz j F c' (Function.update L' (X.vJ (j + 1) v) L1) :=
     Tminus_eq (X.Pj (j + 1)) (X.vJ (j + 1) v) i (X.Kz j F c') L'
+
   rw [eT, map_sum, map_sum]
   have eL : ∀ L1 ∈ EE (X.Pj (j + 1)) (X.vJ (j + 1) v) i (L' (X.vJ (j + 1) v)),
       MvPolynomial.map (algebraMap X.G.Kf Y.Kc) (X.Kz j F c' (Function.update L' (X.vJ (j + 1) v) L1)) =
@@ -115,6 +162,7 @@ theorem heckeCondition_of_adm (D : Formalism.BasicNotions.D7) (X : Sys p) (Y : P
               (MvPolynomial.esymm (Fin (X.t + 1)) X.G.Kf l)) *
               (p : X.G.Kf) ^ (-(hv X v * ((i - l : ℕ) : ℤ) * ((NN X.G.P.m X.t j : ℤ) - ((i - l : ℕ) : ℤ))))) •
               X.Kz j (X.Tm v (i - l) j F) := by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun l _ => ?_
         unfold Sys.ecal

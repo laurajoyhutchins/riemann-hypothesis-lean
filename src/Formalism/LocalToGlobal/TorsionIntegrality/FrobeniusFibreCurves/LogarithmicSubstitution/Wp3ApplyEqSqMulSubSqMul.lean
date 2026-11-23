@@ -1,6 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalA
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementD
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementD
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalA
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.EvalSecondZeroAtVariableZero
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.PderivZeroZeroWeierstrassDifference
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +82,7 @@ theorem tau_derivative_rule_holds : TauRule := by
   rw [x00, x11, x01, x10]
   linear_combination (MvPowerSeries.X 0 - MvPowerSeries.X 1) * (MvPowerSeries.X 0 ^ 2 - MvPowerSeries.X 1 ^ 2) * (-e0 + e1 + U * p0 - U * p1)
 
-set_option maxHeartbeats 400000 in
+
 theorem core {R : Type} [CommRing R] (a b c Xa Ya Xb Yb Xc Yc h g3 : R)
     (Ca : Ya ^ 2 = 4 * Xa ^ 3 - 2 * h * a ^ 4 * Xa - g3 * a ^ 6)
     (Cb : Yb ^ 2 = 4 * Xb ^ 3 - 2 * h * b ^ 4 * Xb - g3 * b ^ 6)
@@ -63,18 +114,10 @@ variable {K : Type} [Field K] [CharZero K]
 
 local notation "A3" => MvPowerSeries (Fin 3) K
 
-theorem triple_lintegral_eq (x : Fin 3) (f : PowerSeries K) :
-    (at1 x f : A3) = PowerSeries.substAlgHom (PowerSeries.HasSubst.X x) f := by
-  rw [PowerSeries.coe_substAlgHom]; rfl
-
-theorem series_at_variable_const (x : Fin 3) (c : K) : (at1 x (PowerSeries.C c) : A3) = MvPowerSeries.C c := by
-  show PowerSeries.subst (MvPowerSeries.X x : A3) (PowerSeries.C c) = MvPowerSeries.C c
-  exact PowerSeries.subst_C c
-
 theorem pderiv_series_at_variable (i x : Fin 3) (f : PowerSeries K) :
     pd i (at1 x f : A3) = at1 x (dz f) * pd i (MvPowerSeries.X x : A3) := by
-  show MvPowerSeries.pderiv K i (PowerSeries.subst (MvPowerSeries.X x : A3) f) =
-    PowerSeries.subst (MvPowerSeries.X x : A3) (PowerSeries.derivative K f) * MvPowerSeries.pderiv K i (MvPowerSeries.X x : A3)
+  show MvPowerSeries.pderiv (R := K) i (PowerSeries.subst (MvPowerSeries.X x : A3) f) =
+    PowerSeries.subst (MvPowerSeries.X x : A3) (PowerSeries.derivative (R := K) f) * MvPowerSeries.pderiv (R := K) i (MvPowerSeries.X x : A3)
   exact Formalism.G.LogCR.pderiv_psubst (by simp) f i
 
 theorem partialDeriv_inVar_self (x : Fin 3) (f : PowerSeries K) : pd x (at1 x f : A3) = at1 x (dz f) := by
@@ -100,31 +143,31 @@ def dYt (P : PowerSeries K) (j : Fin 3) : A3 :=
   3 * MvPowerSeries.X j ^ 2 * at1 j (dz P) + MvPowerSeries.X j ^ 3 * at1 j (dz (dz P))
 
 theorem pd_Xt_self (P : PowerSeries K) (j : Fin 3) :
-    MvPowerSeries.pderiv K j (Xt P j) = dXt P j := by
-  simp only [Xt, dXt, map_add, Derivation.leibniz, Derivation.leibniz_pow, Derivation.map_one_eq_zero,
+    MvPowerSeries.pderiv (R := K) j (Xt P j) = dXt P j := by
+  simp only [Xt, dXt, map_add (f := _), Derivation.leibniz, Derivation.leibniz_pow, Derivation.map_one_eq_zero,
     MvPowerSeries.pderiv_X_self, partialDeriv_inVar_self, smul_eq_mul, nsmul_eq_mul]
   push_cast
   ring
 
 theorem pd_Xt_ne (P : PowerSeries K) {i j : Fin 3} (h : j ≠ i) :
-    MvPowerSeries.pderiv K i (Xt P j) = 0 := by
+    MvPowerSeries.pderiv (R := K) i (Xt P j) = 0 := by
   simp [Xt, Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X, Pi.single_eq_of_ne h,
     partialDeriv_inVar_of_ne h]
 
-theorem pd_neg_two (i : Fin 3) : MvPowerSeries.pderiv K i (-2 : A3) = 0 := by
-  have h2 : MvPowerSeries.pderiv K i (2 : A3) = 0 := by
-    simpa using (MvPowerSeries.pderiv K i).map_natCast 2
+theorem pd_neg_two (i : Fin 3) : MvPowerSeries.pderiv (R := K) i (-2 : A3) = 0 := by
+  have h2 : MvPowerSeries.pderiv (R := K) i (2 : A3) = 0 := by
+    simpa using (MvPowerSeries.pderiv (R := K) i).map_natCast 2
   rw [map_neg, h2, neg_zero]
 
 theorem pd_Yt_self (P : PowerSeries K) (j : Fin 3) :
-    MvPowerSeries.pderiv K j (Yt P j) = dYt P j := by
-  simp only [Yt, dYt, map_add, Derivation.leibniz, Derivation.leibniz_pow, pd_neg_two,
+    MvPowerSeries.pderiv (R := K) j (Yt P j) = dYt P j := by
+  simp only [Yt, dYt, map_add (f := _), Derivation.leibniz, Derivation.leibniz_pow, pd_neg_two,
     MvPowerSeries.pderiv_X_self, partialDeriv_inVar_self, smul_eq_mul, nsmul_eq_mul]
   push_cast
   ring
 
 theorem pd_Yt_ne (P : PowerSeries K) {i j : Fin 3} (h : j ≠ i) :
-    MvPowerSeries.pderiv K i (Yt P j) = 0 := by
+    MvPowerSeries.pderiv (R := K) i (Yt P j) = 0 := by
   simp [Yt, Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X, Pi.single_eq_of_ne h,
     partialDeriv_inVar_of_ne h, pd_neg_two]
 
@@ -152,7 +195,7 @@ theorem curve_eq {g2 g3 : K} {P : PowerSeries K} (hP : IsWp g2 g3 P) (j : Fin 3)
     Yt P j ^ 2 = 4 * Xt P j ^ 3 - 2 * MvPowerSeries.C (g2 / 2) * MvPowerSeries.X j ^ 4 * Xt P j -
       MvPowerSeries.C g3 * MvPowerSeries.X j ^ 6 := by
   have h' := congrArg (PowerSeries.substAlgHom (R := K) (PowerSeries.HasSubst.X (S := K) (τ := Fin 3) j)) hP.2.2
-  simp only [map_add, map_sub, map_mul, map_pow, map_neg, map_ofNat, map_one, PowerSeries.coe_substAlgHom,
+  simp only [map_add (f := _), map_sub, map_mul, map_pow, map_neg, map_ofNat, map_one, PowerSeries.coe_substAlgHom,
     PowerSeries.subst_X (R := K) (PowerSeries.HasSubst.X (S := K) j), PowerSeries.subst_C] at h'
   have hc : (MvPowerSeries.C g2 : A3) = 2 * MvPowerSeries.C (g2 / 2) := by
     conv_lhs => rw [show g2 = 2 * (g2 / 2) by ring]
@@ -164,7 +207,7 @@ theorem X_mul_dYt {g2 g3 : K} {P : PowerSeries K} (hP : IsWp g2 g3 P) (j : Fin 3
     MvPowerSeries.X j * dYt P j =
       6 * Xt P j ^ 2 - MvPowerSeries.C (g2 / 2) * MvPowerSeries.X j ^ 4 + 3 * Yt P j := by
   have h' := congrArg (PowerSeries.substAlgHom (R := K) (PowerSeries.HasSubst.X (S := K) (τ := Fin 3) j)) (wpReduced K g2 g3 P hP).2
-  simp only [map_add, map_sub, map_mul, map_pow, map_neg, map_ofNat, map_one, PowerSeries.coe_substAlgHom,
+  simp only [map_add (f := _), map_sub, map_mul, map_pow, map_neg, map_ofNat, map_one, PowerSeries.coe_substAlgHom,
     PowerSeries.subst_X (R := K) (PowerSeries.HasSubst.X (S := K) j), PowerSeries.subst_C] at h'
   simp only [dYt, Xt, Yt, Formalism.InvariantFactorPaths.G7.at1]
   linear_combination MvPowerSeries.X j ^ 2 * h'
@@ -195,7 +238,7 @@ theorem pderiv_one_det_three_points (P : PowerSeries K) :
   have h0 : (0 : Fin 3) ≠ 1 := by decide
   have h2 : (2 : Fin 3) ≠ 1 := by decide
   rw [det_three_points_eq_expansion]
-  simp only [map_add, map_sub, Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X_self,
+  simp only [map_add (f := _), map_sub, Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X_self,
     MvPowerSeries.pderiv_X, Pi.single_eq_of_ne h0, Pi.single_eq_of_ne h2, pd_Xt_self, pd_Xt_ne P h0,
     pd_Xt_ne P h2, pd_Yt_self, pd_Yt_ne P h0, pd_Yt_ne P h2, smul_eq_mul, nsmul_eq_mul]
   push_cast
@@ -211,7 +254,7 @@ theorem pderiv_two_det_three_points (P : PowerSeries K) :
   have h0 : (0 : Fin 3) ≠ 2 := by decide
   have h1 : (1 : Fin 3) ≠ 2 := by decide
   rw [det_three_points_eq_expansion]
-  simp only [map_add, map_sub, Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X_self,
+  simp only [map_add (f := _), map_sub, Derivation.leibniz, Derivation.leibniz_pow, MvPowerSeries.pderiv_X_self,
     MvPowerSeries.pderiv_X, Pi.single_eq_of_ne h0, Pi.single_eq_of_ne h1, pd_Xt_self, pd_Xt_ne P h0,
     pd_Xt_ne P h1, pd_Yt_self, pd_Yt_ne P h0, pd_Yt_ne P h1, smul_eq_mul, nsmul_eq_mul]
   push_cast

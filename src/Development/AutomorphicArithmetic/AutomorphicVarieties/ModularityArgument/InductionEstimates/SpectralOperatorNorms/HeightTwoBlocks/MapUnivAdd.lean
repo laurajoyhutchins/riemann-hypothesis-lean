@@ -1,6 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.HeightTwoBlocks.Blo
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.NearBlo
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.ResTyp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.HeightTwoBlocks.Blo
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.NearBlo
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.ResTyp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain GlobalTheory.CuspRep GlobalTheory.CompanionTheory.CTFin
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -8,7 +47,7 @@ open GroundTheory.Automorphic.CuspidalSpectrum PositivityTheory.Rg.Fx UpperTheor
 
 namespace UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.KX
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {S : Set (BW.Pl E)}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {S : Set (BW.Pl E)}
 
 private abbrev Pts (E : Type) [Field E] [NumberField E] : Type :=
   ((E →+* ℂ) → Multiset ℂ) → (BW.Pl E → Multiset ℂ) → Prop
@@ -21,8 +60,8 @@ private def step (S : Set (BW.Pl E)) (r : ℕ) (p : ((E →+* ℂ) → Fin r →
     (∀ τ, Λ τ = (Finset.univ.val.map fun i => p.1 τ i + c) + Λ' τ) ∧
     ∀ w ∉ S, t w = ((p.2 w).map fun x : ℂˣ => (x : ℂ) * ((Formalism.UG.qV E w : ℕ) : ℂ) ^ (-c)) + t' w)
 
-open Classical in
 
+open Classical in
 private noncomputable def par {r : ℕ} (b : Blo S r) : ((E →+* ℂ) → Fin r → ℂ) × (BW.Pl E → Multiset ℂˣ) :=
   (b.Λ, fun w => if w ∈ S then 0 else b.sat w)
 
@@ -78,7 +117,7 @@ private theorem step_key {r s : ℕ} (b : Blo S r) (d : Dat S s) :
     · rw [ht w hw, ptS_cons]
       simp [par, if_neg hw]
 
-private def Fin' (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (S : Set (BW.Pl E)) (n : ℕ) : Prop :=
+private def Fin' (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (S : Set (BW.Pl E)) (n : ℕ) : Prop :=
   ∀ (ρ : Typ E n) (B : ℝ),
     {q : ℕ × Pts E | ∃ d : Dat S n, d.HasTyp ρ.ρ ∧ (∀ τ i, ‖d.lam τ i‖ ≤ B) ∧ q = key d}.Finite
 
@@ -139,7 +178,7 @@ private theorem fin_all (n : ℕ) : Fin' E S n := by
 end UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.KX
 
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.KX.near2 :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (S : Set (BW.Pl E)) (n : ℕ) (ρ : Typ E n) (B : ℝ), ∃ D : Set (Dat S n), D.Finite ∧
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (S : Set (BW.Pl E)) (n : ℕ) (ρ : Typ E n) (B : ℝ), ∃ D : Set (Dat S n), D.Finite ∧
       ∀ d : Dat S n, d.HasTyp ρ.ρ → (∀ τ i, ‖d.lam τ i‖ ≤ B) → ∃ d' ∈ D, d'.len = d.len ∧ ∀ Λ t, d'.On Λ t ↔ d.On Λ t := by
   intro E _ _ _ S n ρ B
   have f := fin_all (E := E) (S := S) n ρ B

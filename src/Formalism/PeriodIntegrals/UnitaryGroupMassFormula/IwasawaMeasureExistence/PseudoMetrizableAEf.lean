@@ -1,5 +1,50 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.CharEqOneOfPreimage
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.EqSmulOfSub
+module
+
+public import Mathlib.MeasureTheory.Measure.Haar.MulEquivHaarChar
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.LeviSizesMeasurable
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.LocallyCompactAEf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,11 +76,6 @@ theorem char_eq_of_map' (μ : Measure A) [μ.IsAddHaarMeasure] (φ : A ≃ₜ+ A
   have h5 : addEquivAddHaarChar φ * c = 1 := by exact_mod_cast h4
   exact eq_inv_of_mul_eq_one_left h5
 
-theorem char_eq_one_of_map (μ : Measure A) [μ.IsAddHaarMeasure] (φ : A ≃ₜ+ A) (h : μ.map φ = μ) :
-    addEquivAddHaarChar φ = 1 := by
-  have h1 : μ.map φ = (1 : ℝ≥0) • μ := by rw [one_smul]; exact h
-  simpa using char_eq_of_map' μ φ one_ne_zero h1
-
 def piE {ι : Type*} [Fintype ι] (φ : ι → A ≃ₜ+ A) : (ι → A) ≃ₜ+ (ι → A) where
   toFun x i := φ i (x i)
   invFun x i := (φ i).symm (x i)
@@ -63,7 +103,9 @@ theorem char_pi {ι : Type} [Fintype ι] [DecidableEq ι] (φ : ι → A ≃ₜ+
     refine (Measure.pi_eq (μ := fun i => d i • μ) (μ' := (∏ i, d i) • Measure.pi (fun _ : ι => μ)) fun s hs => ?_)
     rw [Measure.smul_apply, Measure.pi_pi]
     simp only [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul]
-    rw [Finset.prod_mul_distrib, ENNReal.coe_finset_prod]
+    rw [Finset.prod_mul_distrib]
+    push_cast
+    rfl
   have hpm : (Measure.pi (fun _ : ι => μ)).map (piE φ) = (∏ i, (c i)⁻¹) • Measure.pi (fun _ : ι => μ) := by
     have h2 : ⇑(piE φ) = fun x i => φ i (x i) := rfl
     rw [h2, Measure.pi_map_pi (f := fun i => (φ i : A → A)) (fun i => (φ i).continuous.measurable.aemeasurable)]
@@ -80,33 +122,6 @@ section AEf
 variable (I : AutInst)
 
 attribute [local instance] AfT.tAf Nrm.topRing Nrm.t2 Nrm.mAf Nrm.borel_mAf MFI.locallyCompact_AEf
-
-theorem sigmaCompact_AEf : SigmaCompactSpace (AEf I) := by
-  refine ⟨⟨fun N => (fun x => (((AfT.isUnit_natCast I (N + 1) (by omega)).unit⁻¹ : (AEf I)ˣ) : AEf I) * x) ''
-    ((IntAf I.F I.E : Subring (AEf I)) : Set (AEf I)), fun N => (Nrm.isCompact_IntAf I).image
-      (continuous_const.mul continuous_id), ?_⟩⟩
-  refine Set.eq_univ_of_forall fun t => ?_
-  obtain ⟨N, hN, hmem⟩ := AfT.exists_nat_mul_mem I t
-  refine Set.mem_iUnion.2 ⟨N - 1, (N : AEf I) * t, hmem, ?_⟩
-  have e : ((N - 1 + 1 : ℕ) : AEf I) = N := by congr 1; omega
-  show (((AfT.isUnit_natCast I (N - 1 + 1) (by omega)).unit⁻¹ : (AEf I)ˣ) : AEf I) * ((N : AEf I) * t) = t
-  rw [← mul_assoc]
-  have h2 : (((AfT.isUnit_natCast I (N - 1 + 1) (by omega)).unit⁻¹ : (AEf I)ˣ) : AEf I) * (N : AEf I) = 1 := by
-    rw [← e]; exact (AfT.isUnit_natCast I (N - 1 + 1) (by omega)).val_inv_mul
-  rw [h2, one_mul]
-
-theorem pseudoMetrizable_AEf : TopologicalSpace.PseudoMetrizableSpace (AEf I) := by
-  letI : UniformSpace (AEf I) := IsTopologicalAddGroup.rightUniformSpace (AEf I)
-  haveI : IsUniformAddGroup (AEf I) := isUniformAddGroup_of_addCommGroup
-  haveI : (𝓝 (0 : AEf I)).IsCountablyGenerated := (AfT.hasBasis_nhds_zero_tAf I).isCountablyGenerated
-  haveI : (uniformity (AEf I)).IsCountablyGenerated := IsUniformAddGroup.uniformity_countably_generated
-  exact UniformSpace.pseudoMetrizableSpace
-
-theorem secondCountable_AEf : SecondCountableTopology (AEf I) := by
-  haveI := sigmaCompact_AEf I
-  haveI := pseudoMetrizable_AEf I
-  letI := TopologicalSpace.pseudoMetrizableSpacePseudoMetric (AEf I)
-  infer_instance
 
 end AEf
 

@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabRange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRatPointOfFiniteType
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.NonemptyIsLimitBaseChange
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProjectiveModel
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.GenericExistsUniqueOActOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjIsAbelianSchemeDimRigidifiedSym
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,6 +59,10 @@ namespace GlobalTheory.UPoinc.LocSpread
 
 set_option backward.isDefEq.respectTransparency false
 
+#check ExtUnique.isIso_of_isPullback
+#check exists_lbIso_of_isLimit
+#check pull_isLB
+#check PolPull.isAbelianScheme_of_isGrpPullback
 section Loc
 
 variable {R K : Type} [CommRing R] [CommRing K]
@@ -69,8 +117,8 @@ theorem exists_hom (hσ : IsStalkMap σ) {Y X Y₀ : Scheme.{0}} (p : Y ⟶ Sp R
     rw [← cancel_mono (pullback.fst p V.ι), Category.assoc, hl, hφ', hw]
   rw [reassoc_of% this, hwu]
 
-open GenSpread in
 
+open GenSpread in
 theorem exists_lbIso (hσ : IsStalkMap σ) {Y Y₀ : Scheme.{0}} (p : Y ⟶ Sp R) [QuasiCompact p] [QuasiSeparated p]
     {φ : Y₀ ⟶ Y} {p₀ : Y₀ ⟶ Sp K} (h : IsPullback φ p₀ p (spMap σ)) {M N : LB Y}
     (hM : M.IsLB) (hN : N.IsLB) (H : LBIso (M.pull φ) (N.pull φ)) :
@@ -90,7 +138,7 @@ theorem exists_lbIso (hσ : IsStalkMap σ) {Y Y₀ : Scheme.{0}} (p : Y ⟶ Sp R
   let ι₀ : (StalkLimit.diagram _ p).obj V₀ ⟶ Y := pullback.fst p V₀.1.ι
   have e₀ : φ = (StalkLimit.cone h₁).π.app V₀ ≫ ι₀ := (StalkLimit.cone_π_fst h₁ V₀).symm
   obtain ⟨V, i, HV⟩ := exists_lbIso_of_isLimit (StalkLimit.diagram _ p) (fun V => (StalkLimit.cone h₁).π.app V)
-    (fun i => (StalkLimit.cone h₁).w i) hc (M.pull ι₀) (N.pull ι₀) (pull_isLB hM _) (pull_isLB hN _)
+    (w := fun i => (StalkLimit.cone h₁).w i) (hc := hc) (M.pull ι₀) (N.pull ι₀) (pull_isLB hM _) (pull_isLB hN _)
     (LBIso.trans (pull_isLB (pull_isLB hM _) _) (pull_isLB hM _) (pull_isLB (pull_isLB hN _) _)
       (lbIso_pull_pull hM _ e₀).symm
       (LBIso.trans (pull_isLB hM _) (pull_isLB hN _) (pull_isLB (pull_isLB hN _) _) H (lbIso_pull_pull hN _ e₀)))
@@ -291,6 +339,7 @@ theorem exists_spread {Xo : Moduli D l} {c : Coeff l} (hc : ∀ n : ℤ, n ≠ 0
     ⟨V, le_rfl, hV, hw, rfl⟩ h
   exact ⟨U, hle, hU, hwU, H⟩
 
+set_option synthInstance.maxHeartbeats 200000 in
 theorem exists_model_of_subring {Xo : Moduli D l} {c : Coeff l} {S R₁ : Subalgebra o Ω} (hS : R₁ ≤ S) {R : Subring S}
     {P : PolAV (Sp R)} {v : Sp S ⟶ Xo.XF c} (h : UOver Xo c P R.subtype v) {t : Finset R}
     (ht : Algebra.adjoin ℤ (t : Set R) = ⊤) (hR : (fun a : R => ((a : S) : Ω)) '' t ⊆ R₁) :

@@ -1,14 +1,52 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.QuotientMetricDivisors.Statement
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.DivIntoDual
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.IsSelfDualE
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairingNondegenerateHolds
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
-import Formalism.GradedWeylDivisibility.StatementE
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Formalism.QuotientMetricDivisors.ReductionLemmaZero
-import Formalism.QuotientMetricDivisors.ProdFormula
 import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LeafBounds.MeanMaxLeaf.LeafMMFree
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.DivIntoDual
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MvPolynomial Formalism.BasicNotions Formalism.L2.DIV Formalism.DivisionValues GlobalTheory.TestLat Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open scoped Matrix ComplexOrder
@@ -50,7 +88,7 @@ theorem exists_map_eq_of_mem_nabStd {ι : Type} [Fintype ι] {n : ℕ} (lam : ι
   simp only [Formalism.GradedWeylDivisibility.blockEmb]
   exact map_rename _ _ _
 
-theorem localIntegrality : ∀ (K : Type) [Field K] [NumberField K] [StarRing K], (∀ a : K, (∀ w : HeightOneSpectrum (𝓞 K), 0 ≤ vw w a) → a ∈ (algebraMap (𝓞 K) K).range) ∧ ∀ (ι : Type) [Fintype ι] (n : ℕ) (lam : ι → DomWeight n) (w : HeightOneSpectrum (𝓞 K)) (F : Pol K ι n), F ∈ Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (nabStd K lam) → ∀ mo, 0 ≤ vw w (coeff mo F) := by
+theorem localIntegrality : ∀ (K : Type) [Field K] [NumberField K] [StarRing K], (∀ a : K, (∀ w : HeightOneSpectrum (𝓞 K), 0 ≤ vw w a) → a ∈ (algebraMap (𝓞 K) K).range) ∧ ∀ (ι : Type) [Fintype ι] (n : ℕ) (lam : ι → DomWeight n) (w : HeightOneSpectrum (𝓞 K)) (F : Pol K ι n), F ∈ Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (nabStd K lam) → ∀ mo, 0 ≤ vw w (AddMonoidAlgebra.coeff F mo) := by
   intro K _ _ _
   refine ⟨fun a h => ?_, fun ι _ n lam w F hF mo => ?_⟩
   · by_cases ha : a = 0
@@ -59,19 +97,19 @@ theorem localIntegrality : ∀ (K : Type) [Field K] [NumberField K] [StarRing K]
     · exact DualLatticeDivisor.mem_range_of_vw_nonneg a ha h
   · obtain ⟨s, hs, hsF⟩ := hF
     obtain ⟨Q, hQ⟩ := exists_map_eq_of_mem_nabStd lam hsF
-    by_cases hc : coeff mo F = 0
+    by_cases hc : AddMonoidAlgebra.coeff F mo = 0
     · rw [hc, ValuationRepresentative.vw_zero]
     have hs' : s ∉ w.asIdeal := hs
     have hs0 : (s : K) ≠ 0 := by
       intro h0
       have : s = 0 := RingOfIntegers.ext h0
       exact hs' (this ▸ w.asIdeal.zero_mem)
-    have hco : (s : K) * coeff mo F = ((coeff mo Q : 𝓞 K) : K) := by
-      have h1 := congrArg (coeff mo) hQ
-      rw [coeff_smul] at h1
-      have h2 : coeff mo (toK K _ Q) = ((coeff mo Q : 𝓞 K) : K) := coeff_map _ _ _
+    have hco : (s : K) * AddMonoidAlgebra.coeff F mo = ((AddMonoidAlgebra.coeff Q mo : 𝓞 K) : K) := by
+      have h1 := congrArg (AddMonoidAlgebra.coeff · mo) hQ
+      rw [MvPolynomial.coeff_smul] at h1
+      have h2 : AddMonoidAlgebra.coeff (toK K _ Q) mo = ((AddMonoidAlgebra.coeff Q mo : 𝓞 K) : K) := coeff_map _ _ _
       rw [← h2, h1, Algebra.smul_def]
-    have h3 := ValuationRepresentative.vw_int_nonneg w (coeff mo Q)
+    have h3 := ValuationRepresentative.vw_int_nonneg w (AddMonoidAlgebra.coeff Q mo)
     rwa [← hco, ValuationRepresentative.vw_mul w _ _ hs0 hc, vw_eq_zero_of_notMem w hs', zero_add] at h3
 
 end GlobalTheory.LocInt

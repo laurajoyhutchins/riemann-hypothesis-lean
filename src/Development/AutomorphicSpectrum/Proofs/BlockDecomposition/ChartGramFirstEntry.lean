@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FreeCell
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FreeCell
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCovolOne
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TrMMemFramesEIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +72,7 @@ theorem halfR_add_halfR (h2 : (2 : F) ≠ 0) :
     halfR (F := F) (E := E) R + halfR (F := F) (E := E) R = 1 := by
   have h : (1 / 2 : F) + 1 / 2 = 1 := by field_simp; norm_num
   unfold halfR
-  rw [← map_add, ← map_add, h, map_one, map_one]
+  rw [← map_add (f := _), ← map_add (f := _), h, map_one, map_one]
 
 theorem vH_zero {K : Type} {M : ℕ} (a s : K) (Y : Fin M → K) : vH a s Y 0 = a := rfl
 theorem vH_one {K : Type} {M : ℕ} (a s : K) (Y : Fin M → K) : vH a s Y 1 = s := rfl
@@ -43,6 +91,7 @@ theorem sigR_hR (σ : E →ₐ[F] E) (hσ : ∀ e, σ (σ e) = e) {M : ℕ} (J :
     (hJ : ∀ i j, σ (J j i) = J i j) (x y : Fin M → R ⊗[F] E) :
     sigR R σ (hR R σ J x y) = hR R σ J y x := by
   unfold hR hform JR
+
   simp only [map_sum, map_mul, sigR_sigR R σ hσ, Matrix.map_apply, sigR_inclR]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -61,7 +110,7 @@ theorem hR_comb_left (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) 
     (u w y : Fin M → R ⊗[F] E) :
     hR R σ J (fun i => c * u i + w i) y = sigR R σ c * hR R σ J u y + hR R σ J w y := by
   unfold hR hform
-  simp only [Finset.mul_sum, ← Finset.sum_add_distrib, map_add, map_mul]
+  simp only [Finset.mul_sum, ← Finset.sum_add_distrib, map_add (f := _), map_mul]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
 
@@ -69,7 +118,7 @@ theorem sigR_tHalf (σ : E →ₐ[F] E) (hσ : ∀ e, σ (σ e) = e) {M : ℕ} (
     (hJ : ∀ i j, σ (J j i) = J i j) (x : Fin (M + 2) → R ⊗[F] E) :
     sigR R σ (tHalf R σ J x) = tHalf R σ J x := by
   unfold tHalf
-  rw [map_mul, sigR_halfR, hR_hypOne, map_add, map_add, map_mul, map_mul, sigR_sigR R σ hσ, sigR_sigR R σ hσ,
+  rw [map_mul, sigR_halfR, hR_hypOne, map_add (f := _), map_add (f := _), map_mul, map_mul, sigR_sigR R σ hσ, sigR_sigR R σ hσ,
     sigR_hR R σ hσ J hJ]
   ring
 
@@ -103,7 +152,7 @@ theorem hR_cvec_cvec (h2 : (2 : F) ≠ 0) (σ : E →ₐ[F] E) (hσ : ∀ e, σ 
   have htv : tailH (cvec R σ J x v) = fun i => v 0 * tailH x i + tailH v i := rfl
   have htw : tailH (cvec R σ J x w) = fun i => w 0 * tailH x i + tailH w i := rfl
   rw [hR_hypOne, hR_hypOne R σ J v w, htv, htw, hR_comb_left, hR_comb_right, hR_comb_right]
-  simp only [cvec, vH_zero, vH_one, map_add, map_sub, map_mul, sigR_tHalf R σ hσ J hJ,
+  simp only [cvec, vH_zero, vH_one, map_add (f := _), map_sub, map_mul, sigR_tHalf R σ hσ J hJ,
     sigR_hR R σ hσ J hJ]
   linear_combination
     (sigR R σ (v 0) * (w 1 - tHalf R σ J x * w 0 - hR R σ J (tailH x) (tailH w))) * e1 +

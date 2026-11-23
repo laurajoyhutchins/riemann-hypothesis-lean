@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.DivisorIdealBotUniformiser
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.DivisorIdealBotUniformiser
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -22,18 +68,18 @@ theorem idealCycle_eq_of_mul_mem {J J' U : Ideal (MRing ι R)} {s t : MRing ι R
   by_cases h : U ∈ J.minimalPrimes ∧ IsRelevant U
   · have h' : U ∈ J'.minimalPrimes ∧ IsRelevant U :=
       ⟨mem_minimalPrimes_of_mul_mem hs ht hsJ htJ h.1, h.2⟩
-    rw [dif_pos h, dif_pos h']
+    rw [dite_eq_left h, dite_eq_left h']
     have : U.IsPrime := h.1.1.1
     unfold multAt
     rw [length_localized_eq_of_mul_mem hs ht hsJ htJ]
   · have h' : ¬ (U ∈ J'.minimalPrimes ∧ IsRelevant U) := fun h' =>
       h ⟨mem_minimalPrimes_of_mul_mem ht hs htJ hsJ h'.1, h'.2⟩
-    rw [dif_neg h, dif_neg h']
+    rw [dite_eq_right h, dite_eq_right h']
 
 theorem divCycle_eq_zero_of_not_mem {W U : Ideal (MRing ι R)} {x : MRing ι R} (hx : x ∉ U) :
     divCycle W x U = 0 := by
   unfold divCycle
-  rw [dif_neg]
+  rw [dite_eq_right]
   rintro ⟨h, -⟩
   exact hx (h.1.2 (Ideal.mem_sup_right (Ideal.mem_span_singleton_self x)))
 
@@ -106,7 +152,7 @@ theorem DivisorIdealCycle.proof : DivisorIdealCycle.Statement.{u} := by
       exact hU ⟨h.1.1, hWJ.trans h.1.2, hrel⟩
     show divCycle W v U - divCycle W u U = idealCycle (W ⊔ divisorIdeal P f g) U
     unfold divCycle idealCycle
-    rw [dif_neg (hcomp _ le_sup_left), dif_neg (hcomp _ le_sup_left), dif_neg (hcomp _ le_sup_left),
+    rw [dite_eq_right (hcomp _ le_sup_left), dite_eq_right (hcomp _ le_sup_left), dite_eq_right (hcomp _ le_sup_left),
       sub_self]
 
 end

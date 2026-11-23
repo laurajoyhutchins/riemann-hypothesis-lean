@@ -1,7 +1,50 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodicEqZeroOfFourierCoefficientsZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuotientAverageTranslateInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuotientAverageAddOfPeriodicStatement
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodicEqZeroOfFourierCoefficientsZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuotientAverageTranslateInvariantStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SetIntegralFundamentalDomainEqMassMulAverageStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,11 +62,7 @@ namespace tableDegreeThreeBase
 
 variable {E : Type} [Field E] [NumberField E] {ι : Type} [Fintype ι]
 
-theorem ratV_eq : ratV E ι = vecLattice E ι := rfl
-
 instance haar : (vecMeasure E ι).IsAddHaarMeasure := inferInstance
-
-theorem borel_ok : BorelSpace (ι → Ad E) := inferInstance
 
 theorem avg_eq_integral (f : (ι → Ad E) → ℂ) (hf : Per (ratV E ι) f) :
     avg (ratV E ι) f = ∫ x in vecDomain E ι, f x ∂vecMeasure E ι := by
@@ -84,8 +123,8 @@ theorem avg_char {ψ : AddChar (Ad E) ℂ} (hψ : StdPsi ψ) (ζ : ι → E) :
       rw [sub_mul, h1, one_mul, sub_self]
     exact (mul_eq_zero.1 h3).resolve_left (sub_ne_zero.2 ha)
 
-variable (E ι) in
 
+variable (E ι) in
 abbrev Q : Type := (ι → Ad E) ⧸ ratV E ι
 
 theorem isClosed_ratV : IsClosed (ratV E ι : Set (ι → Ad E)) := by
@@ -114,8 +153,8 @@ instance instMS : MeasurableSpace (Q E ι) := borel _
 
 instance instBS : BorelSpace (Q E ι) := ⟨rfl⟩
 
-variable (E ι) in
 
+variable (E ι) in
 def nu : Measure (Q E ι) :=
   Measure.map (QuotientAddGroup.mk : (ι → Ad E) → Q E ι) ((vecMeasure E ι).restrict (vecDomain E ι))
 
@@ -270,7 +309,7 @@ theorem dense : ⊤ ≤ (Submodule.span ℂ (Set.range (chL ψ hψ (ι := ι))))
       obtain ⟨ξ, rfl⟩ := hy
       exact Submodule.subset_span ⟨ξ, rfl⟩
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
     | smul c y _ hy => rw [map_smul]; exact Submodule.smul_mem _ c hy
   have h1 : Set.range (ContinuousMap.toLp 2 (nu E ι) ℂ : C(Q E ι, ℂ) →L[ℂ] Lp ℂ 2 (nu E ι)) ⊆
       ((Submodule.span ℂ (Set.range (chL ψ hψ (ι := ι)))).topologicalClosure : Set (Lp ℂ 2 (nu E ι))) := by

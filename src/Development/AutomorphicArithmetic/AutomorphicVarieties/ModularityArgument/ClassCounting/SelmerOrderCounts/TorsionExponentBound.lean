@@ -1,10 +1,58 @@
+module
+
+public import Mathlib.Data.Nat.Factorization.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Multiplicity
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.HasVal
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.SelmerOrderCounts.TwoLe
-import Mathlib.NumberTheory.Multiplicity
+import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+
+@[expose] public section
 
 open NumberField IsDedekindDomain UpperTheory.V UpperTheory.V.ZK UpperTheory.V.ZK.Ct
 
 private theorem padic_val_one_add_pow_sub_one (l c m : ℕ) (hl : l.Prime) (hc : 1 ≤ c) (h2 : l = 2 → 2 ≤ c)
     (hm : m ≠ 0) : padicValNat l ((1 + l ^ c) ^ m - 1) = c + padicValNat l m := by
+  simp only [Nat.padicValNat_def]
   haveI := Fact.mk hl
   have hpow1 : 1 ≤ l ^ c := Nat.one_le_pow c l hl.pos
   have hx1 : 1 < 1 + l ^ c := by omega
@@ -22,14 +70,14 @@ private theorem padic_val_one_add_pow_sub_one (l c m : ℕ) (hl : l.Prime) (hc :
     have h := padicValNat.pow_two_sub_pow (x := 1 + 2 ^ (d + 2)) (y := 1) hx1 hdvd hnd
       (n := 2 * m) (by omega) (even_two_mul m)
     rw [one_pow] at h
-    have hA : padicValNat 2 (1 + 2 ^ (d + 2) + 1) = 1 := by
+    have hA : multiplicity 2 (1 + 2 ^ (d + 2) + 1) = 1 := by
       have e : 1 + 2 ^ (d + 2) + 1 = 2 * (1 + 2 * 2 ^ d) := by rw [h4]; ring
-      rw [e, padicValNat.mul (by norm_num) (by omega), padicValNat.self (by norm_num),
-        padicValNat.eq_zero_of_not_dvd (by omega)]
-    have hB : padicValNat 2 (1 + 2 ^ (d + 2) - 1) = d + 2 := by
-      rw [Nat.add_sub_cancel_left, padicValNat.prime_pow]
-    have hC : padicValNat 2 (2 * m) = 1 + padicValNat 2 m := by
-      rw [padicValNat.mul (by norm_num) hm, padicValNat.self (by norm_num)]
+      rw [e, Nat.multiplicity_mul (by norm_num) (by omega), Nat.multiplicity_self (by norm_num),
+        (Nat.multiplicity_eq_zero_iff.mpr (Or.inr (Or.inr (by omega))))]
+    have hB : multiplicity 2 (1 + 2 ^ (d + 2) - 1) = d + 2 := by
+      rw [Nat.add_sub_cancel_left, Nat.multiplicity_prime_pow]
+    have hC : multiplicity 2 (2 * m) = 1 + multiplicity 2 m := by
+      rw [Nat.multiplicity_mul (by norm_num) hm, Nat.multiplicity_self (by norm_num)]
     have hxm : 1 < (1 + 2 ^ (d + 2)) ^ m := Nat.one_lt_pow hm hx1
     obtain ⟨b, hb⟩ : ∃ b, (1 + 2 ^ (d + 2)) ^ m = b + 1 := ⟨_ - 1, (Nat.sub_add_cancel hxm.le).symm⟩
     have hmod : (1 + 2 ^ (d + 2)) ^ m % 4 = 1 := by
@@ -37,20 +85,20 @@ private theorem padic_val_one_add_pow_sub_one (l c m : ℕ) (hl : l.Prime) (hc :
       have : (1 + 4 * 2 ^ d) % 4 = 1 := by omega
       rw [this, one_pow]
       rfl
-    have hD : padicValNat 2 ((1 + 2 ^ (d + 2)) ^ m + 1) = 1 := by
+    have hD : multiplicity 2 ((1 + 2 ^ (d + 2)) ^ m + 1) = 1 := by
       obtain ⟨q, hq⟩ : ∃ q, (1 + 2 ^ (d + 2)) ^ m + 1 = 2 * (2 * q + 1) :=
         ⟨((1 + 2 ^ (d + 2)) ^ m + 1) / 4, by omega⟩
-      rw [hq, padicValNat.mul (by norm_num) (by omega), padicValNat.self (by norm_num),
-        padicValNat.eq_zero_of_not_dvd (by omega)]
+      rw [hq, Nat.multiplicity_mul (by norm_num) (by omega), Nat.multiplicity_self (by norm_num),
+        (Nat.multiplicity_eq_zero_iff.mpr (Or.inr (Or.inr (by omega))))]
     have hfac : (1 + 2 ^ (d + 2)) ^ (2 * m) - 1 =
         ((1 + 2 ^ (d + 2)) ^ m - 1) * ((1 + 2 ^ (d + 2)) ^ m + 1) := by
       rw [pow_mul', hb, Nat.add_sub_cancel]
       have : (b + 1) ^ 2 = b * (b + 1 + 1) + 1 := by ring
       rw [this, Nat.add_sub_cancel]
-    rw [hfac, padicValNat.mul (by omega) (by omega), hD, hA, hB, hC] at h
+    rw [hfac, Nat.multiplicity_mul (by omega) (by omega), hD, hA, hB, hC] at h
     omega
   · have := padicValNat.pow_sub_pow hodd hx1 hdvd hnd hm
-    rwa [one_pow, Nat.add_sub_cancel_left, padicValNat.prime_pow] at this
+    rwa [one_pow, Nat.add_sub_cancel_left, Nat.multiplicity_prime_pow] at this
 
 theorem UpperTheory.V.ZK.Ct.lte :
     ∀ l c ν E : ℕ, l.Prime → 1 ≤ c → (l = 2 → 2 ≤ c) → c ≤ ν → 1 ≤ E → 2 ≤ (1 + l ^ c) ^ E ∧ ((1 + l ^ c) ^ E - 1).factorization l = c + E.factorization l ∧ (((1 + l ^ c) ^ E) ^ l ^ (ν - c) - 1).factorization l = ν + E.factorization l := by
@@ -61,8 +109,10 @@ theorem UpperTheory.V.ZK.Ct.lte :
   · have : 2 ≤ 1 + l ^ c := by have := Nat.one_le_pow c l hl.pos; omega
     exact this.trans (Nat.le_self_pow hE0 _)
   · rw [Nat.factorization_def _ hl, Nat.factorization_def _ hl]
-    exact padic_val_one_add_pow_sub_one l c E hl hc h2 hE0
-  · rw [Nat.factorization_def _ hl, Nat.factorization_def _ hl, ← pow_mul,
-      padic_val_one_add_pow_sub_one l c _ hl hc h2 (mul_ne_zero hE0 (pow_ne_zero _ hl.ne_zero)),
-      padicValNat.mul hE0 (pow_ne_zero _ hl.ne_zero), padicValNat.prime_pow]
+    simpa only [← Nat.padicValNat_def] using padic_val_one_add_pow_sub_one l c E hl hc h2 hE0
+  · have hval := padic_val_one_add_pow_sub_one l c (E * l ^ (ν - c)) hl hc h2
+      (mul_ne_zero hE0 (pow_ne_zero _ hl.ne_zero))
+    simp only [Nat.padicValNat_def] at hval
+    rw [Nat.factorization_def _ hl, Nat.factorization_def _ hl, ← pow_mul, hval,
+      Nat.multiplicity_mul hE0 (pow_ne_zero _ hl.ne_zero), Nat.multiplicity_prime_pow]
     omega

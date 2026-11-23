@@ -1,19 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SameUnifRefl
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FinitePartOfIsFinitePart
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFiniteCubeInduction
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsLinearOfIsPullUniformisation
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkBaseChange
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkDescendsAlongBaseChange
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIdentityPullbackDegeneration
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PullPointIdentityDegeneration
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsBaseChangeUniformization
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SameUniformizationIdentityPullback
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformizationPowerGroup
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IotaPointsAdditive
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TauBalOfIsPullDeg
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.TorsionFiniteFlatIff
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.CMModuli.FlatIsoUnitGenerator
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FinitePartOfIsFinitePart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -47,10 +74,6 @@ end Flat
 section Move
 
 variable {I : Ideal R} {t t' : SAB H (Sp R)}
-
-def withUnif (P : PELUnif I t) (U' : Unif I P.D P.A t'.G) (hb : U'.LG = t'.PP)
-    (hl : letI := H.starRing; U'.toUnifPre.OLinear (𝓞 E) P.oD P.oA t'.act.toRingAct) : PELUnif I t' :=
-  { D := P.D, mod := P.mod, oD := P.oD, A := P.A, oA := P.oA, U := U', bundle := hb, lin := hl, w0 := P.w0 }
 
 end Move
 

@@ -1,5 +1,62 @@
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.ParametricIntegralSmoothness.IntCommute
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.AdmissibleOfIwasawa
+module
+
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SecondCountableQuotients.ModExists
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothVec
+public import Formalism.FormalDegreeBessel.StatementDS
+public import Formalism.PeriodIntegrals.IsLowUnitH
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.IntegralMemOfIsClosed
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.PhMeas
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothCyc
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.AdmissibleOfIwasawa
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.MaximalCompactIsCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.ContinuousMap.StoneWeierstrass
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Filter Topology Set MeasureTheory MeasureTheory.Measure
 open scoped ContDiff
@@ -25,12 +82,14 @@ def finAlg (Γ : Type) [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] 
     refine ⟨V * W, ⟨hV.1.mul hW.1, fun a x hx => ?_⟩, Submodule.mul_mem_mul hp hq⟩
     refine Submodule.mul_induction_on hx (fun m hm n hn => ?_) fun x y hx hy => ?_
     · rw [map_mul]; exact Submodule.mul_mem_mul (hV.2 a m hm) (hW.2 a n hn)
-    · rw [map_add]; exact add_mem hx hy
+    · rw [map_add (tr a)]
+      exact add_mem hx hy
   add_mem' := by
     rintro p q ⟨V, hV, hp⟩ ⟨W, hW, hq⟩
     refine ⟨V ⊔ W, ⟨hV.1.sup hW.1, fun a x hx => ?_⟩, Submodule.add_mem_sup hp hq⟩
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.1 hx
-    rw [map_add]; exact Submodule.add_mem_sup (hV.2 a y hy) (hW.2 a z hz)
+    rw [map_add (tr a)]
+    exact Submodule.add_mem_sup (hV.2 a y hy) (hW.2 a z hz)
   algebraMap_mem' c := by
     refine ⟨Submodule.span ℝ {1}, ⟨Submodule.fg_span (finite_singleton _), fun a x hx => ?_⟩, ?_⟩
     · obtain ⟨t, rfl⟩ := Submodule.mem_span_singleton.1 hx
@@ -116,7 +175,6 @@ def co (hK : IsMatGroup K) : (Mat n →L[ℝ] ℝ) →ₗ[ℝ] C(MG K hK, ℝ) w
 
 theorem finAlg_sep : (finAlg (MG K hK)).SeparatesPoints := by
   intro x y hxy
-  have hne : x.mat - y.mat ≠ 0 := fun h => hxy (MG.ext (sub_eq_zero.1 h))
   obtain ⟨i, j, hij⟩ : ∃ i j, x.mat i j ≠ y.mat i j := by
     by_contra h
     push Not at h
@@ -182,7 +240,10 @@ theorem fin_of_finAlg (hG : IsMatGroup G) (hKG : K ⊆ G) (h : RepOn G σ) {v : 
     rw [← hs, Submodule.map_span, Submodule.span_span_of_tower]
   refine ⟨Submodule.span ℂ (V.map T : Set H), ?_, Submodule.subset_span ⟨p, hpV, rfl⟩, fun a ha x hx => ?_⟩
   · rw [hS]; exact FiniteDimensional.span_of_finite ℂ (s.finite_toSet.image _)
-  · refine Submodule.span_induction (fun y hy => ?_) (by simp) (fun y z _ _ hy hz => by rw [map_add]; exact add_mem hy hz)
+  · refine Submodule.span_induction (fun y hy => ?_) (by simp)
+      (fun y z _ _ hy hz => by
+        rw [(σ a).map_add]
+        exact add_mem hy hz)
       (fun c y _ hy => by rw [map_smul]; exact Submodule.smul_mem _ c hy) hx
     obtain ⟨q, hq, rfl⟩ := hy
     set a' : MG K hK := MG.mk hK a ha with ha'

@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementC
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementE
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.IsPairFrame
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactAltForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -107,16 +150,5 @@ def EigenFrameE : Prop :=
           (if ab = ab' then u t else 0) + ι (Complex.I * ((Real.sqrt d : ℝ) : ℂ)) * e) →
       ∃ q : ((Bool × H) × Fin N0 × Fin N1) → ((Bool × H) × Fin N0 × Fin N1) → ℂ_[p],
         IsPairFrame (ι : ℂ →+* ℂ_[p]) (cmL a b d ha hd lam hlam) h Λ v A u (ι (Complex.I * ((Real.sqrt d : ℝ) : ℂ))) q
-
-def HomGram : Prop :=
-  ∀ (O L L' : Type) [CommRing O] [AddCommGroup L] [Module O L] [AddCommGroup L'] [Module O L']
-    (hL' : L' → L' → O) (N0 N1 : ℕ) (e es : Fin N0 → L) (e' es' : Fin N1 → L'),
-    (∀ y, hL' 0 y = 0) → (∀ y, hL' y 0 = 0) → (∀ b b', hL' (e' b) (es' b') = if b = b' then 1 else 0) →
-    ∀ (Eab Es : Fin N0 × Fin N1 → L →ₗ[O] L'),
-      (∀ a b a', Eab (a, b) (e a') = if a = a' then e' b else 0) → (∀ a b a', Eab (a, b) (es a') = 0) →
-      (∀ a b a', Es (a, b) (es a') = if a = a' then es' b else 0) → (∀ a b a', Es (a, b) (e a') = 0) →
-    ∀ x y : Fin N0 × Fin N1,
-      (∑ a, hL' (Eab x (e a)) (Es y (es a)) + ∑ a, hL' (Eab x (es a)) (Es y (e a))) =
-        if x = y then 1 else 0
 
 end Formalism.L2.Th1.GD

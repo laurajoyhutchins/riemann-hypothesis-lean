@@ -1,16 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SameGenericSymm
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVerticalDivisorJoinPullback
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InstFintypeSumElim
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FieldExtensionIntersectionInvarianceStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MultiProjectivePrimeIntersectionStatement
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PComponentDim
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PConeTrdegFnField
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleFiniteSupport
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDvrConeDimTrdeg
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSupSpanMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PComponentDim
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDvrConeDimTrdeg
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PConeTrdegFnField
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwinBirationalJoin
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MultiProjectivePrimeIntersectionStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FieldExtensionIntersectionInvarianceStatement
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwinBirationalJoin
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVerticalDivisorJoinPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+
+@[expose] public section
 
 open MvPolynomial GroundTheory.Heights₂.Heights.NumbersDVR
 open ReciprocityTheory.ChartRestriction.G.Geo (chartRing)
@@ -33,8 +79,8 @@ theorem vNumL_perm (W : Ideal (MRing ι O)) {l₁ l₂ : List (K → ℤ)} (h : 
   simp only [vNumL, vNum, intNum, mixedDiff, List.ofFn_get]
   rw [h.foldr_eq]
 
-open Classical in
 
+open Classical in
 noncomputable def vertEval (ϖ : O) (P : Ideal (MRing ι O)) (f : MRing ι O) (l : List (K → ℤ)) : ℤ :=
   cycEval (fun W => if (C ϖ : MRing ι O) ∈ W then vNumL W l else 0) (divCycle P f)
 
@@ -120,6 +166,7 @@ theorem expansion_zero {N : ℕ} {G : MvPolynomial (Fin N) ℤ} (hG : G.IsHomoge
   have e := h.expansion
   rw [hGC, rename_C, rename_C, sub_self] at e
   have e2 := congrArg (eval (fun s : Fin N ⊕ Fin N => if s = Sum.inl i then (1 : ℤ) else 0)) e
+
   rw [map_zero, map_sum, Finset.sum_eq_single i] at e2
   · rw [hC i] at e2 ⊢
     simp only [map_mul, map_sub, eval_X, eval_C] at e2
@@ -164,7 +211,7 @@ theorem trdeg_fnField [∀ k, Fintype (ι k)] {y : (Σ k, ι k) → Ω} {d : ℕ
   have h1 := DvrConeDimTrdeg.proof O K ι _ h.multiProj h.noTorsion
   have h2 : Algebra.trdeg O (MRing ι O ⧸ pointIdeal O y) = _ :=
     ConeTrdegFnField.proof O Ω (algebraMap_inj h) K ι y (exists_coord_ne h)
-  rw [h.dim, h2, map_add, map_natCast] at h1
+  rw [h.dim, h2, map_add (f := _), map_natCast] at h1
   generalize Cardinal.toENat (Algebra.trdeg O (Algebra.adjoin O (fnField O y : Set Ω))) = t at h1
   have h3 : ((d + 1 + Fintype.card K : ℕ) : ℕ∞) = t + Fintype.card K + 1 := by exact_mod_cast h1
   induction t using ENat.recTopCoe with
@@ -263,7 +310,7 @@ theorem vertEval_contract {ϖ : O} (hϖ : Irreducible ϖ) {y : (Σ k, ι k) → 
   have hm : W ∈ (pointIdeal O (joinCoords y y') ⊔ Ideal.span {joinForm f}).minimalPrimes ∧
       IsRelevant W := by
     by_contra hn
-    exact h0 (by unfold divCycle; rw [dif_neg hn])
+    exact h0 (by unfold GroundTheory.Heights₂.Heights.NumbersDVR.divCycle; rw [dite_eq_right hn])
   have hh := MinimalPrimeMultiHomog.proof O _ _ _ W
     (SupSpanMultiHomog.proof O _ _ _ _ _ hj.multiProj.multiHomog hf') hm.1
   refine GlobalTheory.T.multi_projective_prime_intersection O Ω K ι y ϖ hϖ d r hr hy K' ι' y' W ⟨hm.1.1.1, hh, hm.2⟩ ?_ hW l hl hdim.le

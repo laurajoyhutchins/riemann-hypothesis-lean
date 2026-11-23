@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.CarrierRow
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelativeEquivalence.DCRelEquivAllHolds
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.CarrierRow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,10 +93,12 @@ theorem nil_a (c : Fin r) : nilF e a s (a c) = ∑ d, kap e a s (a c) d • e d 
 theorem nil_nil (v : S.V) :
     nilF e a s (nilF e a s v) = ∑ c, S.hT (e c) v • ∑ d, kap e a s (a c) d • e d := by
   rw [nilF_apply e a s v]
-  simp only [map_sum, map_add, map_smul, nil_e e a s hiso hea, nil_a e a s hiso hea, smul_zero, add_zero]
+
+  simp only [map_sum, map_add (f := _), map_smul, nil_e e a s hiso hea, nil_a e a s hiso hea, smul_zero, add_zero]
 
 theorem nil3 (v : S.V) : nilF e a s (nilF e a s (nilF e a s v)) = 0 := by
   rw [nil_nil e a s hiso hea v]
+
   simp [map_sum, map_smul, nil_e e a s hiso hea]
 
 end Nil
@@ -98,15 +141,17 @@ theorem form_nil (x y : S.V) :
   have E1 : S.hT (nilF e a s x) y = ∑ c, (star (S.hT (e c) x) * S.hT (a c) y +
       (-star (S.hT (a c) x) + ∑ d, star (s c d) * star (S.hT (e d) x)) * S.hT (e c) y) := by
     rw [nilF_apply]
-    simp only [map_sum, map_add, map_smulₛₗ, LinearMap.sum_apply, LinearMap.add_apply,
-      LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply]
+
+    simp only [map_sum, map_add (f := _), map_smulₛₗ, LinearMap.sum_apply, LinearMap.add_apply,
+    LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply]
     refine Finset.sum_congr rfl fun c _ => ?_
     simp only [kap, star_add, star_neg, star_sum, star_mul']
     all_goals ring
   have E2 : S.hT x (nilF e a s y) = ∑ c, (S.hT (e c) y * star (S.hT (a c) x) +
       (-S.hT (a c) y + ∑ d, s c d * S.hT (e d) y) * star (S.hT (e c) x)) := by
     rw [nilF_apply]
-    simp only [map_sum, map_add, map_smul, smul_eq_mul]
+
+    simp only [map_sum, map_add (f := _), map_smul, smul_eq_mul]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [hsym, hsym]
     simp only [kap]
@@ -114,9 +159,10 @@ theorem form_nil (x y : S.V) :
   have E3 : S.hT (nilF e a s x) (nilF e a s y) =
       ∑ c, ∑ d, star (S.hT (e c) x) * S.hT (e d) y * S.hT (a c) (a d) := by
     rw [nilF_apply e a s x, nilF_apply e a s y]
-    simp only [map_sum, map_add, map_smulₛₗ, map_smul, LinearMap.sum_apply, LinearMap.add_apply,
-      LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, hiso, hea, hae e a hea, mul_zero, add_zero,
-      zero_add, Finset.sum_const_zero, Finset.mul_sum, RingHom.id_apply]
+
+    simp only [map_sum, map_add (f := _), map_smulₛₗ, map_smul, LinearMap.sum_apply, LinearMap.add_apply,
+    LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, hiso, hea, hae e a hea, mul_zero, add_zero,
+    zero_add, Finset.sum_const_zero, Finset.mul_sum, RingHom.id_apply]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => ?_
     ring
@@ -127,7 +173,7 @@ theorem form_nil (x y : S.V) :
 theorem isom_nil (x y : S.V) :
     S.hT (x + nilF e a s x) (y + nilF e a s y) = S.hT x y := by
   have h := form_nil e a s hiso hea hs x y
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
   linear_combination h
 
 end Form

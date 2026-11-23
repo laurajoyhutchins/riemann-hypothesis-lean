@@ -1,10 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SquareIntegrableColumnsCompatible
-import Formalism.LocalToGlobal.ThresholdSelection
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.STiesR
-import Formalism.LocalToGlobal.IndefiniteReal.RealTB
-import Formalism.LocalToGlobal.Divisibility.NumericScaleExponentEqExtended
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SquareIntegrableColumnsCompatible
+public import Formalism.LocalToGlobal.ThresholdSelection
+public import Formalism.LocalToGlobal.IndefiniteReal.RealTB
+public import Formalism.LocalToGlobal.Divisibility.NumericScaleExponentEqExtended
+public import Formalism.LocalToGlobal.Divisibility.NumbersLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,9 +92,9 @@ def zsc {D : D7} {O : Obj D} (P : Formalism.L2.Rows.RowSideFamily O.ex) (Del h0 
     let z := Formalism.L2.DIV.ZscOfNum3 P.A3 P.P0 P.ψ0 (Formalism.L2.DIV.ofRecord D O.L Del h0) (Equiv.refl _) O.L.Nc Zs
     { z with l6m := fun j => z.l6m j - c * z.l6u, l6u := 0 }
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure Bundle (D : D7) (O : Obj D) (c : ℝ) : Type 1 where
   R : Formalism.L2.RecT O.ex
   S : Formalism.L2.SG.SpectralTiesReal.STiesR R
@@ -69,11 +104,9 @@ structure Bundle (D : D7) (O : Obj D) (c : ℝ) : Type 1 where
   C : SquareIntegrableColumnsCompatible R.T P
   B : Formalism.IndefR.RealTB R P C.c.face C.Sp (zsc P DH.1.1 DH.1.2 c) S
 
-abbrev BdR : BdT := fun _ O _ => Formalism.L2.RecT O.ex
-
 variable {𝒜 : FamClass} (σ : RawSel Bundle 𝒜)
 
-def sel : Formalism.L2.TSel 𝒜 := fun Fm hc => ⟨Fm.x1, fun x hx _ i => (σ Fm hc x hx i).R⟩
+def sel : Formalism.L2.TSel 𝒜 := fun Fm hc => (⟨Fm.x1, fun x hx _ i => (σ Fm hc x hx i).R⟩ : Formalism.L2.TSelF Fm)
 
 def selS : SelS 𝒜 (sel σ) := fun Fm hc x hx _ i => (σ Fm hc x hx i).S
 

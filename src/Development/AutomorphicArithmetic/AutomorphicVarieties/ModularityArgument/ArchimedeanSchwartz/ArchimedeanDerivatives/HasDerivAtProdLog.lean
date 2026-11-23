@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ShiftOf
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RingEquivPlaceCorrespondencePlaceUnder
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WeylCharacterRegularity.IsRegConj
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ShiftOf
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RingEquivPlaceCorrespondencePlaceUnder
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WeylCharacterRegularity.IsRegConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,7 +55,7 @@ open scoped ContDiff
 
 namespace UpperTheory.V.Z.Inf
 
-variable {K : Type} [Field K] [NumberField K] [IsTotallyComplex K] {n : ℕ}
+variable {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] {n : ℕ}
 
 private theorem prod_coord (d : Cinf K) : ∏ σ : K →+* ℂ, coord σ d = ((∏ w, ‖d w‖ ^ 2 : ℝ) : ℂ) := by
   classical
@@ -35,7 +81,7 @@ private theorem prod_coord (d : Cinf K) : ∏ σ : K →+* ℂ, coord σ d = ((�
 
 private theorem nrm_eq (x : Lie K n) : ((nrm x : ℝ) : ℂ) = ∏ σ, detAt σ x := (prod_coord _).symm
 
-omit [NumberField K] [IsTotallyComplex K] in
+omit [NumberField K] [_root_.NumberField.IsTotallyComplex K] in
 private theorem detAt_ne {x : Lie K n} (hx : x ∈ invSet K n) (σ : K →+* ℂ) : detAt σ x ≠ 0 :=
   (((Matrix.isUnit_iff_isUnit_det _).1 hx).map (coord σ)).ne_zero
 
@@ -50,7 +96,7 @@ private theorem wt_eq (u : ℂ) (e : (K →+* ℂ) → ℕ) :
     (wt u e : Lie K n → ℂ) = fun x => (∏ σ, detAt σ x) ^ u * ∏ σ, (detAt σ x)⁻¹ ^ e σ := by
   funext x; rw [wt, nrm_eq]
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 private theorem contDiff_detAt (σ : K →+* ℂ) : ContDiff ℝ ∞ (detAt σ : Lie K n → ℂ) := by
   let l : Cinf K →ₗ[ℝ] ℂ :=
     { toFun := coord σ, map_add' := map_add _, map_smul' := GlobalTheory.IsoPull.coord_smul σ }
@@ -77,7 +123,7 @@ private theorem det_one_add_single {R : Type} [CommRing R] (a b : Fin n) (c : R)
   · subst hab; simp [dotProduct, Pi.single_apply]
   · simp [dotProduct, Pi.single_apply, hab]
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 private theorem detAt_line (σ : K →+* ℂ) (a b : Fin n) (c : Cinf K) (x : Lie K n) (s : ℝ) :
     detAt σ (x + s • rmul (toL (single a b c)) x) =
       detAt σ x * (1 + (s : ℂ) * if a = b then coord σ c else 0) := by
@@ -85,7 +131,7 @@ private theorem detAt_line (σ : K →+* ℂ) (a b : Fin n) (c : Cinf K) (x : Li
     rw [Matrix.mul_add, Matrix.mul_one, ← Matrix.smul_single, Matrix.mul_smul]
     rfl
   unfold detAt
-  rw [hm, Matrix.det_mul, map_mul, det_one_add_single, map_add, map_one]
+  rw [hm, Matrix.det_mul, map_mul, det_one_add_single, map_add (f := _), map_one]
   split_ifs
   · rw [GlobalTheory.IsoPull.coord_smul, Complex.real_smul]
   · simp
@@ -155,7 +201,7 @@ private theorem rd_wt (u : ℂ) (e : (K →+* ℂ) → ℕ) (τ : K →+* ℂ) (
     exact Finset.sum_congr rfl fun σ _ => by ring
   · simp
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 private theorem rd_congr (τ : K →+* ℂ) (a b : Fin n) {F G : Lie K n → ℂ} {x : Lie K n}
     (h : ∀ᶠ y in nhds x, F y = G y) : rd τ a b F x = rd τ a b G x := by
   unfold rd
@@ -203,7 +249,7 @@ private theorem foldr_chart_wt (u : ℂ) (e : (K →+* ℂ) → ℕ) (τ : K →
     simp only [List.foldr_cons, List.map_cons, List.prod_cons]
     rw [rd_congr τ (p j) j (Filter.eventually_of_mem (isOpen_invSet.mem_nhds hx) ih), rd_chart_wt u e τ _ _ _ g hx,
       ih x hx, Module.End.mul_apply]
-    simp only [← chartL_apply, Formalism.REAL.Tm, LinearMap.add_apply, map_add]
+    simp only [← chartL_apply, Formalism.REAL.Tm, LinearMap.add_apply, map_add (f := _)]
     have hj : ((n - 1 - j.val : ℕ) : ℂ) = (n : ℂ) - 1 - (j.val : ℂ) := by
       have := j.isLt
       rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]
@@ -229,8 +275,9 @@ theorem UpperTheory.V.Z.Inf.ptwOf :
       ∑ p : Equiv.Perm (Fin n), (((Equiv.Perm.sign p : ℤˣ) : ℤ) : ℂ) *
         chart (((List.finRange n).map fun j : Fin n =>
           Formalism.REAL.Tm (Eop τ) (u - e τ + n - 1 - ((j : ℕ) : ℂ)) (p j) j).prod φ).1 g x := by
+
     simp only [← chartL_apply, Formalism.REAL.qdet, Formalism.REAL.qminor, LinearMap.sum_apply, map_sum,
-      Module.End.mul_apply, Module.End.intCast_apply, map_zsmul, zsmul_eq_mul, List.ofFn_eq_map, id]
+    Module.End.mul_apply, Module.End.intCast_apply, map_zsmul, zsmul_eq_mul, List.ofFn_eq_map, id]
   have hcap : Formalism.REAL.qdet (Eop (a := n) τ) (u - e τ + n - 1) =
       (cap τ (u - e τ + ((n : ℂ) - 1) / 2) : Module.End ℂ (Sm K n)) := by
     change _ = Formalism.REAL.qdet (Eop (a := n) τ) (u - e τ + ((n : ℂ) - 1) / 2 + ((n : ℂ) - 1) / 2)

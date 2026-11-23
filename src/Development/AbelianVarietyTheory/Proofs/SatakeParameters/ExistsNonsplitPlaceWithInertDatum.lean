@@ -1,11 +1,60 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+public import Formalism.AlgebraicWeights.InertDatumExists
+public import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAut
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSplitAtOfIsSplitPl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnramifiedNonsplitExistsConjInvolutionUniformise
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitExEveryDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnramifiedNonsplitExistsConjInvolutionUniformise
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSplitAtOfIsSplitPl
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousNormFin
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitExEveryDatum
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT NumberField IsDedekindDomain Polynomial GlobalTheory.HeightCounting GlobalTheory.RowTie GlobalTheory.SplitRead GlobalTheory.NPin
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
@@ -69,19 +118,53 @@ theorem exists_inertDatum : ∀ (D : D7) (n : ℕ) (v : HeightOneSpectrum (𝓞 
   have key : ∀ x ∈ w.asIdeal, IsCMField.ringOfIntegersComplexConj D.host.E x ∈ w.asIdeal := by
     intro x hx
     by_contra hc
-    obtain ⟨s, hs⟩ := GlobalTheory.SplitConjPlace.exists_splitPlace w x hx hc
-    exact hv s (hs.trans (HeightOneSpectrum.ext hov))
+    have hspl : IsSplitPl D.host w := ⟨x, hx, fun y hy hym => hc (by
+      have : y = IsCMField.ringOfIntegersComplexConj D.host.E x := by
+        apply RingOfIntegers.ext
+        rw [hy, IsCMField.coe_ringOfIntegersComplexConj, GlobalTheory.SplitPlaceOver.host_conj_eq']
+      simpa [this] using hym)⟩
+    obtain ⟨s, ϖ, hs, hϖ⟩ := GlobalTheory.SplitConjPlace.splitEx_all D w hspl
+    apply hv s
+    apply HeightOneSpectrum.ext
+    rw [← s.w_under, ← hov]
+    ext a
+    have ha : D.host.conj ((algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E) a : 𝓞 D.host.E) : D.host.E) =
+        ((algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E) a : 𝓞 D.host.E) : D.host.E) := by
+      rw [GlobalTheory.SplitPlaceOver.host_conj_eq']
+      exact congrArg (fun z : 𝓞 D.host.E => (z : D.host.E)) ((IsCMField.ringOfIntegersComplexConj_eq_self_iff D.host.E _).2 ⟨a, rfl⟩)
+    exact (hs _ _ ha.symm).symm
   have hnsp : ¬ IsSplitPl D.host w := by
     rintro ⟨x, hx, hy⟩
     exact hy _ (by rw [IsCMField.coe_ringOfIntegersComplexConj, GlobalTheory.SplitPlaceOver.host_conj_eq']) (key x hx)
   have hnsa : ¬ GlobalTheory.UnitaryBC.IsSplitAt w := by
     rintro ⟨u, hne, hu⟩
-    rcases GlobalTheory.SplitConjPlace.eq_or_eq_conjPlE w u (congrArg HeightOneSpectrum.asIdeal hu) with e | e
-    · exact hne e
-    · apply hne
-      rw [e]
-      exact (HeightOneSpectrum.ext (w.isMaximal.eq_of_le
-        (GlobalTheory.SplitConjPlace.conjPlE w).isPrime.ne_top fun x hx => key x hx)).symm
+    apply hne
+    apply HeightOneSpectrum.ext
+    apply u.isMaximal.eq_of_le w.isPrime.ne_top
+    intro x hx
+    by_contra hxw
+    have hfix : IsCMField.ringOfIntegersComplexConj D.host.E (x * IsCMField.ringOfIntegersComplexConj D.host.E x) =
+        x * IsCMField.ringOfIntegersComplexConj D.host.E x := by
+      apply RingOfIntegers.ext
+      simp [IsCMField.coe_ringOfIntegersComplexConj, mul_comm]
+    obtain ⟨a, ha⟩ := (IsCMField.ringOfIntegersComplexConj_eq_self_iff D.host.E _).1 hfix
+    have hcom := congrArg HeightOneSpectrum.asIdeal hu
+    change u.asIdeal.comap (algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E)) =
+      w.asIdeal.comap (algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E)) at hcom
+    have hp : a ∈ u.asIdeal.comap (algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E)) := by
+      change algebraMap _ _ a ∈ u.asIdeal
+      rw [ha]; exact u.asIdeal.mul_mem_right _ hx
+    rw [hcom] at hp
+    change algebraMap _ _ a ∈ w.asIdeal at hp
+    rw [ha] at hp
+    rcases w.isPrime.mem_or_mem hp with h | h
+    · exact hxw h
+    · apply hxw
+      have hh := key _ h
+      have he : IsCMField.ringOfIntegersComplexConj D.host.E (IsCMField.ringOfIntegersComplexConj D.host.E x) = x := by
+        apply RingOfIntegers.ext
+        simp [IsCMField.coe_ringOfIntegersComplexConj]
+      rwa [he] at hh
   have hw : Formalism.UG.IsInertAt (maximalRealSubfield D.host.E) D.host.E v w := by
     have h := GlobalTheory.InertPlaceConj.isInertAt_of_not_split w (GlobalTheory.DefiniteBC.host_unramified D.host w) hnsa
     rwa [hunder] at h
@@ -103,7 +186,7 @@ theorem exists_inertDatum : ∀ (D : D7) (n : ℕ) (v : HeightOneSpectrum (𝓞 
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => rfl
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   · intro x
     rw [mem_tensInt_iff, GlobalTheory.LFun.InertChart.mem_intLoc_iff hw hunder, hO]
     exact Iff.rfl

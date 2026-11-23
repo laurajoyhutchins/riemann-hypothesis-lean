@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DefiniteUnitaryRealApproxAndFiniteInfiniteSplit
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RightFiniteMemPoly
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DefiniteUnitaryRealApproxAndFiniteInfiniteSplit
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RightFiniteMemPoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,10 +70,10 @@ theorem infSpan_stable (φ : UA E n → ℂ) (k : infU E n) : ∀ ψ ∈ infSpan
     rw [RU_RU]
     exact mem_infSpan φ (k * l)
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add _ _ _ _ h₁ h₂ => rw [map_add]; exact Submodule.add_mem _ h₁ h₂
+  | add _ _ _ _ h₁ h₂ => rw [map_add (f := _)]; exact Submodule.add_mem _ h₁ h₂
   | smul c _ _ h => rw [map_smul]; exact Submodule.smul_mem _ c h
 
-def finStab (φ : UA E n → ℂ) : Subgroup (finU E n) where
+def finStab (φ : UA E n → ℂ) : Subgroup (finU (E := E) (n := n)) where
   carrier := {k | RU E n k φ = φ}
   one_mem' := by
     change RU E n 1 φ = φ
@@ -45,7 +87,7 @@ def finStab (φ : UA E n → ℂ) : Subgroup (finU E n) where
     conv_lhs => rw [← show RU E n a φ = φ from ha]
     rw [RU_RU, inv_mul_cancel, map_one]; rfl
 
-theorem isAutFormU_of_mem (hc : ∀ k : infU E n, ∀ g ∈ finU E n, k.1 * g = g * k.1) {φ : UA E n → ℂ}
+theorem isAutFormU_of_mem (hc : ∀ k : infU E n, ∀ g ∈ finU (E := E) (n := n), k.1 * g = g * k.1) {φ : UA E n → ℂ}
     (hφ : IsAutFormU φ) (ψ : UA E n → ℂ) (hψ : ψ ∈ infSpan φ) : IsAutFormU ψ := by
   refine ⟨?_, ?_, ?_, ?_⟩
   · induction hψ using Submodule.span_induction with
@@ -71,7 +113,7 @@ theorem isAutFormU_of_mem (hc : ∀ k : infU E n, ∀ g ∈ finU E n, k.1 * g = 
       obtain ⟨l, rfl⟩ := h
       rw [RU_RU, ← hc l k.1 k.2, ← RU_RU, show RU E n k φ = φ from hk]
     | zero => rw [map_zero]
-    | add _ _ _ _ h₁ h₂ => rw [map_add, h₁, h₂]
+    | add _ _ _ _ h₁ h₂ => rw [map_add (f := _), h₁, h₂]
     | smul c _ _ h => rw [map_smul, h]
   · have := hφ.kfin
     refine Submodule.finiteDimensional_of_le (S₂ := infSpan φ) (Submodule.span_le.2 ?_)

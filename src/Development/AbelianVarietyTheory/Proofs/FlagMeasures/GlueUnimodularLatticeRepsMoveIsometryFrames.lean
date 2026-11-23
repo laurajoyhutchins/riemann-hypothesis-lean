@@ -1,7 +1,48 @@
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GlobSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.NGAnalytic
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.InVolumesAtOfSWS
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GlobSet
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StepHeightOfNormOne
+
+@[expose] public section
 
 open NumberField MeasureTheory Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.HidaSetting Formalism.L2.SG.Full Formalism.L2.SG.TermLoc Formalism.L2.SG.RowsConc Formalism.L2.SG.NGCut Formalism.L2.SG.NGAnalytic Formalism.FourierDecayAlt GlobalTheory.Unfold GlobalTheory.LocOver GlobalTheory.GenMass
 open scoped Classical ENNReal
@@ -93,12 +134,7 @@ theorem dual_gmap (h : V →ₗ⋆[K] V →ₗ[K] K) (n : V ≃ₗ[K] V) (hn : n
 
 theorem isLattice_gmap (n : V ≃ₗ[K] V) (L : Submodule (𝓞 K) V) (hL : Submodule.IsLattice K L) :
     Submodule.IsLattice K (Formalism.HermitianLatticesTheory.gmap n L) := by
-  refine ⟨hL.fg.map _, ?_⟩
-  have hspan : Submodule.span K ((Formalism.HermitianLatticesTheory.gmap n L : Submodule (𝓞 K) V) : Set V) =
-      (Submodule.span K (L : Set V)).map (n : V →ₗ[K] V) := by
-    rw [Submodule.map_span]
-    rfl
-  rw [hspan, hL.span_eq_top, Submodule.map_top, LinearEquiv.range]
+  exact Submodule.IsLattice.of_fg K (hL.fg.map _)
 
 theorem gmap_inf_map (n : V ≃ₗ[K] V) (Λ : Submodule (𝓞 K) V) (U : Submodule K V) :
     Formalism.HermitianLatticesTheory.gmap n Λ ⊓ (U.map (n : V →ₗ[K] V)).restrictScalars (𝓞 K) =
@@ -248,22 +284,22 @@ open Formalism.L2.SG.Pf.Cnt
 
 variable {D : D7}
 
-theorem fvec_move {T : D.host.E} (F G : LFlag (VS D) D.R.rS T) (n : GV D)
+theorem fvec_move {T : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) : G.fl.fvec = fun a => n (F.fl.fvec a) := by
   funext a
   exact hG a
 
-theorem e_move {T : D.host.E} (F G : LFlag (VS D) D.R.rS T) (n : GV D)
+theorem e_move {T : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) (i : Fin D.R.rS) : G.fl.e i = n (F.fl.e i) := by
   have := hG i.castSucc
   simpa [Formalism.MainNotions.S.FlagG.fvec, Fin.snoc_castSucc] using this
 
-theorem z_move {T : D.host.E} (F G : LFlag (VS D) D.R.rS T) (n : GV D)
+theorem z_move {T : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) : G.fl.z = n F.fl.z := by
   have := hG (Fin.last _)
   simpa [Formalism.MainNotions.S.FlagG.fvec, Fin.snoc_last] using this
 
-theorem upair_move {T T' : D.host.E} (F G : LFlag (VS D) D.R.rS T) (F' G' : LFlag (VS D) D.R.rS T') (n : GV D)
+theorem upair_move {T T' : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (F' G' : LFlag (D.sp.Y 0) D.R.rS T') (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) (hG' : ∀ a, frame G' a = n (frame F' a)) :
     UPair D G.fl G' = (UPair D F.fl F').map (n : (VS D).V →ₗ[D.host.E] (VS D).V) := by
   unfold Formalism.L2.SG.Pf.Cnt.UPair
@@ -271,7 +307,7 @@ theorem upair_move {T T' : D.host.E} (F G : LFlag (VS D) D.R.rS T) (F' G' : LFla
     fvec_move F G n hG, fvec_move F' G' n hG']
   rfl
 
-theorem xs_move {T : D.host.E} (F G : LFlag (VS D) D.R.rS T) (n : GV D)
+theorem xs_move {T : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) : XS D G.fl = Formalism.HermitianLatticesTheory.gmap n (XS D F.fl) := by
   unfold Formalism.MainNotions.S.XS
   rw [gmap_span]
@@ -284,14 +320,14 @@ theorem xs_move {T : D.host.E} (F G : LFlag (VS D) D.R.rS T) (n : GV D)
   · rintro ⟨_, ⟨a, x, hx, rfl⟩, rfl⟩
     exact ⟨a, x, hx, by rw [map_smul, e_move F G n hG]⟩
 
-theorem uus_move {T T' : D.host.E} (F G : LFlag (VS D) D.R.rS T) (F' G' : LFlag (VS D) D.R.rS T') (n : GV D)
+theorem uus_move {T T' : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (F' G' : LFlag (D.sp.Y 0) D.R.rS T') (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) (hG' : ∀ a, frame G' a = n (frame F' a)) :
     UUS D G.fl G' = Formalism.HermitianLatticesTheory.gmap n (UUS D F.fl F') := by
   unfold Formalism.L2.SG.Pf.Cnt.UUS
   rw [gmap_sup, gmap_sup, gmap_sup, gmap_span, gmap_span, Set.image_singleton, Set.image_singleton,
     xs_move F G n hG, xs_move F' G' n hG', z_move F G n hG, z_move F' G' n hG']
 
-theorem mmg_move {T T' : D.host.E} (F G : LFlag (VS D) D.R.rS T) (F' G' : LFlag (VS D) D.R.rS T') (n : GV D)
+theorem mmg_move {T T' : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (F' G' : LFlag (D.sp.Y 0) D.R.rS T') (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) (hG' : ∀ a, frame G' a = n (frame F' a)) :
     MMg D G.fl G' = Formalism.HermitianLatticesTheory.gmap n (MMg D F.fl F') := by
   unfold Formalism.L2.SG.Pf.Cnt.MMg
@@ -302,7 +338,7 @@ theorem mmg_move {T T' : D.host.E} (F G : LFlag (VS D) D.R.rS T) (F' G' : LFlag 
   funext b
   simp [map_sub, map_smul]
 
-theorem mmof_move {T T' : D.host.E} (F G : LFlag (VS D) D.R.rS T) (F' G' : LFlag (VS D) D.R.rS T') (n : GV D)
+theorem mmof_move {T T' : D.host.E} (F G : LFlag (D.sp.Y 0) D.R.rS T) (F' G' : LFlag (D.sp.Y 0) D.R.rS T') (n : GV D)
     (hG : ∀ a, frame G a = n (frame F a)) (hG' : ∀ a, frame G' a = n (frame F' a)) :
     MMof D G.fl G' = Formalism.HermitianLatticesTheory.gmap n (MMof D F.fl F') := by
   unfold Formalism.L2.SG.Pf.Cnt.MMof
@@ -319,7 +355,7 @@ namespace GlobalTheory.GlueMove
 
 open Formalism.L2.SG.Pf.Cnt
 
-theorem glue_move : ∀ (D : D7) (T T' : D.host.E) (F G : LFlag (VS D) D.R.rS T) (F' G' : LFlag (VS D) D.R.rS T') (n : GV D), n ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT → (∀ a, frame G a = n (frame F a)) → (∀ a, frame G' a = n (frame F' a)) → ∀ s : Finset (LV D), Glue F F' s → ∃ s' : Finset (LV D), Glue G G' s' ∧ glueSum G G' s' = glueSum F F' s := by
+theorem glue_move : ∀ (D : D7) (T T' : D.host.E) (F G : LFlag (D.sp.Y 0) D.R.rS T) (F' G' : LFlag (D.sp.Y 0) D.R.rS T') (n : GV D), n ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT → (∀ a, frame G a = n (frame F a)) → (∀ a, frame G' a = n (frame F' a)) → ∀ s : Finset (LV D), Glue F F' s → ∃ s' : Finset (LV D), Glue G G' s' ∧ glueSum G G' s' = glueSum F F' s := by
   intro D T T' F G F' G' n hn hG hG' s hs
   refine ⟨s.image (Formalism.HermitianLatticesTheory.gmap n), ?_, ?_⟩
   · unfold GlobalTheory.GenMass.Glue at hs ⊢

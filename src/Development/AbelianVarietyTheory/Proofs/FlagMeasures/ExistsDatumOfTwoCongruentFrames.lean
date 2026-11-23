@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FrameDualUnipotentGroupActsUnitriangularOntoStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SelfDualLatticeFrameEqStandardTranslateStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsTermLocalTermMoveOfIsometry
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FrameDualUnipotentGroupActsUnitriangularOntoStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SelfDualLatticeFrameEqStandardTranslateStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open ValuativeRel Formalism.MainNotions.S Formalism.MainNotions.S.Loc Formalism.MainNotions.S.LocNG GlobalTheory.LocOver
 open scoped Classical
@@ -38,66 +80,12 @@ lemma img_one (Λ : Submodule M.L.O V) : img (1 : V ≃ₗ[E] V) Λ = Λ := by
 
 lemma img_selfDual (H : HermSp M V) {g : V ≃ₗ[E] V} (hg : IsUnitary H g)
     {Λ : Submodule M.L.O V} (hΛ : H.IsSelfDual Λ) : H.IsSelfDual (img g Λ) := by
-  obtain ⟨h1, h2, h3⟩ := hΛ
-  refine ⟨h1.map _, ?_, ?_⟩
-  · have himg : ((img g Λ : Submodule M.L.O V) : Set V) = (g : V →ₗ[E] V) '' (Λ : Set V) := by
-      ext x
-      simp only [SetLike.mem_coe, mem_img, Set.mem_image]
-      rfl
-    rw [himg, ← Submodule.map_span, h2, Submodule.map_top]
-    exact LinearMap.range_eq_top.mpr g.surjective
-  · intro x
-    constructor
-    · intro hx y hy
-      obtain ⟨a, ha, rfl⟩ := (mem_img g Λ x).1 hx
-      obtain ⟨b, hb, rfl⟩ := (mem_img g Λ y).1 hy
-      rw [hg]
-      exact (h3 a).1 ha b hb
-    · intro hx
-      obtain ⟨a, rfl⟩ := g.surjective x
-      refine (mem_img g Λ _).2 ⟨a, (h3 a).2 fun y hy => ?_, rfl⟩
-      have := hx (g y) ((mem_img g Λ _).2 ⟨y, hy, rfl⟩)
-      rwa [hg] at this
+  apply GlobalTheory.LocOver.MoveTerm.isSelfDual_img <;> assumption
 
 lemma img_frame (H : HermSp M V) {g : V ≃ₗ[E] V} (hg : IsUnitary H g)
     {Λ : Submodule M.L.O V} {r : ℕ} {f : Fin (r + 1) → V} {T : F} (hf : H.IsFrame Λ r f T) :
     H.IsFrame (img g Λ) r (fun b => g (f b)) T := by
-  obtain ⟨⟨p1, p2, p3⟩, h2, h3, h4, h5⟩ := hf
-  refine ⟨⟨fun a => (mem_img g Λ _).2 ⟨f a, p1 a, rfl⟩, ?_, ?_⟩, ?_, ?_, h4, h5⟩
-  · exact p2.map' (g : V →ₗ[E] V) (LinearEquiv.ker g)
-  · intro x hx hs
-    obtain ⟨y, hy, rfl⟩ := (mem_img g Λ x).1 hx
-    have hrange : Set.range (fun b => g (f b)) = (g : V →ₗ[E] V) '' Set.range f := by
-      rw [← Set.range_comp]
-      rfl
-    rw [hrange, ← Submodule.map_span] at hs
-    obtain ⟨y', hy', hyy⟩ := hs
-    have hyy' : y' = y := g.injective hyy
-    subst hyy'
-    have hO := p3 y' hy hy'
-    have hmap : ∀ v ∈ Submodule.span M.L.O (Set.range f),
-        g v ∈ Submodule.span M.L.O (Set.range fun b => g (f b)) := by
-      intro v hv
-      induction hv using Submodule.span_induction with
-      | mem v hv =>
-        obtain ⟨b, rfl⟩ := hv
-        exact Submodule.subset_span ⟨b, rfl⟩
-      | zero => simp
-      | add a b _ _ ha hb =>
-        rw [map_add]
-        exact Submodule.add_mem _ ha hb
-      | smul c a _ ha =>
-        have : g (c • a) = c • g a := by
-          change g ((c : E) • a) = (c : E) • g a
-          exact map_smul g (c : E) a
-        rw [this]
-        exact Submodule.smul_mem _ c ha
-    exact hmap y' hO
-  · intro a b hab
-    rw [hg]
-    exact h2 a b hab
-  · rw [hg]
-    exact h3
+  apply GlobalTheory.LocOver.MoveTerm.isFrame_img <;> assumption
 
 lemma side (hM : M.OK) (H : HermSp M V) (r : ℕ) (Fr : FrameD H r) {Λ : Submodule M.L.O V}
     {f : Fin (r + 1) → V} (hΛ : H.IsSelfDual Λ) (hf : H.IsFrame Λ r f Fr.T) (hT : Tri E Fr.f f) :

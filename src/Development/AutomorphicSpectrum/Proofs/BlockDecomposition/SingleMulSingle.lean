@@ -1,5 +1,55 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.Reductions.SiegelPar
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.SiegelPar
+import Aesop.Frontend.Tactic
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModerateGrowthOfHasCompactSupport
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Development.WeilBound.ThetaLifts.FrameEstimates.LeHeightOfIsTorusElt
+import Development.WeilBound.ThetaLifts.Reductions.SiegelAbs
+import Development.WeilBound.ThetaLifts.Reductions.SiegelGood
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField MeasureTheory Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet PositivityTheory.ThKR
 open Formalism.UG (cT)
@@ -208,14 +258,14 @@ open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels (realAd)
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
   {n r : ℕ} {J : Matrix (Fin n) (Fin n) E} {X Y : Matrix (Fin n) (Fin r) E}
 
-variable (σ J X Y) in
 
+variable (σ J X Y) in
 def Pj : Idx r → Matrix (Fin n) (Fin n) (AF F ⊗[F] E) :=
   pr (adMat F X) (adMat F Y) (cT (sigR (AF F) σ) (adMat F X) * JR (F := F) (AF F) J)
     (cT (sigR (AF F) σ) (adMat F Y) * JR (F := F) (AF F) J)
 
-variable (F E) in
 
+variable (F E) in
 def eA (x : ℝ) : AF F ⊗[F] E := algebraMap (AF F) (AF F ⊗[F] E) (1 + realAd F (x - 1))
 
 theorem eA_exp (u : ℝ) : eA F E (Real.exp u) = algebraMap (AF F) (AF F ⊗[F] E) (rId F u) := rfl
@@ -237,7 +287,7 @@ theorem continuous_eA [IsTotallyReal F] : Continuous (eA F E) := by
       have : (InfinitePlace.Completion.extensionEmbedding w) ∘ (fun t => (1 + realAd F (t - 1) : AF F).1 w) =
           fun t : ℝ => (t : ℂ) := funext fun t => by
         change InfinitePlace.Completion.extensionEmbedding w (1 + (realAd F (t - 1)).1 w) = _
-        rw [map_add, map_one, realAd_inf]
+        rw [map_add (f := _), map_one, realAd_inf]
         push_cast
         ring
       rw [this]
@@ -345,14 +395,14 @@ theorem pj_mul_pj_eq_zero (h : IsCMExt F E σ) (hJ : IsHermND σ J) (hW : IsWitt
 theorem dl_neg (s : Fin r → ℝ) (α : Idx r) : dl (-s) α = - dl s α := by
   rcases α with i | u | i <;> simp [dl]
 
-variable (σ J X Y) in
 
+variable (σ J X Y) in
 def Psi (q : (Idx r → Idx r → ℝ) × GAd σ J) : Matrix (Fin n) (Fin n) (AF F ⊗[F] E) :=
   ∑ α, ∑ β, eA F E (q.1 α β) • (Pj σ J X Y α * (matHom _ σ J q.2).1 * Pj σ J X Y β)
 
 theorem continuous_Psi [IsTotallyReal F] : Continuous (Psi σ J X Y) := by
   have := GlobalTheory.Doubling.isTopologicalRing_tens (F := F) (E := E) (R := AF F)
-  refine continuous_finset_sum _ fun α _ => continuous_finset_sum _ fun β _ => ?_
+  refine continuous_finsetSum _ fun α _ => continuous_finsetSum _ fun β _ => ?_
   have h1 : Continuous fun q : (Idx r → Idx r → ℝ) × GAd σ J => eA F E (q.1 α β) :=
     continuous_eA.comp ((continuous_apply β).comp ((continuous_apply α).comp continuous_fst))
   have h2 : Continuous fun q : (Idx r → Idx r → ℝ) × GAd σ J =>

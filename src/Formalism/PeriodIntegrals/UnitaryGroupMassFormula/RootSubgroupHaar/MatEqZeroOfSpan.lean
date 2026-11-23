@@ -1,6 +1,53 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupBasics.NegOnePowMulSelf
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupJacobian.ContinuousRootCoords
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.ReverseCauchySchwarzHolds
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupBasics.FlagMatLower
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupJacobian.SUpPowEqZero
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupJacobian.BlkLt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupJacobian.ContinuousRootCoords
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupBasics.NegOnePowMulSelf
+
+@[expose] public section
 
 open Matrix
 
@@ -58,7 +105,7 @@ theorem fvec_high {z : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (a : Fin (
 
 theorem fvec_cs (z : Fin (2 * r + k + 1) → ℂ) (c : Fin r) : fvec k r z (Fin.castSucc c) = bvec (eI k r c) := by
   unfold fvec
-  rw [dif_pos (show (Fin.castSucc c).val < r from c.isLt)]
+  rw [dite_eq_left (show (Fin.castSucc c).val < r from c.isLt)]
   rfl
 
 theorem nset_fix {a : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ} (ha : a ∈ Nset k r)
@@ -104,10 +151,10 @@ theorem fm_low (z' : Fin (2 * r + k + 1) → ℂ) (x : Fin (2 * r + k + 1) → �
   have hc : ∀ c : Fin r, (if h : (Fin.castSucc c).val < r then x (eI k r ⟨(Fin.castSucc c).val, h⟩) else 0)
       = x (eI k r c) := by
     intro c
-    rw [dif_pos (show (Fin.castSucc c).val < r from c.isLt)]
+    rw [dite_eq_left (show (Fin.castSucc c).val < r from c.isLt)]
     rfl
   have hl : (if h : (Fin.last r).val < r then x (eI k r ⟨(Fin.last r).val, h⟩) else 0) = 0 := by
-    rw [dif_neg (show ¬ (Fin.last r).val < r from lt_irrefl r)]
+    rw [dite_eq_right (show ¬ (Fin.last r).val < r from lt_irrefl r)]
   simp only [Matrix.mulVec, dotProduct]
   rw [Fin.sum_univ_castSucc]
   simp only [hc, hl, mul_zero, add_zero, Fm, Matrix.of_apply, fvec_cs, bvec]
@@ -317,11 +364,11 @@ theorem flagZ_eq {z z' : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (hz' : i
   rw [Matrix.add_apply]
   simp only [vM, rootCoords]
   by_cases hq : (i, j) ∈ rootPat p
-  · rw [dif_pos hq]
+  · rw [dite_eq_left hq]
     have hij : i ≠ j := ne_of_lt (mem_rootPat.mp hq).1
     rw [Matrix.one_apply_ne hij, zero_add]
     rfl
-  · rw [dif_neg hq, add_zero]
+  · rw [dite_eq_right hq, add_zero]
     by_cases hji : j ≤ i
     · rw [flagMat_lower ha.1 i j hji, Matrix.one_apply]
     · have hij : i < j := not_le.mp hji

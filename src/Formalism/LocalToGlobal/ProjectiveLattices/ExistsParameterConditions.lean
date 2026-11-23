@@ -1,7 +1,49 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
-import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,9 +79,6 @@ theorem g_jacobi (D : D7) (k : Fin 2) : jacobiSym (-(D.host.d : ℤ)) (D.host.g 
     rw [← Int.natCast_mod, hd1]
     rfl
   rw [h1, jacobiSym.one_left]
-
-def SplitPDelta (D : D7) : Prop :=
-  jacobiSym (-(D.host.d : ℤ)) D.host.pde = 1 ∧ jacobiSym (-(D.host.d : ℤ)) D.host.pde' = 1
 
 theorem splitG (D : D7) : ∀ p ∈ [D.host.g 0, D.host.g 1], SplitOK D p := by
   intro p hp
@@ -168,8 +207,8 @@ theorem eOf_spec (D : D7) (hF : OFull D) (x : 𝓞 (FO D)) :
   rw [h1] at h2
   exact h2.symm
 
-open Classical in
 
+open Classical in
 def epsW (D : D7) (j : ℕ) : ℤˣ := if ∃ hI : DatInt D j, DomFor D j (intForm (efQ D j) hI) then 1 else -1
 
 theorem epsW_coe (D : D7) (j : ℕ) : ((epsW D j : ℤˣ) : ℤ) = sgnW D j := by
@@ -189,8 +228,8 @@ theorem inR_one (D : D7) : InR D 1 := by
   unfold InR
   exact ⟨le_refl 1, le_trans (by norm_num) D.R.two_le_m⟩
 
-open Classical in
 
+open Classical in
 def datumAtLift (D : D7) (hU) (hDat : ∀ j, InR D j → ∃ hI : DatInt D j, DatLaws D j hI) (j : ℕ) :
     Datum (hostOf D hU) :=
   if h : InR D j then datumOf D j (hDat j h).choose (hDat j h).choose_spec
@@ -208,26 +247,5 @@ theorem datumAtLift_pq_pos (D : D7) (hU) (hDat : ∀ j, InR D j → ∃ hI : Dat
   · show 1 ≤ (D.R.sigW 1).1 + (D.R.sigW 1).2
     simp only [Ranks.sigW]
     omega
-
-theorem exists_par_pins (D : D7) (hB : UnramBridge) (hF : OFull D) (hz : OZeta D)
-    (hDat : ∀ j, InR D j → ∃ hI : DatInt D j, DatLaws D j hI) (hN : N1ab) : ∃ Q : Par D, Q.Pins := by
-  let hU := hB D.host.E (cmUnram_conj D)
-  let Q : Par D :=
-    { H := hostOf D hU
-      l := levelG D (hU := hU)
-      c := coeffFieldOfRecord D (hU := hU) hz
-      Dw := datumAtLift D hU hDat
-      Xo := fun j => Classical.choice (hN D.host.E (hostOf D hU) (datumAtLift D hU hDat j) (levelG D (hU := hU))
-        (datumAtLift_pq_pos D hU hDat j))
-      eO := eOf D hF }
-  refine ⟨Q, ⟨rfl, rfl, rfl, tauEmb_sqrt D⟩, levelG_M D hU, eOf_spec D hF, fun j hj => ?_⟩
-  show IsDatW D j (datumAtLift D hU hDat j)
-  unfold datumAtLift
-  rw [dif_pos hj]
-  exact isDatW_datumOf D hU j _ _
-
-theorem exists_parameter_conditions (D : D7) (hF : OFull D) (hz : OZeta D)
-    (hDat : ∀ j, InR D j → ∃ hI : DatInt D j, DatLaws D j hI) (hN : N1ab) : ∃ Q : Par D, Q.Pins :=
-  exists_par_pins D unramBridge hF hz hDat hN
 
 end Formalism.L2.Pj

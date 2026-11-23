@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenNearMul
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenNearMul
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -65,7 +114,7 @@ def locMul (hW : W ≤ Module.annihilator (MRingOver S ι) M) :
       induction y with | h m t =>
       rw [LocalizedModule.mk_add_mk, locMulFun_mk, locMulFun_mk, locMulFun_mk, LocalizedModule.mk_add_mk]
       refine LocalizedModule.mk_eq.mpr ⟨1, ?_⟩
-      simp only [Submonoid.smul_def, Submonoid.coe_mul, one_smul, map_add, map_smul,
+      simp only [Submonoid.smul_def, Submonoid.coe_mul, one_smul, map_add (f := _), map_smul,
         LinearMap.add_apply, LinearMap.smul_apply, smul_add, smul_smul]
       module)
     (by
@@ -81,7 +130,7 @@ def locMul (hW : W ≤ Module.annihilator (MRingOver S ι) M) :
       induction y₂ with | h m₂ t₂ =>
       rw [LocalizedModule.mk_add_mk, locMulFun_mk, locMulFun_mk, locMulFun_mk, LocalizedModule.mk_add_mk]
       refine LocalizedModule.mk_eq.mpr ⟨1, ?_⟩
-      simp only [Submonoid.smul_def, Submonoid.coe_mul, one_smul, map_add, map_smul,
+      simp only [Submonoid.smul_def, Submonoid.coe_mul, one_smul, map_add (f := _), map_smul,
         smul_add, smul_smul]
       module)
     (by
@@ -128,7 +177,7 @@ theorem act_mem (hW : W ≤ Module.annihilator (MRingOver S ι) M) {𝓜 : (K �
     funext k
     simp [hc k]
   | zero => rw [map_zero, LinearMap.zero_apply]; exact zero_mem _
-  | add a₁ a₂ _ _ h₁ h₂ => rw [map_add, LinearMap.add_apply]; exact add_mem h₁ h₂
+  | add a₁ a₂ _ _ h₁ h₂ => rw [map_add (f := _), LinearMap.add_apply]; exact add_mem h₁ h₂
   | smul s a _ h => rw [act_smulS]; exact Submodule.smul_mem _ s h
 
 theorem locMul_mem (hW : W ≤ Module.annihilator (MRingOver S ι) M) {𝓜 : (K → ℤ) → Submodule S M}
@@ -154,7 +203,7 @@ theorem locMul_mem (hW : W ≤ Module.annihilator (MRingOver S ι) M) {𝓜 : (K
     | add y₁ y₂ _ _ h₁ h₂ => rw [map_add]; exact add_mem h₁ h₂
     | smul c y _ h => rw [(locMul_smulS T hW c x y).2]; exact Submodule.smul_mem _ c h
   | zero => rw [map_zero, LinearMap.zero_apply]; exact zero_mem _
-  | add x₁ x₂ _ _ h₁ h₂ => rw [map_add, LinearMap.add_apply]; exact add_mem h₁ h₂
+  | add x₁ x₂ _ _ h₁ h₂ => rw [map_add (f := _), LinearMap.add_apply]; exact add_mem h₁ h₂
   | smul c x _ h => rw [(locMul_smulS T hW c x y).1]; exact Submodule.smul_mem _ c h
 
 theorem cechD_zero_apply_uniform (I : KH.Cell K ι 1) :
@@ -209,8 +258,8 @@ theorem cechD_zero_apply_uniform (I : KH.Cell K ι 1) :
     by unfold KH.faceSign; exact neg_one_pow_eq_or ℤ _, fun N _ _ f => ?_⟩
   change (∑ k : K, ∑ i ∈ I.1 k, _ :
     KH.CechC S ι N 0 →ₗ[MRingOver S ι] LocalizedModule (KH.cellMon S I.1) N) f = _
-  rw [Finset.sum_eq_single k₀, Finset.sum_eq_add_of_mem x y hx hy hxy, dif_pos (hface x hx),
-    dif_pos (hface y hy)]
+  rw [Finset.sum_eq_single k₀, Finset.sum_eq_add_of_mem x y hx hy hxy, dite_eq_left (hface x hx),
+    dite_eq_left (hface y hy)]
   · rw [hsign, LinearMap.add_apply]
     change KH.faceSign I.1 k₀ x • (KH.cellRes S N _ I.1 (f _)) +
       (-KH.faceSign I.1 k₀ x) • (KH.cellRes S N _ I.1 (f _)) = _
@@ -302,7 +351,7 @@ theorem exists_div (hW : W ≤ Module.annihilator (MRingOver S ι) M) {𝓜 : (K
   | add x₁ x₂ _ _ h₁ h₂ =>
     obtain ⟨y₁, hy₁, e₁⟩ := h₁
     obtain ⟨y₂, hy₂, e₂⟩ := h₂
-    exact ⟨y₁ + y₂, add_mem hy₁ hy₂, by rw [map_add, e₁, e₂]⟩
+    exact ⟨y₁ + y₂, add_mem hy₁ hy₂, by rw [map_add (f := _), e₁, e₂]⟩
   | smul c x _ h =>
     obtain ⟨y, hy, e⟩ := h
     exact ⟨c • y, Submodule.smul_mem _ c hy, by rw [(locMul_smulS _ hW c _ y).2, e]⟩
@@ -340,8 +389,6 @@ theorem GenNearMul.proof : GenNearMul.Statement := by
       (GenTwistGenerated.isMultiHomog_mul (GenNearMul.isMultiHomog_pow hf b) (GenNearMul.isMultiHomog_pow hg a))
       (hp (finProdFinEquiv.symm i).1)) (hq (finProdFinEquiv.symm i).2)
     convert h1 using 1
-    funext k
-    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
     ring
   · rw [← hxy]
     have key : ((f * g) ^ (a + b) * (t * t')) • GenNearMul.locMul _ hW
@@ -354,6 +401,7 @@ theorem GenNearMul.proof : GenNearMul.Statement := by
       congr 1
       ring
     rw [key, hwu, hyz]
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, Finset.smul_sum, smul_smul]
     rw [← Equiv.sum_comp finProdFinEquiv]
     simp only [Equiv.symm_apply_apply, Fintype.sum_prod_type, GenNearMul.prodCochain]

@@ -1,5 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsPhiBridge
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcLenThreeThickLetters
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsPhiBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+
+@[expose] public section
 
 open scoped TensorProduct
 
@@ -37,7 +83,7 @@ theorem letE_mul_self (a : ZMod n) : (letE a : LetA O n) * letE a = letE a := by
 theorem ea_add (a : ZMod n) (F F' : PowerSeries O) : ea Br a (F + F') = ea Br a F + ea Br a F' := by
   have h : Br.cst (F + F') = Br.cst F + Br.cst F' := funext fun _ => map_add Br.ι F F'
   unfold Formalism.MainNotions.N.FrobeniusPowerSeries.ArcLengthThreeFiltration.ea
-  rw [h, mul_add, map_add]
+  rw [h, mul_add, map_add (f := _)]
 
 theorem ea_zero (a : ZMod n) : ea Br a 0 = 0 := by
   have h : Br.cst 0 = 0 := funext fun _ => map_zero Br.ι
@@ -69,6 +115,7 @@ theorem ea_sum (a : ZMod n) {ι : Type*} (s : Finset ι) (F : ι → PowerSeries
     rw [Finset.sum_apply]
     exact map_sum Br.ι F s
   unfold Formalism.MainNotions.N.FrobeniusPowerSeries.ArcLengthThreeFiltration.ea
+
   rw [h1, Finset.mul_sum, map_sum]
 
 theorem ea_inj (a : ZMod n) {F F' : PowerSeries O} (h : ea Br a F = ea Br a F') : F = F' := by
@@ -107,22 +154,7 @@ theorem inFr_ea (a : ZMod n) {N D : PowerSeries O} {f : W.EE} (h : InFr W a (Br.
 theorem p_zero : Br.P.p 0 = X := rfl
 
 theorem ps_cst (s : ℕ) : ps W s = Br.cst (Br.P.p s) := by
-  induction s with
-  | zero =>
-    unfold Formalism.MainNotions.ArcLiftingSetup.ps
-    rw [pow_zero, AlgHom.one_apply]
-    funext i
-    show W.π₀₁ + ((PD.p : ℕ) : PowerSeries O) = Br.ι X
-    rw [Br.ι_X, map_natCast]
-  | succ s ih =>
-    unfold Formalism.MainNotions.ArcLiftingSetup.ps at ih ⊢
-    rw [pow_succ', AlgHom.mul_apply, ih]
-    funext i
-    show W.φ₀ (Br.ι (Br.P.p s)) = Br.ι (Br.P.p (s + 1))
-    rw [← Br.ι_φ]
-    congr 1
-    show Br.P.φ ((Br.P.φ : PowerSeries O → PowerSeries O)^[s] X) = (Br.P.φ : PowerSeries O → PowerSeries O)^[s + 1] X
-    rw [Function.iterate_succ_apply']
+  apply Formalism.MainNotions.N.FrobeniusPowerSeries.PhiBridge.ps_eq <;> assumption
 
 theorem prod_two_levels_eq_const (F : ℕ → ℕ) :
     (∏ s ∈ Finset.range 2, ps W s ^ F s) = Br.cst (X ^ F 0 * Br.P.p 1 ^ F 1) := by

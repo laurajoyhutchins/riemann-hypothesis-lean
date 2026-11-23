@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveCrystalHodgeLiftClasses
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveCrystalHodgeLiftClasses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj DividedPowers
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.DeRham GlobalTheory.SqLift GlobalTheory.Published GlobalTheory.Published.GrothendieckMessing
@@ -28,7 +67,25 @@ theorem filtration_reduction : AbelianDeRham → ∀ (R R₁ R₀ : Type) [CommR
     intro d d₁
     refine ⟨fun H' c' ↦ ?_, fun H' ↦ crysToDR_corr κ h h₁ M (redMor h₂) e' H'⟩
     obtain ⟨c, rfl⟩ := hs c'
-    have k := (liftMor κ h).comp M
+    have k : GrpMor (dp0 R) (𝟙 (Sp R)) A κ₁ (spMap π₁) A₀
+        (ρ.comp (RingHom.id R)) (𝟙 _ ≫ spMap π) (𝟙 _ ≫ i) := by
+      let m := liftMor κ h
+      refine ⟨IsDPMorphism.comp _ M.dp m.dp, ?_, ?_, ?_⟩
+      · rw [Category.assoc, m.base, ← Category.assoc, M.base, Category.assoc, Cris.spMap_comp]
+      · rw [Category.assoc, m.w, ← Category.assoc, M.w, Category.assoc]
+      · intro T x y x₀ y₀ hx hy
+        let x₁ : Over.mk (T.hom ≫ 𝟙 _) ⟶ A₀ := Over.homMk (x.left ≫ 𝟙 _) (by
+          simp only [Over.mk_hom, Category.assoc]; rw [M.w, reassoc_of% (Over.w x)])
+        let y₁ : Over.mk (T.hom ≫ 𝟙 _) ⟶ A₀ := Over.homMk (y.left ≫ 𝟙 _) (by
+          simp only [Over.mk_hom, Category.assoc]; rw [M.w, reassoc_of% (Over.w y)])
+        let x₂ : Over.mk ((Over.mk (T.hom ≫ 𝟙 _)).hom ≫ spMap π) ⟶ A := Over.homMk x₀.left (by simpa using Over.w x₀)
+        let y₂ : Over.mk ((Over.mk (T.hom ≫ 𝟙 _)).hom ≫ spMap π) ⟶ A := Over.homMk y₀.left (by simpa using Over.w y₀)
+        have h₁ : (x₁ * y₁).left = (x * y).left ≫ 𝟙 _ := M.mul T x y x₁ y₁ rfl rfl
+        have h₂ : (x₂ * y₂).left = (x₁ * y₁).left ≫ i :=
+          m.mul _ x₁ y₁ x₂ y₂ (by simp [x₂, x₁, hx]) (by simp [y₂, y₁, hy])
+        have h₃ : (x₀ * y₀).left = (x₂ * y₂).left := by
+          simp only [Hom.mul_def, Over.comp_left, Over.lift_left, x₂, y₂, Over.homMk_left]
+        rw [h₃, h₂, h₁, Category.assoc]
     rw [GrpMor.pull_pull (liftMor κ h) M k (fun _ ↦ rfl) rfl c,
       ← GrpMor.pull_pull (redMor h₂) (liftMor κ₁ h₁) k (fun _ ↦ rfl) e' c]
     exact H' c

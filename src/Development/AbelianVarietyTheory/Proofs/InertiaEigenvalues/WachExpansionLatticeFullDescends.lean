@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -232,7 +277,7 @@ theorem phi_mem (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (i : ZMod n) (x
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [actVB, φVB, PD.φ_comm]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have a2 : ∀ (c : K₀) (y : T.V ⊗[Qp] B),
       mulVB (K₀ := K₀) (B := B) (V := T.V) (LL := LL) (PD.σ c) (φVB PD (LL := LL) (V := T.V) y) =
       φVB PD (LL := LL) (V := T.V) (mulVB (K₀ := K₀) (B := B) (V := T.V) (LL := LL) c y) := by
@@ -240,7 +285,7 @@ theorem phi_mem (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (i : ZMod n) (x
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [mulVB, φVB, PD.φ_K₀]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   refine ⟨fun g => by rw [a1, h1], fun c => ?_⟩
   obtain ⟨c, rfl⟩ := PD.σ_bij.2 c
   have h3 := DFunLike.congr_fun (W.emb_σ (i - 1)) c
@@ -257,8 +302,8 @@ theorem lev_q_ne (W : LocWach PD LL O v n) (i : ZMod n) (ζ : LL)
     funext a
     simpa [letπ, LocWach.q] using W.q₀_def
   have h4 := congrArg (W.lev i ζ) h3
-  rw [map_mul, h, mul_zero, map_sub, map_pow, map_add, map_one, h2] at h4
-  have h5 := congrArg (fun f => PowerSeries.constantCoeff (PowerSeries.derivative LL f)) h4
+  rw [map_mul, h, mul_zero, map_sub, map_pow, map_add (f := _), map_one, h2] at h4
+  have h5 := congrArg (fun f => PowerSeries.constantCoeff (PowerSeries.derivative (R := LL) f)) h4
   simp [Derivation.leibniz_pow, h0, h1, hz, p_ne W] at h5
 
 theorem root_pow {ζ : LL} {p : ℕ} (hp : p.Prime) (hζ : ∃ j : ℕ, IsPrimitiveRoot ζ (p ^ j)) :
@@ -312,7 +357,7 @@ theorem pow_mem (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) {M : Type} [Add
     { carrier := {x | e x ∈ Λ}
       zero_mem' := by simp
       add_mem' := fun {a b} ha hb => by
-        simp only [Set.mem_setOf_eq, map_add] at ha hb ⊢
+        simp only [Set.mem_setOf_eq, map_add (f := _)] at ha hb ⊢
         exact Λ.add_mem ha hb
       smul_mem' := fun a x hx => hs a x hx }
   let U' : Submodule (LetA O n) (W.DD T) := U.map (W.N T).subtype
@@ -382,7 +427,7 @@ theorem full_down_generic (W : LocWach PD LL O v n) {RW : Type} [CommRing RW] [A
 
 end Generic
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem full_down : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; let E := ((F l).E K s LL h).tie; let C := Cm l; ∀ T : Lt K LL, IsCrys ((D.loc l).PD K) T.ρ → ∀ (i : Let K) (ζ : ↥LL.1), (∃ j : ℕ, IsPrimitiveRoot ζ (l ^ j)) → Full (Di (HW l) h T i) (Lat C h T i ζ) → Full (Di (HW l) h T (i - 1)) (Lat C h T (i - 1) (ζ ^ l)) := by
   intro D HW F Cm l _ K s LL h W E C T hT i ζ hζ hF

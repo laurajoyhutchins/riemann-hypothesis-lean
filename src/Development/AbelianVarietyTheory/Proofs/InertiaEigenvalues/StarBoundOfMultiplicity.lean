@@ -1,21 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoAndThreeForFamily
-import Development.AutomorphicArithmetic.CyclotomicBounds.CyclotomicOrders.NuHost
-import Formalism.SharpRestriction.GlobalTheoremInputs
-import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.JointConditionTameBound
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CrysOnCond
-import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
-import Formalism.SharpRestriction.LevelLetterCocycles.RamifiedCoefficientChains
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BaseSizes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitBoundOfParamsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChebotarevDegreeOne
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.SemisimpleDecompositionOf
-import Formalism.SharpRestriction.LevelLetterCocycles.EndomorphismIndexBound
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.TwoPowS0EqTwoPartModulus
-import Formalism.SharpRestriction.LevelLetterCocycles.NEqRZeroMulXPow
-import Formalism.SharpRestriction.LevelLetterCocycles.PairedCharacterCondition
-import Formalism.SharpRestriction.ElevenLe
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.PairedCharacterCondition
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoThreeFamily
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
+public import Formalism.SharpRestriction.LevelLetterCocycles.NEqRZeroMulXPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations GlobalTheory.NLink
 
 noncomputable section
@@ -81,8 +109,8 @@ end GlobalTheory.NLinkTyp
 
 namespace GlobalTheory.NLinkTyp
 
-open Classical in
 
+open Classical in
 theorem starH_of_local {D : D7} (L : SizeData₂ D) (C : ℝ)
     (hloc : ∀ i : D.nd.Loc, TwistedPlaces.TwLoc D i → D.nd.l i ∈ TwistedPlaces.gset D →
       (D.nd.etaLoc i : ℝ) ≤ ∑ π ∈ D.nd.Zgood i, (D.nd.mult i π : ℝ) *
@@ -166,7 +194,8 @@ theorem rhs_le {D : D7} (L : SizeData₂ D) (P : ParameterChoice' D L) (X : Kill
     have h1 := LargeLevelLemmas.vdel_le (D := D) i
     rw [UpperTheory.Small.localLevel_eq_one_of_not_mem_smallPrimes D.nd i hl2] at h1
     have h2 : (padicValNat (D.nd.l i) D.R.t.factorial : ℚ) ≤ D.R.t := by
-      exact_mod_cast padicValNat_factorial_le (D.nd.l i) D.R.t
+      rw [Nat.padicValNat_def]
+      exact_mod_cast multiplicity_factorial_le (D.nd.l i) D.R.t
     have h3 : D.nd.vdel i ≤ 2 * (D.R.t : ℚ) := by push_cast at h1; linarith
     exact_mod_cast h3
   have hS := typePrime_size_terms_le_elementary (D.R.n : ℝ) D.R.t D.R.r D.R.nV D.R.f L.etaSz (X.eta : ℝ) (D.nd.vdel i : ℝ) constantSecondHub C1 L.sc.x
@@ -192,78 +221,8 @@ theorem g_two_lt {D : D7} (L : SizeData₂ D) (hG : SizeG L) (k : Fin 2) : 2 < D
   have : (2 : ℝ) < D.host.g k := by nlinarith
   exact_mod_cast this
 
-theorem etaLoc_le_rhs (hPr : Hypotheses₂) (D : D7) (L : SizeData₂ D) (P : ParameterChoice' D L) (nch : NChoice D) (HW : HWOf D.loc)
-    (F : FonOf D.loc D.locA HW) (X : KillingConditions.HubData D) (C₂ : ℝ) (hS : Setup L nch HW X C₂) (constantSecondHub : ℝ) (CT : ℕ)
-    (hCT : (CT : ℝ) ≤ L.sc.b) (h68 : PairedCharacterCondition.aux₃ (D := D) constantSecondHub CT) (hG : SizeG L)
-    (i : D.nd.Loc) (hi : TwistedPlaces.TwLoc D i) (k k' : Fin 2) (hkk : k ≠ k') (hlk : D.nd.l i = D.host.g k) :
-    (D.nd.etaLoc i : ℝ) ≤ ∑ π ∈ D.nd.Zgood i, (D.nd.mult i π : ℝ) * PairedCharacterCondition.rhs constantSecondHub X.eta i (X.ρ i) π := by
-  by_cases hHG : HG D.nd D.naut i
-  · have hX := GlobalTheory.T.split_bound_of_params hPr.font hPr.fin GlobalTheory.Published.cheb_holds D L HW F (rowC C₂) nch X 120 CT hS.canon P
-      (by linarith [hS.big]) (by norm_num) hCT (hS.facts.admJ L hS.par) hS.par67 hS.facts.toCore.admA
-      hS.facts.Conclusion1.1 hS.facts.Conclusion1.2.2 hS.facts.Conclusion2.1 hS.facts.Conclusion2.2.2 hS.facts.rhoBar hS.facts.large.2.1
-      hS.facts.large.2.2 hS.facts.nct hS.facts.trip hS.facts.same hS.facts.block hS.facts.muUnr hS.facts.depthG
-    obtain ⟨-, -, -, -, -, -, -, -, -, -, -, hT, -⟩ := hX
-    obtain ⟨hgood, hZρ, s, S, sg, U, hs, hCTg, hsg, hHJ, hSQ⟩ := hT i k hi hlk hHG
-    have hAN : SumRepresentations.adm5 D := hS.facts.toCore.admA.2.2.2.2.2.2
-    have hl2 : 2 < D.nd.l i := hlk ▸ g_two_lt L hG k
-    have hodd : Odd (D.nd.l i) := (D.nd.lPrime i).out.odd_of_ne_two (by omega)
-    have hlog : Real.log (D.host.g k' : ℝ) ≤ 2 * Real.log (D.host.g k : ℝ) := by
-      have h1 := (hG k' k).2.1
-      have hg0 : (0 : ℝ) < D.host.g k' := by exact_mod_cast (D.host.g_prime k').pos
-      have hg2 : (2 : ℝ) ≤ D.host.g k := by exact_mod_cast (D.host.g_prime k).two_le
-      have h2 := Real.log_le_log hg0 h1
-      rw [Real.log_mul (by norm_num) (by linarith)] at h2
-      have h3 : Real.log 2 ≤ Real.log (D.host.g k : ℝ) := Real.log_le_log (by norm_num) hg2
-      linarith
-    have hsha : ∀ e ∈ Finset.Ioo 0 D.R.t, Formalism.GaloisCohomology.shaLen (D.nd.ldat (D.nd.l i)) (e : ℤ) < ⊤ := by
-      intro e he
-      rw [Finset.mem_Ioo] at he
-      exact lt_top_iff_ne_top.2 (hS.sha (D.nd.l i) e he.1 he.2)
-    exact h68 i k k' hkk hlk (X.r i) (X.ρ i) hgood
-      (fun π hπ => semisimple_decomposition_of D i (X.r i) (X.ρ i) π hAN hgood (hZρ π hπ).1 (hZρ π hπ).2)
-      X.eta s S sg U hs hlog hCTg hsg hHJ hSQ (fun π hπ => ((hS.kill i hi).1 π hπ).1) hsha
-  · have hZ : D.nd.Zgood i = ∅ :=
-      Finset.eq_empty_of_forall_notMem fun x hx => hHG ⟨x, (D.Zgood_tie i x).1 hx⟩
-    have hP := TruncatedSeriesCountingIdentities.endomorphism_index_bound i (D.nd.Zgood i) (Formalism.L2.zgoodSub D i) 0 1 one_ne_zero
-      (fun f => by simp) (fun x hx => by rw [hZ] at hx; simp at hx) (fun x _ _ u _ => by simp)
-    rw [← TruncatedSeriesCountingIdentities.Br.etaLoc_eq, hZ, Finset.sum_empty] at hP
-    rw [hZ, Finset.sum_empty]
-    exact_mod_cast hP
-
 end GlobalTheory.NLinkTyp
 
 namespace GlobalTheory.NLinkTyp
-
-theorem main : Hypotheses₂ → ∀ (D : D7) (L : SizeData₂ D) (P : ParameterChoice' D L) (nch : NChoice D) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (X : KillingConditions.HubData D) (C₂ : ℝ), Setup L nch HW X C₂ → ∀ (constantSecondHub C1 : ℝ) (CT : ℕ), 0 ≤ constantSecondHub → 1 ≤ C1 → (CT : ℝ) ≤ L.sc.b → PairedCharacterCondition.aux₃ (D := D) constantSecondHub CT → MultLe L → TwistedPlaces.ParametersPolynomiallyBounded L C1 P → SizeG L → StarH L (2000 * (constantSecondHub + 1) + 5 * C1) := by
-  intro hPr D L P nch HW F _ X C₂ hS constantSecondHub C1 CT hC68 hC1 hCT h68 hmult hpar hG
-  have heta : (X.eta : ℝ) ≤ L.etaSz := by
-    rw [hS.canon.eta]
-    exact Nat.floor_le (by linarith [TwistedPlaces.one_le_eta L P])
-  have hM : ∀ l ∈ TwistedPlaces.gset D, 0 ≤ (2000 * (constantSecondHub + 1) + 5 * C1) * L.sc.x ^ (2000 * (constantSecondHub + 1) + 5 * C1) * L.etaSz +
-      TwistedPlaces.epsL l + TwistedPlaces.VVr D l + TwistedPlaces.vhE D l + TwistedPlaces.epsL l := by
-    intro l _
-    have h1 : 0 ≤ L.sc.x ^ (2000 * (constantSecondHub + 1) + 5 * C1) := Real.rpow_nonneg (by linarith [L.sc.one_lt_alt]) _
-    have h2 : 0 ≤ L.etaSz := by linarith [TwistedPlaces.one_le_eta L P]
-    have h3 : 0 ≤ TwistedPlaces.epsL l := by unfold TwistedPlaces.epsL; positivity
-    have h4 : 0 ≤ TwistedPlaces.VVr D l := by
-      show (0 : ℝ) ≤ ((∑ e ∈ Finset.Ico 1 D.R.t, D.what₂.shaLen l e : ℚ) : ℝ)
-      exact_mod_cast Finset.sum_nonneg fun e _ => D.what₂.shaLen_nonneg l e
-    have h5 : 0 ≤ TwistedPlaces.vhE D l := by unfold TwistedPlaces.vhE; positivity
-    have h6 : 0 ≤ 2000 * (constantSecondHub + 1) + 5 * C1 := by linarith
-    have := mul_nonneg (mul_nonneg h6 h1) h2
-    linarith
-  refine starH_of_local L _ (fun i hi hl => ?_) hM hmult (hS.facts.toCore.a3 L)
-  have hk : ∃ k k' : Fin 2, k ≠ k' ∧ D.nd.l i = D.host.g k := by
-    unfold TwistedPlaces.gset at hl
-    rcases Finset.mem_insert.1 hl with h | h
-    · exact ⟨0, 1, by decide, h⟩
-    · exact ⟨1, 0, by decide, Finset.mem_singleton.1 h⟩
-  obtain ⟨k, k', hkk, hlk⟩ := hk
-  have hl2 : D.nd.l i ≠ 2 := by have := g_two_lt L hG k; omega
-  refine (etaLoc_le_rhs hPr D L P nch HW F X C₂ hS constantSecondHub CT hCT h68 hG i hi k k' hkk hlk).trans ?_
-  refine Finset.sum_le_sum fun π hπ => ?_
-  exact mul_le_mul_of_nonneg_left (rhs_le L P X constantSecondHub C1 hC68 hC1 hpar heta hS.kill i hi
-    (by rw [hlk]; exact UpperTheory.Small.not_mem_of_mod D.host (D.ntypes.g_cond k))
-    (UpperTheory.KStar.nuL_eq_zero_of_g D _ (by rw [hlk]; fin_cases k <;> simp [TwistedPlaces.gset]) hl2) π hπ) (Nat.cast_nonneg _)
 
 end GlobalTheory.NLinkTyp

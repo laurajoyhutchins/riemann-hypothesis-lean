@@ -1,4 +1,51 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsGat
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsOrb
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.IdemMulCompl
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsMain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,25 +110,17 @@ theorem card_stabU (x : GA sp) : Nat.card (StabU L x) = Nat.card (C.stab 0 (clsO
   obtain ⟨h0, rfl⟩ := exists_ratA h hh
   exact (Nat.card_congr ((stabRec _).trans (stabConj _ x h0 κ hκ e))).symm
 
-theorem trivStabU_of_rec (h : ∀ c : C.cls 0, Nat.card (C.stab 0 c) = 1) : TrivStabU L := by
-  intro x γ hγ
-  have h1 : Nat.card (StabU L x) = 1 := by rw [card_stabU, h]
-  have h2 : Subsingleton (StabU L x) := (Nat.card_eq_one_iff_unique.1 h1).1
-  have h3 : x⁻¹ * ratA sp (1 : UJ (sp.cm.sig : E →+* E) sp.gram0) * x ∈ KA L := by
-    rw [map_one, mul_one, inv_mul_cancel]; exact (KA L).one_mem
-  exact congrArg Subtype.val (h2.elim (⟨γ, hγ⟩ : StabU L x) ⟨1, h3⟩)
-
 variable (hS : HidaSetting p n' W Qq O Kf ι σ j w) (r : ℕ)
     (lam0 : Fin nV → Fin n' → Fin (m + 1) → ℤ) (dom : ∀ v, IsDominant (lam0 v)) (hk : m + 1 = R.k)
     (I : LocId L p nV W Qq) (ψ : Formalism.L2.Herm.awayFrom₂ L p →* Oˣ) (e : ℕ) (hdet : IsUnit sp.gram0.det) (hH : HypAtP I)
 
-include hH in
 
+include hH in
 theorem fix_iff (i : compL L p) (g : Fin nV → GL (Fin (m + 1)) Qq) (γ : UJ (sp.cm.sig : E →+* E) sp.gram0) :
     (repP L p i * jQ I hdet hk g)⁻¹ * ratA sp γ * (repP L p i * jQ I hdet hk g) ∈ KA L ↔
       γ ∈ gamC sp.cm.sig sp.gram0 (Formalism.L2.Herm.awayFrom₂ L p) (repP L p i).1 ∧
         (fun v => gMap W (prP I hk (ratA sp γ) v) (tupOf W g v)) = tupOf W g := by
-  refine ((fibP I hdet hk hH).stab_iff (HA sp) (repP L p) (prP_repP I hk) i g (ratA sp γ)).trans
+  refine ((fibP I hdet hk hH).stab_iff (HA sp) (repP L p) (prP_repP I hk) i g (ratA sp γ) (prP_repP I hk)).trans
     (and_congr (mem_gamC_iff (repP L p i) γ).symm ?_)
   show g⁻¹ * (prP I hk (ratA sp γ) * g) ∈ _ ↔ _
   rw [← tupOf_eq_iff]
@@ -90,8 +129,8 @@ theorem fix_iff (i : compL L p) (g : Fin nV → GL (Fin (m + 1)) Qq) (γ : UJ (s
     exact gMap_mul W _ _ _
   rw [this]
 
-include hH in
 
+include hH in
 def fixEquiv (i : compL L p) (y : GL (Fin R.k) (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) (hy : y = (repP L p i).1)
     (g : Fin nV → GL (Fin (m + 1)) Qq) :
     {γ : gamC sp.cm.sig sp.gram0 (Formalism.L2.Herm.awayFrom₂ L p) y //

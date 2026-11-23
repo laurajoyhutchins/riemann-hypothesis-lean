@@ -1,11 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.PartFixed
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsVacFOfIsVacVec
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaSquareIntegrable
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FourierInversionZeroCompactQuotientSummable
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FourierInversionZeroCompactQuotient
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AeZeroOfSmall
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisThetaLaws
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AeZeroOfSmall
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HomSymplecticHalfFormAlgebraicLawsContinuous
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisThetaLaws
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FourierInversionZeroCompactQuotient
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FourierInversionZeroCompactQuotientSummable
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaSquareIntegrable
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.NatCastSmulMemHatL
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TowerEx
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows
 open scoped TensorProduct
@@ -73,8 +125,8 @@ theorem rat_eq_zero_of_inf {x : WO S T} (hx : x ∈ ratL T S) (h0 : ∀ i j, inf
   show incA D (m i j) = 0
   rw [e, map_zero]
 
-open GlobalTheory.ThetaAllChar in
 
+open GlobalTheory.ThetaAllChar in
 theorem chiR_eq_zero {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsCharAF D.host.F ψ) (γ : ratL T S)
     (h : ∀ x, chiR ψ S T γ x = 1) : γ = 0 := by
   have hall : ∀ c : AF D.host.F, (c • (γ : WO S T)) ∈ ratL T S := by
@@ -92,8 +144,8 @@ theorem chiR_eq_zero {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsCharAF D.host.F �
     rw [← one_smul (AF D.host.F) (γ : WO S T), ← add_sub_cancel (GlobalTheory.FinTranslate.eInf D) 1, add_smul, h1, h2, add_zero]
   exact Subtype.ext h3
 
-open GlobalTheory.ThetaAllChar in
 
+open GlobalTheory.ThetaAllChar in
 theorem sum_coef_mul_translate : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D ψ (-1) → ∀ (S T : HSp D) (μ : Measure (WO S T)) (𝓕 : Set (WO S T)), IsCovolOne (ratL T S) μ 𝓕 → ∀ f f₀ : WO S T → ℂ, IsThetaFunO ψ S T f → IsThetaFunO ψ S T f₀ → ∀ w x : WO S T, Summable (fun γ : ratL T S => ‖thPair μ 𝓕 f (heisO ψ S T ((γ : WO S T) + w) f₀)‖) → ∑' γ : ratL T S, thPair μ 𝓕 f (heisO ψ S T ((γ : WO S T) + w) f₀) * heisO ψ S T ((γ : WO S T) + w) f₀ x = f x * star (heisO ψ S T w f₀ x) * heisO ψ S T w f₀ x := by
   intro D ψ hψ S T μ 𝓕 hc f f₀ hf hf₀ w x hs
   obtain ⟨hμ, h𝓕, h1⟩ := hc
@@ -128,9 +180,10 @@ theorem sum_coef_mul_translate : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), 
     intro γ
     rw [thPair, hb γ, hIdef, ← integral_const_mul]
     congr 1
-    funext z
-    simp only [chiR, AddSubgroup.coe_neg, hFdef]
+    funext a
+    simp only [hFdef, chiR]
     rw [star_mul, star_mul, star_psi hn, neg_neg, star_chi hn]
+    simp only [AddSubgroup.coe_neg]
     ring
   have hJ : ∀ γ : ratL T S, J (-γ) = chi ψ S T γ x * I γ := by
     intro γ
@@ -162,7 +215,7 @@ theorem sum_coef_mul_translate : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), 
     exact (Equiv.neg (ratL T S)).summable_iff.1 h2
   have hinv := GlobalTheory.SeparatingCharacters.tsum_coefficients_eq_value_zero (WO S T) (ratL T S) K hK hcov
     (ratL T S) (chiR ψ S T) lc lx la l0 ln lker (fun a ha => chiR_eq_zero hψ.1 a ha) μ 𝓕 hμ h𝓕 h1 Φ
-    (hFc.comp (continuous_add_right x)) (fun γ hγ z => by simp only [hΦdef, add_assoc, hFp γ hγ]) hsJ
+    (hFc.comp (continuous_id.add continuous_const)) (fun γ hγ z => by simp only [hΦdef, add_assoc, hFp γ hγ]) hsJ
   simp only [hkey]
   have hre : ∑' γ : ratL T S, J (-γ) = ∑' a, J a := by
     have e := (Equiv.neg (ratL T S)).tsum_eq J

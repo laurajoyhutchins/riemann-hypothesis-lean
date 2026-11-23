@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTotalBiChains
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConeContractingHomotopy
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DTCompDT
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTotalBiChains
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConeContractingHomotopy
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory Limits Opposite AlgebraicTopology GlobalTheory.EZ
 universe u v
 
@@ -41,38 +91,7 @@ theorem alt_double_sum {M : Type*} [AddCommGroup M] (n : ℕ)
     (F : (SimplexCategory.mk n ⟶ SimplexCategory.mk (n + 2)) → M) :
     ∑ i ∈ Finset.range (n + 3), ∑ j ∈ Finset.range (n + 2),
       ((-1 : ℤ) ^ i * (-1) ^ j) • F (fc (n + 1) n j ≫ fc (n + 2) (n + 1) i) = 0 := by
-  rw [← Finset.sum_product']
-  refine Finset.sum_involution (fun x _ => if x.2 < x.1 then (x.2, x.1 - 1) else (x.2 + 1, x.1)) ?_ ?_ ?_ ?_
-  · rintro ⟨i, j⟩ h
-    simp only [Finset.mem_product, Finset.mem_range] at h
-    dsimp only
-    split_ifs with hji
-    · dsimp only
-      rw [fc_comp_fc n i j hji (by omega), ← add_smul]
-      obtain ⟨i', rfl⟩ : ∃ i', i = i' + 1 := ⟨i - 1, by omega⟩
-      rw [show i' + 1 - 1 = i' by omega, pow_succ]
-      ring_nf
-      simp
-    · dsimp only
-      rw [fc_comp_fc n (j + 1) i (by omega) (by omega), show j + 1 - 1 = j by omega, ← add_smul, pow_succ]
-      ring_nf
-      simp
-  · rintro ⟨i, j⟩ _ _
-    dsimp only
-    split_ifs <;> simp only [ne_eq, Prod.mk.injEq] <;> omega
-  · rintro ⟨i, j⟩ h
-    simp only [Finset.mem_product, Finset.mem_range] at h ⊢
-    split_ifs <;> simp only <;> omega
-  · rintro ⟨i, j⟩ _
-    by_cases h : j < i
-    · simp only [h, if_true]
-      rw [if_neg (by omega)]
-      simp only [Prod.mk.injEq, and_true, true_and]
-      omega
-    · simp only [h, if_false]
-      rw [if_pos (by omega)]
-      simp only [Prod.mk.injEq, and_true, true_and]
-      omega
+  apply GlobalTheory.EZ.TotSq.alt_double_sum <;> assumption
 
 theorem dH_comp_dH (a b x y c d : ℕ) : dH a b x y ≫ dH x y c d = 0 := by
   unfold dH
@@ -112,38 +131,7 @@ theorem dH_comp_dV (c d : ℕ) :
 
 theorem dT_comp_dT (a b c d k : ℕ) (hk : c + d = k) :
     ∑ x ∈ Finset.HasAntidiagonal.antidiagonal (k + 1), dT a b x.1 x.2 ≫ dT x.1 x.2 c d = 0 := by
-  subst hk
-  have hsplit : ∀ x : ℕ × ℕ, dT a b x.1 x.2 ≫ dT x.1 x.2 c d =
-      ((-1 : ℤ) ^ x.1) • (dH a b x.1 x.2 ≫ dV x.1 x.2 c d) +
-        ((-1 : ℤ) ^ a) • (dV a b x.1 x.2 ≫ dH x.1 x.2 c d) := by
-    intro x
-    simp only [dT, Preadditive.add_comp, Preadditive.comp_add, Preadditive.zsmul_comp, Preadditive.comp_zsmul,
-      dH_comp_dH, dV_comp_dV, smul_zero, zero_add, add_zero]
-    rw [add_comm]
-  simp_rw [hsplit, Finset.sum_add_distrib]
-  have hm1 : (c, d + 1) ∈ Finset.HasAntidiagonal.antidiagonal (c + d + 1) := by
-    rw [Finset.HasAntidiagonal.mem_antidiagonal]; omega
-  have hm2 : (c + 1, d) ∈ Finset.HasAntidiagonal.antidiagonal (c + d + 1) := by
-    rw [Finset.HasAntidiagonal.mem_antidiagonal]; omega
-  rw [Finset.sum_eq_single_of_mem (c, d + 1) hm1 ?_, Finset.sum_eq_single_of_mem (c + 1, d) hm2 ?_]
-  · dsimp only
-    by_cases h : a = c + 1 ∧ b = d + 1
-    · obtain ⟨rfl, rfl⟩ := h
-      rw [dH_comp_dV c d, ← add_smul, pow_succ]
-      simp
-    · have e1 : dH a b c (d + 1) = 0 := by unfold dH; rw [if_neg h]
-      have e2 : dV a b (c + 1) d = 0 := by unfold dV; rw [if_neg h]
-      rw [e1, e2, zero_comp, zero_comp, smul_zero, smul_zero, add_zero]
-  · rintro ⟨x1, x2⟩ _ hx
-    have : dH x1 x2 c d = 0 := by
-      unfold dH; rw [if_neg]; rintro ⟨rfl, rfl⟩; exact hx rfl
-    dsimp only
-    rw [this, comp_zero, smul_zero]
-  · rintro ⟨x1, x2⟩ _ hx
-    have : dV x1 x2 c d = 0 := by
-      unfold dV; rw [if_neg]; rintro ⟨rfl, rfl⟩; exact hx rfl
-    dsimp only
-    rw [this, comp_zero, smul_zero]
+  apply GlobalTheory.EZ.TotSq.dT_comp_dT <;> assumption
 
 noncomputable def shufRec (cone : ∀ a b n : ℕ, (bo a b ⟶ bo n n) →+ (bo a b ⟶ bo (n + 1) (n + 1))) (n : ℕ) :
     ∀ a b : ℕ, bo a b ⟶ bo n n :=
@@ -178,8 +166,8 @@ theorem exists_shuffle : ∃ G : ∀ a b n : ℕ, bo a b ⟶ bo n n, G 0 0 0 = �
       dsimp only
       rw [hid, Category.comp_id]
       obtain ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ : (a = 0 ∧ b = 1) ∨ (a = 1 ∧ b = 0) := by omega
-      · simp [dT, dH, dV, Finset.sum_range_succ, map_add, map_zsmul, hε]
-      · simp [dT, dH, dV, Finset.sum_range_succ, map_add, map_zsmul, hε]
+      · simp [dT, dH, dV, Finset.sum_range_succ, map_add (f := _), map_zsmul, hε]
+      · simp [dT, dH, dV, Finset.sum_range_succ, map_add (f := _), map_zsmul, hε]
     rw [hr, zero_smul, sub_zero]
   | succ n ih =>
     intro hab

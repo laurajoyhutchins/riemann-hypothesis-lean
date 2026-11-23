@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Skeleton
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Skeleton
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLattice
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +52,7 @@ namespace PI.UnitaryGroupMassFormula.BetaLUniq
 def LineReduce' : Prop :=
   ∀ {E : Type} [Field E] [NumberField E] [StarRing E] (S : HSpace E) (Λ : Submodule (𝓞 E) S.V) {r : ℕ} {T T' : E} (F : LFlag S r T) (F' F'' : LFlag S r T')
     (β₁ β₂ : S.V ≃ₗ[E] S.V) (k : ℕ), finrank E S.V = k + 2 * r + 1 →
-    Submodule.IsLattice E Λ → IsLift Λ F' →
+    Submodule.IsFullLattice E Λ → IsLift Λ F' →
     (finrank E (UUE Λ F F') = 2 * r + 2 ∧ UUE Λ F F' ⊓ orth S (UUE Λ F F') = ⊥) →
     (∀ w ∈ orth S (Xplus F'), S.hT w w = 0 → w ∈ Xsp F') →
     β₁ ∈ Formalism.HermitianLatticesTheory.isom S.hT → β₂ ∈ Formalism.HermitianLatticesTheory.isom S.hT →
@@ -41,7 +82,7 @@ theorem mem_orth_sup {U U' : Submodule E S.V} {v : S.V} :
     rw [mem_orth] at h1 h2 ⊢
     intro x hx
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hx
-    rw [map_add, LinearMap.add_apply, h1 a ha, h2 b hb, add_zero]
+    rw [map_add (f := _), LinearMap.add_apply, h1 a ha, h2 b hb, add_zero]
 
 theorem mem_orth_span {s : Set S.V} {v : S.V} :
     v ∈ orth S (Submodule.span E s) ↔ ∀ x ∈ s, S.hT x v = 0 := by
@@ -50,7 +91,7 @@ theorem mem_orth_span {s : Set S.V} {v : S.V} :
   induction hx using Submodule.span_induction with
   | mem x hx => exact h x hx
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, LinearMap.add_apply, hx, hy, add_zero]
+  | add x y _ _ hx hy => rw [map_add (f := _), LinearMap.add_apply, hx, hy, add_zero]
   | smul c x _ hx => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hx, smul_zero]
 
 theorem mem_orth_span_singleton {z v : S.V} :
@@ -300,10 +341,14 @@ theorem betaLUniq_of' (h1 : GramNondeg) (h2 : AgreeOnH) (h3 : WAniso) (h4 : Line
     (h5 : EigenvalueLastLineOne) : PI.BetaLUniq := by
   intro D u u' Λ F F' F'' β₁ β₂ hF hT' hT'' hG' hG'' hP1 hP2 hs1 hs2
   have hdim := finrank_hS D
-  have n' := h1 (hS D) Λ F F' hF.1 hF.2.2.1 hT'.1 hT'.2.2
-  have n'' := h1 (hS D) Λ F F'' hF.1 hF.2.2.1 hT''.1 hT''.2.2
-  have hH := h2 (hS D) Λ F F' F'' β₁ β₂ D.R.k hF.1 hF.2.2.1 hT''.1 hdim n' n'' hs1 hs2
-  exact h4 (hS D) Λ F F' F'' β₁ β₂ D.R.k hdim hF.1 hT'.1 n' (h3 D u' F') hP1.1.1 hP2.1.1 hP1.2.1
+  have hfull : Submodule.IsFullLattice D.host.E Λ :=
+    { toIsLattice := hF.1
+      span_eq_top := GlobalTheory.LoopC.Base.span_eq_top_of_unimodular
+        (hS D).hT (hS D).herm (hS D).nondeg hF.1 hF.2.1 }
+  have n' := h1 (hS D) Λ F F' hfull hF.2.2.1 hT'.1 hT'.2.2
+  have n'' := h1 (hS D) Λ F F'' hfull hF.2.2.1 hT''.1 hT''.2.2
+  have hH := h2 (hS D) Λ F F' F'' β₁ β₂ D.R.k hfull hF.2.2.1 hT''.1 hdim n' n'' hs1 hs2
+  exact h4 (hS D) Λ F F' F'' β₁ β₂ D.R.k hdim hfull hT'.1 n' (h3 D u' F') hP1.1.1 hP2.1.1 hP1.2.1
     hP2.2.1 hP1.2.2.1 hP2.2.2.1 hH (h5 D u u' Λ F F' F'' β₁ β₂ hF hT' hT'' hG' hG'' hP1 hP2 hs1 hs2)
 
 theorem betaLUniq_of'' (h1 : GramNondeg) (h2 : AgreeOnH) (h3 : WAniso) (h5 : EigenvalueLastLineOne) :

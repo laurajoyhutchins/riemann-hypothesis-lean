@@ -1,5 +1,59 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.StripEntire
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.StripEntire
+public import Mathlib.Topology.Algebra.Module.FiniteDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib.Analysis.Calculus.FDeriv.Comp
+public import Mathlib.Analysis.Calculus.FDeriv.Linear
+public import Mathlib.Analysis.Complex.Trigonometric
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +75,7 @@ theorem isCh_one {Γ P : Subgroup G} {c : G → ℂ} (h : IsCh Γ P c) : c 1 = 1
 
 def fixSp (K Q : Subgroup G) (π : Q →* G') (c₀ : G → ℂ) (ρ : K →* (W →L[ℂ] W)) : Submodule ℂ W where
   carrier := {w | ∀ r : K, ∀ hr : (r : G) ∈ Q, π ⟨r, hr⟩ = 1 → c₀ r • ρ r w = w}
-  add_mem' := fun {a b} ha hb r hr h1 => by rw [map_add, smul_add, ha r hr h1, hb r hr h1]
+  add_mem' := fun {a b} ha hb r hr h1 => by rw [map_add (f := _), smul_add, ha r hr h1, hb r hr h1]
   zero_mem' := fun r _ _ => by simp
   smul_mem' := fun a w hw r hr h1 => by rw [map_smul, smul_comm, hw r hr h1]
 
@@ -30,17 +84,8 @@ variable {Γ K Q : Subgroup G} {Γ' K' : Subgroup G'} {π : Q →* G'} {ι : G' 
 def kι (hL : IsLevi Γ K Q Γ' K' π ι c₀) : K' →* K :=
   (Q.subtype.comp (ι.comp K'.subtype)).codRestrict K (fun m => hL.ιK m m.2)
 
-@[simp] theorem kι_coe (hL : IsLevi Γ K Q Γ' K' π ι c₀) (m : K') : ((kι hL m : K) : G) = ι m := rfl
-
 theorem c₀_mul (hL : IsLevi Γ K Q Γ' K' π ι c₀) (a b : Q) :
     c₀ ((a * b : Q) : G) = c₀ a * c₀ b := hL.par.ch.mul a a.2 b b.2
-
-theorem c₀_inv (hL : IsLevi Γ K Q Γ' K' π ι c₀) (a : Q) : c₀ ((a⁻¹ : Q) : G) = (c₀ a)⁻¹ := by
-  have h := c₀_mul hL a⁻¹ a
-  rw [inv_mul_cancel] at h
-  have h1 : c₀ ((1 : Q) : G) = 1 := isCh_one hL.par.ch
-  rw [h1] at h
-  exact eq_inv_of_mul_eq_one_left h.symm
 
 theorem c₀_ι_left (hL : IsLevi Γ K Q Γ' K' π ι c₀) (m : G') (a : Q) :
     c₀ ((ι m * a : Q) : G) = c₀ a := by
@@ -56,12 +101,12 @@ theorem fix_stable (hL : IsLevi Γ K Q Γ' K' π ι c₀) (ρ : K →* (W →L[�
   set u : K := kι hL m with hu
   have hconj : (((u⁻¹ * r * u : K)) : G) ∈ Q := by
     have : (((u⁻¹ * r * u : K)) : G) = (((ι (m : G'))⁻¹ * ⟨r, hr⟩ * ι (m : G') : Q) : G) := by
-      simp [hu]
+      simp [hu, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
     rw [this]
     exact Subtype.property _
   have hval : (⟨((u⁻¹ * r * u : K) : G), hconj⟩ : Q) = (ι (m : G'))⁻¹ * ⟨r, hr⟩ * ι (m : G') := by
     apply Subtype.ext
-    simp [hu]
+    simp [hu, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
   have hπ : π ⟨((u⁻¹ * r * u : K) : G), hconj⟩ = 1 := by
     rw [hval, map_mul, map_mul, h1, map_inv, hL.sect]
     simp
@@ -117,12 +162,12 @@ theorem am_move (hL : IsLevi Γ K Q Γ' K' π ι c₀) (ρ : K →* (W →L[ℂ]
   set s : K := r * (kι hL m)⁻¹ with hs
   have hsQ : (s : G) ∈ Q := by
     have : (s : G) = ((⟨r, hr⟩ * (ι (π ⟨r, hr⟩))⁻¹ : Q) : G) := by
-      simp [hs, hm]
+      simp [hs, hm, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
     rw [this]
     exact Subtype.property _
   have hsval : (⟨(s : G), hsQ⟩ : Q) = ⟨r, hr⟩ * (ι (π ⟨r, hr⟩))⁻¹ := by
     apply Subtype.ext
-    simp [hs, hm]
+    simp [hs, hm, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
   have hsπ : π ⟨s, hsQ⟩ = 1 := by
     rw [hsval, map_mul, map_inv, hL.sect]
     simp
@@ -373,7 +418,7 @@ theorem sec_pull (hL : IsLevi Γ K Q Γ' K' π ι c₀) (hP : IsPull Q P P' π c
     rw [hπp]
     exact hp'⟩
   have hqk : (q : G) * k = p * ((kι hL m * k : K) : G) := by
-    simp [hpd, hm]
+    simp [hpd, hm, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
   have hcp : c p = c₀ q * c' p' := by
     rw [hP.ch p (by rw [hπp]; exact hp'), hπp, hpd, c₀_ι_right hL]
   have hsec' := h2 _ hv p' hp' m
@@ -464,7 +509,7 @@ theorem mem_secSp_iff (hL : IsLevi Γ K Q Γ' K' π ι c₀) (hP : IsPull Q P P'
     set m : K' := ⟨π ⟨r, hrQ⟩, hL.πK ⟨r, hrQ⟩ r.2⟩ with hm
     set s : K := r * (kι hL m)⁻¹ with hs
     have hsval : (s : G) = ((⟨r, hrQ⟩ * (ι (π ⟨r, hrQ⟩))⁻¹ : Q) : G) := by
-      simp [hs, hm]
+      simp [hs, hm, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
     have hsQ : (s : G) ∈ Q := by
       rw [hsval]
       exact Subtype.property _
@@ -511,7 +556,7 @@ theorem isPar_pull [IsTopologicalGroup G] (hL : IsLevi Γ K Q Γ' K' π ι c₀)
         simp [map_mul, map_inv, hL.sect, hq]
       rw [this]
       exact hp'
-    · simp [hg, hm]
+    · simp [hg, hm, kι, MonoidHom.codRestrict, MonoidHom.comp, Subgroup.subtype]
   · intro p hp q hq
     obtain ⟨hp1, hp2⟩ := (hP.mem _).1 hp
     obtain ⟨hq1, hq2⟩ := (hP.mem _).1 hq

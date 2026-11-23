@@ -1,8 +1,55 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ConjReal
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.RealCyclotomicSubfield
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.FrobMulInertia
+module
+
+public import Formalism.FrobeniusOrbits.Statement
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ConjReal
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField
 
@@ -18,21 +65,7 @@ variable {e : ℕ}
 
 theorem hcl_eq_hcl_iff (u v : (ZMod (2 ^ (e + 2)))ˣ) :
     hcl e u = hcl e v ↔ u = v ∨ u = -v := by
-  unfold hcl
-  rw [QuotientGroup.eq, Subgroup.mem_zpowers_iff]
-  constructor
-  · rintro ⟨k, hk⟩
-    rcases Int.even_or_odd k with hk2 | hk2
-    · left
-      rw [hk2.neg_one_zpow] at hk
-      exact inv_mul_eq_one.mp hk.symm
-    · right
-      rw [hk2.neg_one_zpow] at hk
-      have hv : v = u * -1 := inv_mul_eq_iff_eq_mul.mp hk.symm
-      rw [hv, mul_neg_one, neg_neg]
-  · rintro (rfl | rfl)
-    · exact ⟨0, by simp⟩
-    · exact ⟨1, by simp⟩
+  apply Formalism.FrobeniusOrbits.Galois.hcl_eq_iff <;> assumption
 
 theorem hcl_neg (u : (ZMod (2 ^ (e + 2)))ˣ) : hcl e (-u) = hcl e u := by
   unfold hcl
@@ -180,29 +213,7 @@ theorem galE_of_lift (h : IsLayer (e + 2) q d ζ a b) {σ : hostE ζ a b ≃ₐ[
     {τ : L ≃ₐ[ℚ] L} (hστ : ∀ x : hostE ζ a b, ((σ x : hostE ζ a b) : L) = τ x) :
     galE e ζ a b σ =
       (((galMap h.1 a b τ).2.1, (galMap h.1 a b τ).2.2), hcl e (galMap h.1 a b τ).1) := by
-  have hs : ∀ (x : hostE ζ a b) (y : L), (x : L) = y → Formalism.TwoAdicCyclotomicDecomposition.sgn σ x = Formalism.TwoAdicCyclotomicDecomposition.sgn τ y := by
-    intro x y hxy
-    have hiff : σ x = x ↔ τ y = y := by
-      rw [Subtype.ext_iff, hστ, hxy]
-    unfold Formalism.TwoAdicCyclotomicDecomposition.sgn
-    by_cases h1 : σ x = x
-    · rw [if_pos h1, if_pos (hiff.1 h1)]
-    · rw [if_neg h1, if_neg (fun h2 => h1 (hiff.2 h2))]
-  have hθ : ((σ (thE ζ a b) : hostE ζ a b) : L) =
-      ζ ^ ((h.1.autToPow ℚ τ : (ZMod (2 ^ (e + 2)))ˣ) : ZMod (2 ^ (e + 2))).val +
-        ζ⁻¹ ^ ((h.1.autToPow ℚ τ : (ZMod (2 ^ (e + 2)))ˣ) : ZMod (2 ^ (e + 2))).val := by
-    rw [hστ]
-    show τ (ζ + ζ⁻¹) = _
-    rw [map_add, map_inv₀, ← h.1.autToPow_spec ℚ τ, inv_pow]
-  unfold galE galMap
-  dsimp only
-  rw [hs (aE ζ a b) a rfl, hs (bE ζ a b) b rfl]
-  congr 1
-  unfold hPart
-  have hex : ∃ u : (ZMod (2 ^ (e + 2)))ˣ, ((σ (thE ζ a b) : hostE ζ a b) : L) =
-      ζ ^ (u : ZMod (2 ^ (e + 2))).val + ζ⁻¹ ^ (u : ZMod (2 ^ (e + 2))).val := ⟨_, hθ⟩
-  rw [dif_pos hex]
-  exact hcl_eq_of_pow_add_inv_pow_eq h.1 _ _ ((Classical.choose_spec hex).symm.trans hθ)
+  apply Formalism.FrobeniusOrbits.Galois.galE_lift <;> assumption
 
 theorem galE_aE (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b)
     (σ : hostE ζ a b ≃ₐ[ℚ] hostE ζ a b) :
@@ -259,7 +270,7 @@ theorem galE_snd_eq_hcl_iff (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b)
         ζ⁻¹ ^ ((h.1.autToPow ℚ τ : (ZMod (2 ^ (e + 2)))ˣ) : ZMod (2 ^ (e + 2))).val := by
     rw [hτ]
     show τ (ζ + ζ⁻¹) = _
-    rw [map_add, map_inv₀, ← h.1.autToPow_spec ℚ τ, inv_pow]
+    rw [map_add (f := _), map_inv₀, ← h.1.autToPow_spec ℚ τ, inv_pow]
   rw [galE_of_lift h hτ]
   unfold galMap
   dsimp only

@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.ClassSum
+module
+
+public import Formalism.LocalToGlobal.Divisibility.ClassSum
+public import Mathlib.RepresentationTheory.Character
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder
@@ -23,8 +73,8 @@ def chiIdem (χ : G → K) : MonoidAlgebra K G :=
 
 def idemOf (X : Finset (G → K)) : MonoidAlgebra K G := ∑ χ ∈ X, chiIdem χ
 
-open Classical in
 
+open Classical in
 def lvlIdem (P : Subgroup G) (ψ : P →* Kˣ) : MonoidAlgebra K G :=
   ∑ h : P, MonoidAlgebra.single (h : G) ((Nat.card P : K)⁻¹ * ((ψ h⁻¹ : Kˣ) : K))
 
@@ -45,8 +95,8 @@ def subDim (Z : Submodule K (Fin n → K)) : ℕ := finrank K Z
 def SubHasRatBasis (Z : Submodule K (Fin n → K)) : Prop :=
   ∃ b : Basis (Fin (subDim Z)) K Z, ∀ j i, (b j : Fin n → K) i ∈ cmMax K
 
-open Classical in
 
+open Classical in
 def subBasis (Z : Submodule K (Fin n → K)) : Basis (Fin (subDim Z)) K Z :=
   if h : SubHasRatBasis Z then h.choose else finBasis K Z
 
@@ -165,10 +215,6 @@ def IdemOfCentral : Prop :=
     (∀ χ ∈ X, IsAbsIrrChar χ) →
       idemOf X * idemOf X = idemOf X ∧ ∀ b : MonoidAlgebra K G, b * idemOf X = idemOf X * b
 
-def IdemOfOrth : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (G : Type) [Group G] [Fintype G] (X Y : Finset (G → K)),
-    (∀ χ ∈ X, IsAbsIrrChar χ) → (∀ χ ∈ Y, IsAbsIrrChar χ) → Disjoint X Y → idemOf X * idemOf Y = 0
-
 def LvlIdemSpec : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (v0 : InfinitePlace K), IsConjAt v0 →
     ∀ (G : Type) [Group G] [Fintype G] (P : Subgroup G) (ψ : P →* Kˣ),
@@ -244,23 +290,6 @@ def LvlOpSpec : Prop :=
     ∀ (P : Subgroup G) (ψ : P →* Kˣ) (a : MonoidAlgebra K G), a * lvlIdem P ψ = lvlIdem P ψ * a →
       S.lvlE r P ψ * S.lvlOp r P ψ a = S.gaMat r a * S.lvlE r P ψ ∧
       ∀ b : MonoidAlgebra K G, S.lvlOp r P ψ (b * a) = S.lvlOp r P ψ b * S.lvlOp r P ψ a
-
-def LvlOpIntegral : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (v0 : InfinitePlace K), IsConjAt v0 →
-    ∀ (S : CSD K), (S.H.map v0.embedding).PosDef →
-    ∀ (G : Type) [Group G] [Fintype G] (r : Representation K G S.Forms), S.ActGood r →
-    ∀ (X : Finset (G → K)), (∀ χ ∈ X, IsAbsIrrChar χ) → ∀ (P : Subgroup G) (ψ : P →* Kˣ),
-      (∀ x ∈ S.lvlNab r P ψ,
-        (Fintype.card G : 𝓞 K) • (S.lvlOp r P ψ (idemOf X)).mulVec x ∈ S.lvlNab r P ψ) ∧
-      ∀ x ∈ S.lvlDel r P ψ,
-        (Fintype.card G : 𝓞 K) • (S.lvlOp r P ψ (idemOf X)).mulVec x ∈ S.lvlDel r P ψ
-
-def LvlDualLe : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (v0 : InfinitePlace K), IsConjAt v0 →
-    ∀ (S : CSD K) (s : ℕ), S.Good s → (S.H.map v0.embedding).PosDef →
-    ∀ (G : Type) [Group G] [Fintype G] (r : Representation K G S.Forms), S.ActGood r →
-    ∀ (P : Subgroup G) (ψ : P →* Kˣ),
-      ∀ y ∈ Formalism.HermitianLatticesTheory.dual (hform (S.lvlH r P ψ)) (S.lvlNab r P ψ), (s : 𝓞 K) • y ∈ S.lvlDel r P ψ
 
 def GoodPartSpec : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (S : CSD K) (G : Type) [Group G] [Fintype G]

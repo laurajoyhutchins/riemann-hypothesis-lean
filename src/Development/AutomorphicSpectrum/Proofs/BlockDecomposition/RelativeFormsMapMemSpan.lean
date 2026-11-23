@@ -1,8 +1,54 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.NLeA
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapConeRing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonLNegMul
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExceptionalIdealLeSpanPosDegree
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapConeRing
+public import Mathlib.Tactic.ENatToNat
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExceptionalIdealLeSpanPosDegree
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonLNegMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -151,7 +197,9 @@ theorem form_expand {a : ℕ} (c₀ : Gam n d) (c : Fin a → Gam n d) :
     have h1 : (fun k => (c k (f k)) • (dl (f k) : Ω[Lr K n d⁄K])) =
         fun k => ((c k (f k) : ℤ) : Lr K n d) • (dl (f k) : Ω[Lr K n d⁄K]) :=
       funext fun k => (Int.cast_smul_eq_zsmul _ _ _).symm
-    rw [h1, W.map_smul_univ, ← Int.cast_prod, Int.cast_smul_eq_zsmul]
+    rw [h1, W.map_smul_univ]
+    simp only [RingHom.id_apply]
+    rw [← Int.cast_prod, Int.cast_smul_eq_zsmul]
     rfl
   unfold form
   simp only [LaurentD.D_monL]
@@ -240,7 +288,7 @@ theorem form_update_add {a : ℕ} (y₀ : A) (x : Fin a → A) (i : Fin a) (u v 
     form K y₀ (Function.update x i (u + v)) =
       form K y₀ (Function.update x i u) + form K y₀ (Function.update x i v) := by
   unfold form
-  rw [D_update, D_update, D_update, map_add, AlternatingMap.map_update_add, smul_add]
+  rw [D_update, D_update, D_update, map_add (f := _), AlternatingMap.map_update_add, smul_add]
 
 theorem form_update_smul {a : ℕ} (y₀ : A) (x : Fin a → A) (i : Fin a) (c : K) (u : A) :
     form K y₀ (Function.update x i (c • u)) = c • form K y₀ (Function.update x i u) := by
@@ -254,7 +302,7 @@ theorem form_multi {N : Type} [AddCommMonoid N] [Module K N] {a : ℕ} (Φ : Om 
   span_multi (fun x => Φ (form K y₀ x)) T
     (fun x i u v => by
       show Φ _ = Φ _ + Φ _
-      rw [form_update_add, map_add])
+      rw [form_update_add, map_add (f := _)])
     (fun x i c u => by
       show Φ _ = c • Φ _
       rw [form_update_smul, map_smul])
@@ -284,7 +332,7 @@ theorem mem_of_spans (S : Finset (Fin d)) {a : ℕ} (q₀ : Prop) (q : Fin a →
     exact Submodule.zero_mem _
   | add u v _ _ hu hv =>
     have h1 : form K (u + v) y = form K u y + form K v y := by unfold form; rw [add_smul]
-    rw [h1, map_add]
+    rw [h1, map_add (f := _)]
     exact Submodule.add_mem _ hu hv
   | smul c u _ hu =>
     have h1 : form K (c • u) y = c • form K u y := by unfold form; rw [smul_assoc]
@@ -320,7 +368,7 @@ theorem relOm_image_mem_span : ∀ {K : Type} [Field K] {n d : ℕ} (S : Finset 
       · exact Or.inl (Ideal.mul_mem_left _ r h)
       · exact Or.inr h
     | zero => intro r; rw [smul_zero, map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => intro r; rw [smul_add, map_add]; exact Submodule.add_mem _ (hx r) (hy r)
+    | add x y _ _ hx hy => intro r; rw [smul_add, map_add (f := _)]; exact Submodule.add_mem _ (hx r) (hy r)
     | smul c x _ hx => intro r; rw [smul_smul]; exact hx (r * c)
   have h1 := key 1
   rw [one_smul] at h1

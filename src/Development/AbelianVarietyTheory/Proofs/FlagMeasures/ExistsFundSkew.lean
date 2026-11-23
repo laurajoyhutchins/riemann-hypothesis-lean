@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsFundOne
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFundIpow
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ConjStableLatticeRealImagCovolumeLe
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemOfForall
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FinrankMulDiscrRpowLeSumSqOfMemTraceDual
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsFundOne
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurePreservingOfBall
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAddFundamentalDomainLatticeDomain
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FinrankMulDiscrRpowLeSumSqOfMemTraceDual
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ConjStableLatticeRealImagCovolumeLe
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFundIpow
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemOfForall
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Group.GeometryOfNumbers
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField MeasureTheory Matrix Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.Amp GlobalTheory.DegVol
 open scoped Pointwise ENNReal Classical nonZeroDivisors
@@ -129,7 +177,7 @@ theorem exists_fund_skew : ∀ (K : Type) [Field K] [NumberField K] [StarRing K]
     obtain ⟨u, -⟩ := (hσ.2 (Classical.arbitrary _)).exists
     refine absurd h1 (not_le.2 ?_)
     rw [pow_mul, ← Finset.card_univ, ← Finset.prod_const]
-    refine Finset.prod_lt_prod_of_nonempty (fun v _ => pow_pos (norm_pos_iff.2 ((map_ne_zero _).2 ht0)) _)
+    refine Finset.prod_lt_prod_of_nonempty₀ (fun v _ => pow_pos (norm_pos_iff.2 ((map_ne_zero _).2 ht0)) _)
       (fun v _ => pow_lt_pow_left₀ ?_ (norm_nonneg _) two_ne_zero) ⟨u, Finset.mem_univ _⟩
     have := hlt v
     rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg hc0.le] at this
@@ -137,7 +185,7 @@ theorem exists_fund_skew : ∀ (K : Type) [Field K] [NumberField K] [StarRing K]
   obtain ⟨u, -⟩ := (hσ.2 (Classical.arbitrary _)).exists
   have hre : ∀ t : K, t + star t = 0 → ∀ v, (σ v t).re = 0 := fun t ht v => by
     have := congrArg (fun x => (σ v x).re) ht
-    simp only [map_add, hσ.1, map_zero, Complex.add_re, Complex.conj_re, Complex.zero_re] at this
+    simp only [map_add (f := _), hσ.1, map_zero, Complex.add_re, Complex.conj_re, Complex.zero_re] at this
     linarith
   have hB' : ∀ y, y ∈ B ↔ ∃ t : K, (t ∈ ipow 𝔡 (-(2 * (n : ℤ))) ∧ t + star t = 0) ∧
       y = fun v => c * (σ v t).im := by
@@ -147,7 +195,7 @@ theorem exists_fund_skew : ∀ (K : Type) [Field K] [NumberField K] [StarRing K]
     · rintro ⟨t, ht, hy⟩
       refine ⟨t, ⟨ht, (σ u).injective ?_⟩, funext fun v => by simpa using congrArg Complex.im (congrFun hy v)⟩
       have h1 : (σ u t).re = 0 := by simpa [hc0.ne'] using congrArg Complex.re (congrFun hy u)
-      rw [map_add, hσ.1, map_zero]
+      rw [map_add (f := _), hσ.1, map_zero]
       apply Complex.ext <;> simp [h1]
     · rintro ⟨t, ⟨ht, ht'⟩, rfl⟩
       exact ⟨t, ht, funext fun v => by apply Complex.ext <;> simp [hre t ht']⟩

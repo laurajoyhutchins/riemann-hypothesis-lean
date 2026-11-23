@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.GeOfPowEqOne
+module
+
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GaugedFormalGroupCurveLogarithmsAddSubgroupResca
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieDefs
+public import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+public import Formalism.LocalToGlobal.CharacterGerms.NegMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,32 +66,7 @@ theorem coeff_alongCv_congr {σ : Type} [Finite σ] {a a' : σ → PowerSeries C
     (ha : ∀ i, PowerSeries.constantCoeff (a i) = 0) (ha' : ∀ i, PowerSeries.constantCoeff (a' i) = 0) {k : ℕ}
     (h : ∀ i, ∀ m < k, PowerSeries.coeff m (a i) = PowerSeries.coeff m (a' i)) (f : MvPowerSeries σ C) :
     ∀ m < k, PowerSeries.coeff m (alongCv a f) = PowerSeries.coeff m (alongCv a' f) := by
-  intro m hm
-  have hA : MvPowerSeries.HasSubst a := MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  have hA' : MvPowerSeries.HasSubst a' := MvPowerSeries.hasSubst_of_constantCoeff_zero ha'
-  have hdiff : ∀ i, a i - a' i ∈ Ideal.span {(PowerSeries.X : PowerSeries C) ^ k} := by
-    intro i
-    rw [Ideal.mem_span_singleton, PowerSeries.X_pow_dvd_iff]
-    intro n hn
-    rw [map_sub, h i n hn, sub_self]
-  have hprod : ∀ e : σ →₀ ℕ, PowerSeries.coeff m (e.prod fun s n => a s ^ n) =
-      PowerSeries.coeff m (e.prod fun s n => a' s ^ n) := by
-    intro e
-    have hq : Ideal.Quotient.mk (Ideal.span {(PowerSeries.X : PowerSeries C) ^ k}) (e.prod fun s n => a s ^ n) =
-        Ideal.Quotient.mk (Ideal.span {(PowerSeries.X : PowerSeries C) ^ k}) (e.prod fun s n => a' s ^ n) := by
-      simp only [Finsupp.prod, map_prod, map_pow]
-      refine Finset.prod_congr rfl fun s _ => ?_
-      rw [Ideal.Quotient.eq.2 (hdiff s)]
-    rw [Ideal.Quotient.eq, Ideal.mem_span_singleton, PowerSeries.X_pow_dvd_iff] at hq
-    have hm' := hq m hm
-    rwa [map_sub, sub_eq_zero] at hm'
-  simp only [alongCv]
-  change MvPowerSeries.coeff (Finsupp.single () m) (MvPowerSeries.subst a f) =
-    MvPowerSeries.coeff (Finsupp.single () m) (MvPowerSeries.subst a' f)
-  rw [MvPowerSeries.coeff_subst hA, MvPowerSeries.coeff_subst hA']
-  refine finsum_congr fun e => ?_
-  congr 1
-  exact hprod e
+  apply GlobalTheory.RowLaw.CvGroup.alongCv_congr <;> assumption
 
 theorem coeff_tyS_congr {l : ℕ} (hl : 2 ≤ l) (a b : ℕ → C) (N : ℕ) (hab : ∀ i < N, a i = b i) (m : ℕ)
     (hm : m < l ^ N) : PowerSeries.coeff m (tyS l a) = PowerSeries.coeff m (tyS l b) := by
@@ -110,6 +136,7 @@ theorem sumV_mem (V : VF C) (g : Fin 2) (hlg0 : ∀ i, MvPowerSeries.constantCoe
     intro i
     rw [hA]
     show PowerSeries.constantCoeff (∑ c : I g, X.u g c i • tyS V.l (fun s => sumV y s (Sum.inl c))) = 0
+
     rw [map_sum]
     apply Finset.sum_eq_zero
     intro c _
@@ -136,6 +163,7 @@ theorem sumV_mem (V : VF C) (g : Fin 2) (hlg0 : ∀ i, MvPowerSeries.constantCoe
     show PowerSeries.coeff m' (∑ c : I g, X.u g c j • tyS V.l (fun s => sumV y s (Sum.inl c))) =
       PowerSeries.coeff m' (alongCv (γN N) (X.lg j))
     rw [h1N N j]
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [PowerSeries.coeff_smul, PowerSeries.coeff_smul, htyN N _ m' hm']
@@ -161,8 +189,9 @@ theorem sumV_mem (V : VF C) (g : Fin 2) (hlg0 : ∀ i, MvPowerSeries.constantCoe
       alongCv γ (X.sg (X.u (1 - g) q)) -
       ∑ c : I g, (if X.ty g c = X.ty (1 - g) q then
         X.sg1 (X.u g c) (X.u (1 - g) q) • tyS V.l (fun s => sumV y s (Sum.inl c)) else 0)) = _
-    rw [map_sub, map_sub, map_add, map_add, map_sum, map_sum, htyN N _ m hm,
-      coeff_alongCv_congr hγ0 (fun i => (hγN N i).1) (fun i => hγN' N i) _ m hm]
+
+    rw [map_sub, map_sub, map_add (f := _), map_add (f := _), map_sum, map_sum, htyN N _ m hm,
+    coeff_alongCv_congr hγ0 (fun i => (hγN N i).1) (fun i => hγN' N i) _ m hm]
     congr 1
     refine Finset.sum_congr rfl fun c _ => ?_
     split_ifs

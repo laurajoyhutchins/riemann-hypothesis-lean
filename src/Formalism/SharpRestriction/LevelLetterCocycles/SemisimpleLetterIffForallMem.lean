@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ExtensionClauses
-import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RamifiedCoefficientChains
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -139,31 +178,5 @@ theorem dssLet_iff_mem (W : LocWach PD LL O v n) (h9 : Formalism.MainNotions.Del
     exact ⟨s, hs0, hrec, hm hA T Mi hi hT hJ ug hug hv cO hcO i y' Y y₀ hyY hY hδ s hs0 hrec⟩
 
 end Core
-
-theorem semisimpleProductTheorem_iff_dssMem (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
-    (Cm : CmpOf D.loc D.locA HW F) :
-    Formalism.MainNotions.UnusedSlot35.SemisimpleProductTheorem D HW F Cm ↔ (Formalism.MainNotions.UnusedSlot35.AdmDss D HW F Cm →
-      ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL),
-        DssMem ((HW l).W K s LL h)) := by
-  constructor
-  · intro h hAdm l _ K s LL hG
-    have h9 : Formalism.MainNotions.DeltaInvariantLattices.P9W ((HW l).W K s LL hG) := hAdm.2.2.2.1 l K s LL hG
-    exact (coreDss_iff_mem _ h9).1 (h hAdm l K s LL hG)
-  · intro h hAdm l _ K s LL hG
-    have h9 : Formalism.MainNotions.DeltaInvariantLattices.P9W ((HW l).W K s LL hG) := hAdm.2.2.2.1 l K s LL hG
-    exact (coreDss_iff_mem _ h9).2 (h hAdm l K s LL hG)
-
-theorem semisimple_letter_iff_forall_mem (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
-    (Cm : CmpOf D.loc D.locA HW F) :
-    Formalism.MainNotions.UnusedSlot35.SemisimpleLetterTheorem D HW F Cm ↔ (Formalism.MainNotions.UnusedSlot35.AdmDss D HW F Cm →
-      ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL),
-        DssLetMem ((HW l).W K s LL h)) := by
-  constructor
-  · intro h hAdm l _ K s LL hG
-    have h9 : Formalism.MainNotions.DeltaInvariantLattices.P9W ((HW l).W K s LL hG) := hAdm.2.2.2.1 l K s LL hG
-    exact (dssLet_iff_mem _ h9).1 (h hAdm l K s LL hG)
-  · intro h hAdm l _ K s LL hG
-    have h9 : Formalism.MainNotions.DeltaInvariantLattices.P9W ((HW l).W K s LL hG) := hAdm.2.2.2.1 l K s LL hG
-    exact (dssLet_iff_mem _ h9).2 (h hAdm l K s LL hG)
 
 end Formalism.MainNotions.UnusedSlot35.DssRec

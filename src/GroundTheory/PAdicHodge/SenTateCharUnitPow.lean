@@ -1,9 +1,59 @@
-import Mathlib
-import GroundTheory.LocalFields.PadicExp
-import GroundTheory.LocalFields.UnitsPowers
-import GroundTheory.LocalFields.PrincipalUnitsModule
-import GroundTheory.PAdicHodge.FieldOfNormsRam
+module
+
+public import GroundTheory.LocalFields.PadicExp
+public import GroundTheory.PAdicHodge.FieldOfNormsRam
+public import Mathlib.NumberTheory.Padics.ValuativeRel
 import GroundTheory.LocalFields.Examples
+import GroundTheory.LocalFields.PadicLogHom
+public import GroundTheory.LocalFields.PrincipalUnitsModule
+import GroundTheory.LocalFields.UnitsPowers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -26,7 +76,7 @@ theorem natCast_prime_mem_valBall : (p : K) ∈ valBall K (absRamificationIndex 
 theorem div_natCast_prime_mem_valBall {a : ℤ} {x : K}
     (hx : x ∈ valBall K (a + absRamificationIndex K)) : x / p ∈ valBall K a := by
   have h := div_natCast_mem_valBall p hx hp.out.ne_zero
-  rw [padicValNat_self, Nat.cast_one, mul_one, add_sub_cancel_right] at h
+  rw [Nat.padicValNat_def, Nat.Prime.multiplicity_self, Nat.cast_one, mul_one, add_sub_cancel_right] at h
   exact h
 
 theorem map_pow_unitFiltrationUnits {n : ℕ}
@@ -74,7 +124,7 @@ theorem map_pow_unitFiltrationUnits {n : ℕ}
       exact logSeries_mem_valBall p ((mem_unitFiltrationUnits_iff_valBall (by omega)).1 hw) hn'
     have hz : logSeries (((w : Kˣ) : K) - 1) / p ∈ valBall K n := div_natCast_prime_mem_valBall p hy
     set u := expUnit p n hn ⟨_, hz⟩
-    refine ⟨(u : Kˣ), u.2, ?_⟩
+    refine ⟨(u : Kˣ), u.property, ?_⟩
     have hinj := logValBallHom_injective p n hn
     have key : logValBallHom p n hn (Additive.ofMul (u ^ p)) =
         logValBallHom p n hn (Additive.ofMul W) := by
@@ -107,8 +157,8 @@ section Residue
 
 variable (p : ℕ) [hp : Fact p.Prime] [CharP 𝓀[K] p]
 
-omit hp in
 
+omit hp in
 theorem not_dvd_card_residueField_sub_one : ¬ p ∣ Nat.card 𝓀[K] - 1 := by
   intro h
   apply natCast_card_residueField_sub_one_ne_zero K
@@ -160,8 +210,8 @@ theorem nrm_natCast_prime_eq :
     intro a b hab
     have h1 : a ≤ᵥ b := (Valuation.vle_iff_le (valuation K)).2 (normalizedValuation_le_iff.1 hab.le)
     have h2 : b ≤ᵥ a := (Valuation.vle_iff_le (valuation K)).2 (normalizedValuation_le_iff.1 hab.ge)
-    exact le_antisymm ((nrm_le_nrm_iff _ _).2 ((ValuativeExtension.vle_iff_vle _ _).2 h1))
-      ((nrm_le_nrm_iff _ _).2 ((ValuativeExtension.vle_iff_vle _ _).2 h2))
+    exact le_antisymm ((nrm_le_nrm_iff _ _).2 ((ValuativeExtension.vle_iff_vle).2 h1))
+      ((nrm_le_nrm_iff _ _).2 ((ValuativeExtension.vle_iff_vle).2 h2))
   have h := key _ _ hv
   rw [map_natCast] at h
   rw [h, map_pow, nrm_pow]

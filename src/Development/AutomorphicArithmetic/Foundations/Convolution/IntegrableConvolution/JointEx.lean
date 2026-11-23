@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CompactSelfAdjoint
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TrDefs
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CutIrr
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.JointNe
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TrDefs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CutIrr
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.JointNe
+public import GroundTheory.AutomorphicForms.CompactSelfAdjoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -137,7 +184,7 @@ private lemma list_ne (h : Slots π V m ι E A U) (hall : ∀ j, ∃ v ∈ eigIn
     let M : Submodule ℂ H :=
       { carrier := {w | w ∈ eigIn V E 1 ∧ ∀ g, A k (π (ι k g) w) = 0}
         add_mem' := fun {a b} ha hb => ⟨Submodule.add_mem _ ha.1 hb.1, fun g => by
-          rw [map_add, map_add, ha.2, hb.2, add_zero]⟩
+          rw [map_add (f := _), map_add (f := _), ha.2, hb.2, add_zero]⟩
         zero_mem' := ⟨Submodule.zero_mem _, fun g => by simp⟩
         smul_mem' := fun c a ha => ⟨Submodule.smul_mem _ c ha.1, fun g => by
           rw [map_smul, map_smul, ha.2, smul_zero]⟩ }
@@ -284,7 +331,7 @@ theorem UpperTheory.ConvolutionTheory.L1.jointEx :
     CompactSelfAdjoint.exists_real_of_hasEigenvalue (IsSelfAdjoint.of_nonneg (h.A_pos 0)) hEv
   obtain ⟨hwc, hwQ⟩ := mem_eigIn.1 w.2
   have hr0 : 0 ≤ r := by
-    have hp := (ContinuousLinearMap.nonneg_iff_isPositive _).1 (h.A_pos 0)
+    have hp := ContinuousLinearMap.nonneg_iff_isPositive.1 (h.A_pos 0)
     have h3 := hp.re_inner_nonneg_right (w : H)
     have h4 : 0 < ‖(w : H)‖ ^ 2 := by positivity
     have h5 : RCLike.re (inner ℂ (w : H) ((r : ℂ) • (w : H))) = r * ‖(w : H)‖ ^ 2 := by

@@ -1,8 +1,54 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AutCongrContinuousCycInertia
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSSRepMapOfAbsIrrDistinct
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerNesbittSemisimpleMatrixRepresentationsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteLengthOfFiniteDimensional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Order.Hom.Esakia
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteLengthOfFiniteDimensional
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerNesbittSemisimpleMatrixRepresentationsStatement
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistedModelAdmissibleCocycles
+
+@[expose] public section
 
 open GlobalTheory.PhiGam GlobalTheory.AdmLoc GlobalTheory.Models GlobalTheory.TopSteps Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc
 open scoped LaurentSeries PowerSeries TensorProduct
@@ -19,7 +65,7 @@ def subIso (e : M ≃+ M₁) (h1 : ∀ a : A, ∃ b : B, ∀ x, e (a • x) = b 
     { carrier := {y | e.symm y ∈ p}
       add_mem' := fun {x y} hx hy => by
         change e.symm (x + y) ∈ p
-        rw [map_add]; exact p.add_mem hx hy
+        rw [map_add (f := _)]; exact p.add_mem hx hy
       zero_mem' := by
         change e.symm 0 ∈ p
         rw [map_zero]; exact p.zero_mem
@@ -33,7 +79,7 @@ def subIso (e : M ≃+ M₁) (h1 : ∀ a : A, ∃ b : B, ∀ x, e (a • x) = b 
     { carrier := {x | e x ∈ q}
       add_mem' := fun {x y} hx hy => by
         change e (x + y) ∈ q
-        rw [map_add]; exact q.add_mem hx hy
+        rw [map_add (f := _)]; exact q.add_mem hx hy
       zero_mem' := by
         change e 0 ∈ q
         rw [map_zero]; exact q.zero_mem
@@ -170,16 +216,16 @@ theorem sameSS_iff_of_surjective (hk : Function.Surjective (algebraMap O k))
     | add a a' ha ha' =>
       obtain ⟨b, h1, h2⟩ := ha
       obtain ⟨b', h3, h4⟩ := ha'
-      exact ⟨b + b', fun x => by rw [add_smul, add_smul, map_add, h1, h3],
-        fun x => by rw [add_smul, add_smul, map_add, h2, h4]⟩
+      exact ⟨b + b', fun x => by rw [add_smul, add_smul, map_add (f := _), h1, h3],
+        fun x => by rw [add_smul, add_smul, map_add (f := _), h2, h4]⟩
     | single g a => exact ⟨_, single_smul_compat π τ E hg hs g a, single_smul_compat π' τ' E' hg' hs' g a⟩
   · induction b using MonoidAlgebra.induction_linear with
     | zero => exact ⟨0, fun x => by simp, fun x => by simp⟩
     | add a a' ha ha' =>
       obtain ⟨b, h1, h2⟩ := ha
       obtain ⟨b', h3, h4⟩ := ha'
-      exact ⟨b + b', fun x => by rw [add_smul, add_smul, map_add, h1, h3],
-        fun x => by rw [add_smul, add_smul, map_add, h2, h4]⟩
+      exact ⟨b + b', fun x => by rw [add_smul, add_smul, map_add (f := _), h1, h3],
+        fun x => by rw [add_smul, add_smul, map_add (f := _), h2, h4]⟩
     | single g b =>
       obtain ⟨a, rfl⟩ := hk b
       exact ⟨_, single_smul_compat π τ E hg hs g a, single_smul_compat π' τ' E' hg' hs' g a⟩

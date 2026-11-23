@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.GammaOneNonempty
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.AsmCompat
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.SecondCoeffSecondIdempotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,10 +82,10 @@ theorem gamSup_holds : GamSupP := by
   set Y : Ix r → M.L.O := iota1 hs u + iota2 hs u'
   set Y'' : Ix r → M.L.O := iota1 hs l + iota2 hs l'
   set Y' : Ix r → M.L.O := Y - dgO g g.q • Y''
-  have h1 : cmp1 hs Y = u := by simp only [Y, map_add, firstComponent_iotaOne, firstComponent_iotaTwo, add_zero]
-  have h2 : cmp2 hs Y = u' := by simp only [Y, map_add, secondComponent_iotaOne, secondComponent_iotaTwo, zero_add]
-  have h3 : cmp1 hs Y'' = l := by simp only [Y'', map_add, firstComponent_iotaOne, firstComponent_iotaTwo, add_zero]
-  have h4 : cmp2 hs Y'' = l' := by simp only [Y'', map_add, secondComponent_iotaOne, secondComponent_iotaTwo, zero_add]
+  have h1 : cmp1 hs Y = u := by simp only [Y, map_add (f := _), firstComponent_iotaOne, firstComponent_iotaTwo, add_zero]
+  have h2 : cmp2 hs Y = u' := by simp only [Y, map_add (f := _), secondComponent_iotaOne, secondComponent_iotaTwo, zero_add]
+  have h3 : cmp1 hs Y'' = l := by simp only [Y'', map_add (f := _), firstComponent_iotaOne, firstComponent_iotaTwo, add_zero]
+  have h4 : cmp2 hs Y'' = l' := by simp only [Y'', map_add (f := _), secondComponent_iotaOne, secondComponent_iotaTwo, zero_add]
   have hY : ∀ i, (Y i : E) - Y' i = algebraMap F E (g.q : F) * Y'' i := fun i => by
     simp only [Y', Pi.sub_apply, Pi.smul_apply, smul_eq_mul, dgO, AddSubgroupClass.coe_sub,
       MulMemClass.coe_mul]
@@ -61,9 +105,9 @@ theorem gamSup_holds : GamSupP := by
     · rw [(fY _).1, dl_cast, mul_zero, ZeroMemClass.coe_zero, map_zero]
     · rw [(gY _).1, dl_cast, mul_zero, ZeroMemClass.coe_zero, map_zero]
   · apply E_ext (g := g)
-    · rw [map_add, map_mul, firstProj_algebraMap_split, hW1, hW1, map_zero]
+    · rw [map_add (f := _), map_mul, firstProj_algebraMap_split, hW1, hW1, map_zero]
       linear_combination (fY a.castSucc).2 - (g.q : F) * (fZ a.castSucc).2 + p2 g η * dl_cast (F := F) a
-    · rw [map_add, map_mul, secondProj_algebraMap_split, hW2, hW2, map_zero]
+    · rw [map_add (f := _), map_mul, secondProj_algebraMap_split, hW2, hW2, map_zero]
       linear_combination (gY a.castSucc).2 - (g.q : F) * (gZ a.castSucc).2 + p2 g η' * dl_cast (F := F) a
   · exact Prod.ext rfl (Prod.ext rfl (vals hs hZh T T' h1 h2 h3 h4 hY).symm)
 
@@ -95,7 +139,7 @@ theorem gamSub_holds : GamSubP := by
         ring
       · obtain ⟨a, rfl⟩ := Fin.exists_castSucc_eq.2 hb
         have e := congrArg (p1 g) (c2 a)
-        rw [map_add, map_mul, firstProj_algebraMap_split, hW1, hW1, map_zero] at e
+        rw [map_add (f := _), map_mul, firstProj_algebraMap_split, hW1, hW1, map_zero] at e
         simp only [l, secondProj_firstComponent, dl_cast, mul_zero, zero_add]
         linear_combination e
   have h2 : cmp2 hs Y = η' • (eV r : Fin (r + 1) → M.R) + q2 hs • l' := by
@@ -116,7 +160,7 @@ theorem gamSub_holds : GamSubP := by
         ring
       · obtain ⟨a, rfl⟩ := Fin.exists_castSucc_eq.2 hb
         have e := congrArg (p2 g) (c2 a)
-        rw [map_add, map_mul, secondProj_algebraMap_split, hW2, hW2, map_zero] at e
+        rw [map_add (f := _), map_mul, secondProj_algebraMap_split, hW2, hW2, map_zero] at e
         simp only [l', secondProj_secondComponent, dl_cast, mul_zero, zero_add]
         linear_combination e
   refine ⟨(((QuotientAddGroup.mk (cmp1 hs Y) : DD1 hs Z TT), (QuotientAddGroup.mk l : DD1 hs Z TT), η,

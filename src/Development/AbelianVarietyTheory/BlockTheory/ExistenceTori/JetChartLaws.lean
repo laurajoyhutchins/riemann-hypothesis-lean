@@ -1,7 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -51,44 +96,15 @@ def IsFormalParam (j : JetPts G x d) : Prop :=
     ∀ g : algO x B ⟶ G, algMap x (Ideal.Quotient.mkₐ S I) ≫ g = 1 →
       ∃! f : Jet S (Fin d) m →ₐ[S] B, algMap x f ≫ j m = g
 
-def LawIs (j : JetPts G x d) (F : Fin d → Germ.PS S 2 d) : Prop :=
-  (∀ i, MvPowerSeries.constantCoeff (F i) = 0) ∧
-  ∀ m, (algMap x (jetIn (0 : Fin 2)) ≫ j m) *
-      (algMap x (jetIn (1 : Fin 2)) ≫ j m) =
-    algMap x (jetSubstPS (m := m) F) ≫ j m
+
 
 omit [GrpObj G] in
-
-def EndIs (j : JetPts G x d) (α : G ⟶ G) (φ : Germ.Pt S 1 d) : Prop :=
-  (∀ i, MvPowerSeries.constantCoeff (φ i) = 0) ∧
-  ∀ m, algMap x (jetIn (0 : Fin 1)) ≫ j m ≫ α =
-    algMap x (jetSubstPS (m := m) φ) ≫ j m
-
-omit [GrpObj G] in
-
 def TanIs (j : JetPts G x d) (v : Sp (DualNumber S) ⟶ G.left) (c : Fin d → S) : Prop :=
   v = (algMap x (jetVec c) ≫ j 1).left
-
-def IsGrpChart {O : Type} [CommRing O] (act : OAct O G) {κ : Type} (j : JetPts G x d)
-    (F : Fin d → Germ.PS S 2 d) (A : O → Germ.Pt S 1 d)
-    (u : κ → (Sp (DualNumber S) ⟶ G.left)) (c : κ → Fin d → S) : Prop :=
-  IsFormalParam G x j ∧ LawIs G x j F ∧ (∀ a, EndIs G x j (act.act a) (A a)) ∧
-    (∀ k, TanIs G x j (u k) (c k)) ∧
-    LinearIndependent S c ∧ Submodule.span S (Set.range c) = ⊤
 
 end Group
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
-
-def IsChart (t : SAB H X₀) (x : Sp S ⟶ X₀) {d : ℕ} {κ : Type} (j : JetPts t.G x d)
-    (F : Fin d → Germ.PS S 2 d) (A : 𝓞 E → Germ.Pt S 1 d)
-    (u : κ → (Sp (DualNumber S) ⟶ t.G.left)) (c : κ → Fin d → S) : Prop :=
-  IsGrpChart t.G x t.act j F A u c
-
-abbrev IsChartOf (t : SAB H X₀) (x : Sp S ⟶ X₀) {d : ℕ} {κ : Type} (j : JetPts t.G x d)
-    (GG : Germ.FGLaw S d) (A : Germ.OAct (𝓞 E) GG)
-    (u : κ → (Sp (DualNumber S) ⟶ t.G.left)) (c : κ → Fin d → S) : Prop :=
-  IsChart t x j GG.F A.act u c
 
 theorem jetVec_X {σ : Type} (c : σ → S) (i : σ) :
     jetVec c (Ideal.Quotient.mk _ (MvPolynomial.X i)) = c i • (DualNumber.eps : DualNumber S) := by

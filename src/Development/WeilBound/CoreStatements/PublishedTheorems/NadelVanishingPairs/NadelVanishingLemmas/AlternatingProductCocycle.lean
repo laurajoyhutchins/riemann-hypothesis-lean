@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsFlatLift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsFlatLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -12,14 +61,14 @@ variable {K : Type} [CommRing K] {V : Type} [AddCommGroup V] [Module K V] {ι : 
 theorem dtot_add {E : Type} [AddCommGroup E] (d : E →+ E) (c c' : Finset ι → E) :
     Dtot d (c + c') = Dtot d c + Dtot d c' := by
   funext t
-  simp only [Dtot, delta, Pi.add_apply, smul_add, Finset.sum_add_distrib, map_add]
+  simp only [Dtot, delta, Pi.add_apply, smul_add, Finset.sum_add_distrib, map_add (f := _)]
   abel
 
 def dtotHom {E : Type} [AddCommGroup E] (d : E →+ E) : (Finset ι → E) →+ (Finset ι → E) :=
   AddMonoidHom.mk' (Dtot d) (dtot_add d)
 
-omit [LinearOrder ι] in
 
+omit [LinearOrder ι] in
 theorem oneC_empty : (oneC : Finset ι → ExteriorAlgebra K V) ∅ = 0 := by
   simp [oneC]
 
@@ -147,7 +196,7 @@ private theorem Lop_apply_of_min_eq (f : ι → V →+ V) (h : ι → ι → V �
       (if h2 : (t.erase m0).Nonempty then h m0 ((t.erase m0).min' h2) v • y (t.erase m0) else 0) := by
   subst hm
   unfold Lop
-  rw [dif_pos ht]
+  rw [dite_eq_left ht]
 
 private theorem neg_one_pow_card_erase_of_mem (t : Finset ι) (i : ι) (hi : i ∈ t) :
     (-1 : ℤ) ^ (t.erase i).card = -(-1) ^ t.card := by
@@ -223,7 +272,7 @@ private theorem Dtot_Lop_eq_zero_of_Dtot_eq_zero_of_empty_eq_zero (p : ℕ) (d :
       abel
     have hLs2 : Lop f h v y s = (-1 : ℤ) ^ s.card • (ExteriorAlgebra.ι K (f m v) * y s) +
         (if h2 : s'.Nonempty then h m (s'.min' h2) v • y s' else 0) := hLs
-    rw [hsum, hLs2, hX, map_add, map_zsmul, dω, hys s]
+    rw [hsum, hLs2, hX, map_add (f := _), map_zsmul, dω, hys s]
     by_cases h2 : s'.Nonempty
     · set n := s'.min' h2 with hn_eq
       have hns : n ∈ s' := s'.min'_mem h2
@@ -241,24 +290,24 @@ private theorem Dtot_Lop_eq_zero_of_Dtot_eq_zero_of_empty_eq_zero (p : ℕ) (d :
         · rw [show GlobalTheory.cubeSign s' n = 1 from cubeSign_min_eq_one s' h2]
           simp only [one_smul]
           by_cases h3 : (s'.erase n).Nonempty
-          · rw [dif_pos h3, dif_pos h3, ← sub_smul]
+          · rw [dite_eq_left h3, dite_eq_left h3, ← sub_smul]
             congr 1
             rw [← hD.cocycle m n ((s'.erase n).min' h3) v]
             ring
-          · rw [dif_neg h3, dif_neg h3, Finset.not_nonempty_iff_eq_empty.mp h3, hy0]
+          · rw [dite_eq_right h3, dite_eq_right h3, Finset.not_nonempty_iff_eq_empty.mp h3, hy0]
             simp
         · intro b hb hbn
           have hnb : n ∈ s'.erase b := Finset.mem_erase.mpr ⟨fun e => hbn e.symm, hns⟩
           have hmin : (s'.erase b).min' ⟨n, hnb⟩ = n :=
             le_antisymm ((s'.erase b).min'_le n hnb)
               (Finset.le_min' _ _ _ (fun z hz => s'.min'_le z (Finset.mem_of_mem_erase hz)))
-          rw [dif_pos ⟨n, hnb⟩, hmin, smul_comm (h m n v) (GlobalTheory.cubeSign s' b), sub_self]
+          rw [dite_eq_left ⟨n, hnb⟩, hmin, smul_comm (h m n v) (GlobalTheory.cubeSign s' b), sub_self]
         · intro hn
           exact absurd hns hn
       have hcomm : ∀ x : ExteriorAlgebra K V,
           h m n v • ((-1 : ℤ) ^ s.card • x) = (-1 : ℤ) ^ s.card • (h m n v • x) :=
         fun x => smul_comm _ _ _
-      rw [dif_pos h2, ← hn_eq, hSh, hLs', dsm, hD.dh, hys s', hc]
+      rw [dite_eq_left h2, ← hn_eq, hSh, hLs', dsm, hD.dh, hys s', hc]
       simp only [neg_smul, smul_neg, neg_neg, mul_neg, mul_sub, sub_mul, smul_add, smul_sub,
         mul_smul_comm, hε, hcomm]
       abel
@@ -266,7 +315,7 @@ private theorem Dtot_Lop_eq_zero_of_Dtot_eq_zero_of_empty_eq_zero (p : ℕ) (d :
       have hdy0 : delta y s = 0 := by
         rw [hdy, hs'e]
         simp [hy0]
-      rw [dif_neg h2, hdy0, hs'e]
+      rw [dite_eq_right h2, hdy0, hs'e]
       simp [Lop, hy0]
 
 theorem prodL_closed (p : ℕ) (d : ExteriorAlgebra K V →+ ExteriorAlgebra K V) (f : ι → V →+ V)
@@ -287,6 +336,7 @@ theorem alt_closed (p : ℕ) (d : ExteriorAlgebra K V →+ ExteriorAlgebra K V) 
   constructor
   · change dtotHom d (alt f h a v) = 0
     unfold alt
+
     rw [map_sum]
     apply Finset.sum_eq_zero
     intro σ _

@@ -1,14 +1,72 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSplitK
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanFrameKTypeDecomposition
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSplitK
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasureStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramRightActionIdentities
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianMatricesLocallyCompactBorel
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasureStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianMatricesLocallyCompactBorel
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramRightActionIdentities
+import Formalism.LocalRingCardinality.DataHost
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitarySchrodinger
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GramNear
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TrMMemFramesEIff
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.ThetaOrbits
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel GlobalTheory.StdUnn PositivityTheory.GramSchwartzFunctions PositivityTheory.GramSchwartzFunctions.BC GlobalTheory.CompanionTheory.SiegelND
-open GlobalTheory.IndefiniteRowSideFullHecke.ModerateGrowthSchwartz (schwartzA)
 open GlobalTheory.CompanionTheory.WeilSiegel.Frame GlobalTheory.CompanionTheory.WhitFree
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -39,13 +97,13 @@ theorem map_eq_of_sq_conj (ν : Measure H) [ν.IsAddHaarMeasure] (A B D : H ≃�
   have e1 : b • ν = (c * c) • ν := by
     rw [← hb]
     have : (B : H → H) = A ∘ A := funext h1
-    rw [this, ← Measure.map_map mA mA, hc, Measure.map_smul, hc, smul_smul]
+    rw [this, ← Measure.map_map mA mA, hc, Measure.map_smul c mA.aemeasurable, hc, smul_smul]
   have e2 : (d * b) • ν = (c * d) • ν := by
     have h3 : (B : H → H) ∘ D = D ∘ A := funext h2
     have l : (ν.map D).map B = (d * b) • ν := by
-      rw [hd, Measure.map_smul, hb, smul_smul]
+      rw [hd, Measure.map_smul d mB.aemeasurable, hb, smul_smul]
     have r : (ν.map A).map D = (c * d) • ν := by
-      rw [hc, Measure.map_smul, hd, smul_smul]
+      rw [hc, Measure.map_smul c mD.aemeasurable, hd, smul_smul]
     rw [← l, ← r, Measure.map_map mB mD, Measure.map_map mD mA, h3]
   obtain ⟨Kc, hK, hKn⟩ := exists_compact_mem_nhds (0 : H)
   have hpos : ν Kc ≠ 0 := (Measure.measure_pos_of_mem_nhds ν hKn).ne'
@@ -70,16 +128,16 @@ end Gen
 
 section Mat
 
-local notation "cTr" => HeckeCharacterZeroLocus.SiegelWeilU.cT
+open HeckeCharacterZeroLocus.SiegelWeilU (cT)
 
 variable {K : Type} [CommRing K] (s : K →+* K) {n : ℕ}
 
-theorem cT_one : cTr s (1 : Matrix (Fin n) (Fin n) K) = 1 := by
+theorem cT_one : cT s (1 : Matrix (Fin n) (Fin n) K) = 1 := by
   unfold HeckeCharacterZeroLocus.SiegelWeilU.cT
   rw [Matrix.map_one _ (map_zero _) (map_one _), Matrix.transpose_one]
 
 theorem conj_conj (g h S : Matrix (Fin n) (Fin n) K) :
-    cTr s h * (cTr s g * S * g) * h = cTr s (g * h) * S * (g * h) := by
+    cT s h * (cT s g * S * g) * h = cT s (g * h) * S * (g * h) := by
   rw [HeckeCharacterZeroLocus.SiegelWeilU.cT_mul]
   simp only [Matrix.mul_assoc]
 
@@ -135,18 +193,18 @@ theorem diagAt_shearM (a : Fin n) (x : Fin n → K) (hx : x a = 0) :
 variable [TopologicalSpace K] [IsTopologicalRing K]
 
 def conjEq (H : AddSubgroup (Matrix (Fin n) (Fin n) K))
-    (hH : ∀ S ∈ H, ∀ g : Matrix (Fin n) (Fin n) K, cTr s g * S * g ∈ H)
+    (hH : ∀ S ∈ H, ∀ g : Matrix (Fin n) (Fin n) K, cT s g * S * g ∈ H)
     (g g' : Matrix (Fin n) (Fin n) K) (h1 : g * g' = 1) (h2 : g' * g = 1) : H ≃ₜ+ H where
-  toFun S := ⟨cTr s g * S * g, hH _ S.2 g⟩
-  invFun S := ⟨cTr s g' * S * g', hH _ S.2 g'⟩
+  toFun S := ⟨cT s g * S * g, hH _ S.2 g⟩
+  invFun S := ⟨cT s g' * S * g', hH _ S.2 g'⟩
   left_inv S := Subtype.ext (by
-    change cTr s g' * (cTr s g * (S : Matrix (Fin n) (Fin n) K) * g) * g' = S
+    change cT s g' * (cT s g * (S : Matrix (Fin n) (Fin n) K) * g) * g' = S
     rw [conj_conj, h1, cT_one, Matrix.one_mul, Matrix.mul_one])
   right_inv S := Subtype.ext (by
-    change cTr s g * (cTr s g' * (S : Matrix (Fin n) (Fin n) K) * g') * g = S
+    change cT s g * (cT s g' * (S : Matrix (Fin n) (Fin n) K) * g') * g = S
     rw [conj_conj, h2, cT_one, Matrix.one_mul, Matrix.mul_one])
   map_add' S T := Subtype.ext (by
-    change cTr s g * ((S : Matrix (Fin n) (Fin n) K) + T) * g = cTr s g * S * g + cTr s g * T * g
+    change cT s g * ((S : Matrix (Fin n) (Fin n) K) + T) * g = cT s g * S * g + cT s g * T * g
     rw [Matrix.mul_add, Matrix.add_mul])
   continuous_toFun :=
     ((continuous_const.matrix_mul continuous_subtype_val).matrix_mul continuous_const).subtype_mk _
@@ -154,15 +212,15 @@ def conjEq (H : AddSubgroup (Matrix (Fin n) (Fin n) K))
     ((continuous_const.matrix_mul continuous_subtype_val).matrix_mul continuous_const).subtype_mk _
 
 theorem conjEq_val (H : AddSubgroup (Matrix (Fin n) (Fin n) K))
-    (hH : ∀ S ∈ H, ∀ g : Matrix (Fin n) (Fin n) K, cTr s g * S * g ∈ H)
+    (hH : ∀ S ∈ H, ∀ g : Matrix (Fin n) (Fin n) K, cT s g * S * g ∈ H)
     (g g' : Matrix (Fin n) (Fin n) K) (h1 : g * g' = 1) (h2 : g' * g = 1) (S : H) :
-    (conjEq s H hH g g' h1 h2 S : Matrix (Fin n) (Fin n) K) = cTr s g * S * g := rfl
+    (conjEq s H hH g g' h1 h2 S : Matrix (Fin n) (Fin n) K) = cT s g * S * g := rfl
 
 theorem map_shear (H : AddSubgroup (Matrix (Fin n) (Fin n) K))
-    (hH : ∀ S ∈ H, ∀ g : Matrix (Fin n) (Fin n) K, cTr s g * S * g ∈ H)
+    (hH : ∀ S ∈ H, ∀ g : Matrix (Fin n) (Fin n) K, cT s g * S * g ∈ H)
     [LocallyCompactSpace H] [SecondCountableTopology H] [T2Space H] [MeasurableSpace H] [BorelSpace H]
     (ν : Measure H) [ν.IsAddHaarMeasure] (h2 : IsUnit (2 : K)) (a : Fin n) (x : Fin n → K) (hx : x a = 0)
-    (τ : H → H) (hτ : ∀ S, (τ S : Matrix (Fin n) (Fin n) K) = cTr s (shearM a x) * S * shearM a x) :
+    (τ : H → H) (hτ : ∀ S, (τ S : Matrix (Fin n) (Fin n) K) = cT s (shearM a x) * S * shearM a x) :
     ν.map τ = ν := by
   have inv : ∀ y : Fin n → K, y a = 0 → shearM a y * shearM a (-y) = 1 ∧ shearM a (-y) * shearM a y = 1 := by
     intro y hy

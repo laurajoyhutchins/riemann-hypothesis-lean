@@ -1,7 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeAdelicMatrixIntegralTranslate
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatSmulMemLattice
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeAdelicMatrixIntegralTranslate
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatSmulMemLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -90,13 +132,7 @@ theorem smul_eq {D : D7} (V : HSp D) (s : 𝓞 D.host.E) (w : V.V) : s • w = (
   (algebraMap_smul D.host.E s w).symm
 
 theorem exists_nat_smul_mem_L0 {D : D7} (V : HSp D) (v : V.V) : ∃ d : ℕ, 0 < d ∧ (d : 𝓞 D.host.E) • v ∈ V.L0 := by
-  first
-  | exact @_root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice
-  | exact _root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice
-  | (apply _root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice <;> assumption)
-  | (intros; apply _root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice ..)
+  exact _root_.GlobalTheory.NatSmulMemLattice.exists_nat_smul_mem_lattice V v
 
 theorem exists_nat_smul_frame {D : D7} (V : HSp D) :
     ∃ d : ℕ, 0 < d ∧ ∀ j, (d : 𝓞 D.host.E) • V.frame j ∈ V.L0 := by
@@ -140,7 +176,7 @@ theorem exists_nat_mul_mem_of_latHat {D : D7} (V : HSp D) : ∃ d : ℕ, 0 < d �
       intro i
       obtain ⟨a, ha⟩ := hx i
       obtain ⟨b, hb⟩ := hy i
-      exact ⟨a + b, by rw [map_add, Finsupp.add_apply, mul_add, ← ha, ← hb]; push_cast; rfl⟩
+      exact ⟨a + b, by rw [map_add (f := _), Finsupp.add_apply, mul_add, ← ha, ← hb]; push_cast; rfl⟩
     | smul c x _ hx =>
       intro i
       obtain ⟨a, ha⟩ := hx i
@@ -183,9 +219,9 @@ theorem natCast_isUnit (F : Subfield E) {m : ℕ} (hm : 0 < m) : IsUnit (m : Fin
 
 end GlobalTheory.LatCongImage
 
+
 open GlobalTheory.LatCongImage in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 theorem GlobalTheory.LatCongImage.finCong_mem_levN : ∀ (D : D7) (V : HSp D) (n : ℕ) (P : principalLevelFrame.RowPsi V n) (hF : D.host.F = maximalRealSubfield D.host.E), StdFrame hF P → ∀ N : ℕ, 0 < N → ∃ N' : ℕ, 0 < N' ∧ ∀ k ∈ GfC V, GlobalTheory.Member.FinCong V N' k → k ∈ principalLevelFrame.levN P N := by
   intro D V n P hF hstd N hN

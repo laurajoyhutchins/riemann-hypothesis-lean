@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntVZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyIntegralTensorPointsSharpStableRing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupActionRingHom
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentreCompat
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjoinLocalOrderTensorPadicMatrixAlmostAllStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNsmulMemSpan
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentreCompat
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvMemIntV
+public import Mathlib.NumberTheory.Padics.HeightOneSpectrum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjoinLocalOrderTensorPadicMatrixAlmostAllStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyIntegralTensorPointsSharpStableRing
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNsmulMemSpan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntVZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
+
+@[expose] public section
+
 open Matrix NumberField IsDedekindDomain GlobalTheory.LKTrip GlobalTheory.LKMid GlobalTheory.OrbFinAf
 open scoped TensorProduct Classical
 
@@ -88,7 +136,7 @@ theorem isIntV_theta_locOrder (p : ℕ) [Fact p.Prime] (G : HTGroup p) (v : Away
     have h1k := h1 k
     rw [Algebra.TensorProduct.one_def, basV_repr_tmul, one_mul] at h1k
     exact mul_mem (padicEquiv_symm_coe_mem p G v r) h1k
-  | add x y _ _ hx hy => rw [map_add]; exact isIntV_add' G v hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact isIntV_add' G v hx hy
   | mul x y _ _ hx hy => rw [map_mul]; exact hmul _ _ hx hy
 
 theorem finite_dvd (p : ℕ) (N : ℕ) (hN : 0 < N) :
@@ -134,7 +182,8 @@ theorem matrixUnits_eventually : ∀ (p : ℕ) [Fact p.Prime] (G : HTGroup p),
       · intro c _ hc; simp [Matrix.single_apply, hc]
       · simp
     simp only [E]
-    rw [← map_sum (theta p G v), ← AddSubmonoidClass.coe_finset_sum, ← map_sum ψ.symm, hs, map_one,
-      OneMemClass.coe_one, map_one]
+
+    rw [← map_sum (theta p G v), ← AddSubmonoidClass.coe_finsetSum, ← map_sum ψ.symm, hs, map_one,
+    OneMemClass.coe_one, map_one]
 
 end GlobalTheory.OrbFinAf.MatrixUnits₂

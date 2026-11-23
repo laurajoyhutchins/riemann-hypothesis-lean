@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTailExtra
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTailExtra
 import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.IntNumRelabel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -56,7 +105,7 @@ theorem peel {a : (Σ k, ι k) →₀ ℕ} {d : K → ℕ} {k : K}
     (tsub_add_cancel_of_le (Finsupp.single_le_iff.mpr (Nat.one_le_iff_ne_zero.mpr hi))).symm
   refine ⟨i, a - Finsupp.single ⟨k, i⟩ 1, e, ?_⟩
   have h2 := h
-  rw [e, map_add, Finsupp.weight_single, one_smul] at h2
+  rw [e, map_add (f := _), Finsupp.weight_single, one_smul] at h2
   exact add_right_cancel h2
 
 theorem vals_eq_span (y : (Σ k, ι k) → Ω) (d : K → ℕ) :
@@ -65,10 +114,11 @@ theorem vals_eq_span (y : (Σ k, ι k) → Ω) (d : K → ℕ) :
   apply le_antisymm
   · rintro _ ⟨g, hg, rfl⟩
     rw [SetLike.mem_coe, mem_weightedHomogeneousSubmodule] at hg
+
     rw [AlgHom.toLinearMap_apply, g.as_sum, map_sum]
     refine Submodule.sum_mem _ fun a ha => ?_
     have hw := hg (mem_support_iff.mp ha)
-    have hm : monomial a (coeff a g) = coeff a g • monomial a (1 : F) := by
+    have hm : monomial a (AddMonoidAlgebra.coeff g a) = AddMonoidAlgebra.coeff g a • monomial a (1 : F) := by
       rw [smul_monomial, smul_eq_mul, mul_one]
     rw [hm, map_smul]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, hw, rfl⟩)
@@ -87,7 +137,7 @@ theorem vals_mul_le (y : (Σ k, ι k) → Ω) (d e : K → ℕ) : vals F y d * v
   rintro _ ⟨_, ⟨a, ha, rfl⟩, _, ⟨b, hb, rfl⟩, rfl⟩
   show aeval y (monomial a (1 : F)) * aeval y (monomial b (1 : F)) ∈ vals F y (d + e)
   rw [← map_mul, monomial_mul, one_mul]
-  exact mem_vals_of y (by rw [map_add, ha, hb])
+  exact mem_vals_of y (by rw [map_add (f := _), ha, hb])
 
 theorem vals_single_le (y : (Σ k, ι k) → Ω) (d : K → ℕ) (k : K) :
     vals F y (d + Pi.single k 1) ≤ vals F y d * vals F y (Pi.single k 1) := by
@@ -153,8 +203,8 @@ theorem vals_eq_prod [Fintype K] (y : (Σ k, ι k) → Ω) (d : K → ℕ) :
     rw [Finset.prod_eq_single k (fun j _ hj => by simp [hj]) (by simp)]
     simp
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem prod_span_blocks [Fintype K] (y : (Σ k, ι k) → Ω) :
     ∏ k, Submodule.span F (Set.range fun i => y ⟨k, i⟩) =
       Submodule.span F (Set.range fun c : (∀ k, ι k) => ∏ k, y ⟨k, c k⟩) := by
@@ -173,14 +223,14 @@ theorem mapDomain_fst (a : (Σ k, ι k) →₀ ℕ) :
     ⇑(Finsupp.mapDomain Sigma.fst a) = Finsupp.weight (NumbersDVR.blockWeight ι) a := by
   induction a using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => rw [Finsupp.mapDomain_add, map_add, Finsupp.coe_add, hf, hg]
+  | add f g hf hg => rw [Finsupp.mapDomain_add, map_add (f := _), Finsupp.coe_add, hf, hg]
   | single v n =>
     rw [Finsupp.mapDomain_single, Finsupp.weight_single, Finsupp.single_eq_pi_single]
     ext k'
     simp [NumbersDVR.blockWeight, Pi.single_apply]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem cone_monomial (y : (Σ k, ι k) → Ω) (a : (Σ k, ι k) →₀ ℕ) (c : F) :
     mConeMapOver F y (monomial a c) = monomial (a.mapDomain Sigma.fst) (aeval y (monomial a c)) := by
   have key : (monomial (a.mapDomain Sigma.fst) (1 : Ω) : MvPolynomial K Ω) =
@@ -199,6 +249,7 @@ theorem cone_of_homog [Fintype K] (y : (Σ k, ι k) → Ω) {g : MvPolynomial (�
     mConeMapOver F y g = monomial (Finsupp.equivFunOnFinite.symm d) (aeval y g) := by
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun a ha => ?_
   have hA : a.mapDomain Sigma.fst = Finsupp.equivFunOnFinite.symm d := by
@@ -356,8 +407,8 @@ end Segre
 
 end SegreNum
 
-open SegreNum in
 
+open SegreNum in
 theorem SegreNum.proof : SegreNum.Statement := by
   intro F _ K _ _ ι _ Ω _ _ y _ n μs
   unfold NumbersDVR.intNum

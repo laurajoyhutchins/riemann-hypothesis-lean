@@ -1,11 +1,73 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.Basic
+public import Mathlib.Data.Matrix.Mul
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+public import Mathlib.Algebra.Module.PID
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Algebra.Polynomial.Module.FiniteDimensional
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeProduct.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.DirectSum.Basic
+public import Mathlib.Algebra.DirectSum.Module
+public import Mathlib.Algebra.Polynomial.Module.AEval
+public import Mathlib.LinearAlgebra.Matrix.SesquilinearForm
+
+@[expose] public section
 
 open Polynomial
 
 namespace GlobalTheory.SimilarTranspose
 
-open Polynomial in
 
+open Polynomial in
 theorem _root_.GlobalTheory.SimilarTranspose.exists_form {k : Type} [Field k] (f : k[X]) (hf : f ≠ 0) :
     ∃ l : k[X] →ₗ[k] k, (∀ a, f ∣ a → l a = 0) ∧ ∀ a, (∀ b, l (a * b) = 0) → f ∣ a := by
   set g := f * C f.leadingCoeff⁻¹ with hg
@@ -45,62 +107,6 @@ theorem _root_.GlobalTheory.SimilarTranspose.exists_form {k : Type} [Field k] (f
     rw [hidx, coeff_mul_X_pow] at h
     exact hr (leadingCoeff_eq_zero.1 h)
 
-theorem exists_bilin_cyclic {k : Type} [Field k] (f : k[X]) (hf : f ≠ 0) :
-    ∃ B : (k[X] ⧸ Submodule.span k[X] {f}) →ₗ[k] (k[X] ⧸ Submodule.span k[X] {f}) →ₗ[k] k,
-      (∀ x y, B ((X : k[X]) • x) y = B x ((X : k[X]) • y)) ∧ ∀ y, (∀ x, B x y = 0) → y = 0 := by
-  obtain ⟨l, h1, h2⟩ := exists_form f hf
-  let l' : (k[X] ⧸ Ideal.span {f}) →ₗ[k] k :=
-    (((Ideal.span {f}).restrictScalars k).liftQ l (fun a ha => h1 a (Ideal.mem_span_singleton.mp ha))).comp
-      (Submodule.Quotient.restrictScalarsEquiv k (Ideal.span {f})).symm.toLinearMap
-  have hl : ∀ a, l' (Ideal.Quotient.mk _ a) = l a := fun a => rfl
-  refine ⟨(LinearMap.mul k (k[X] ⧸ Ideal.span {f})).compr₂ l', ?_, ?_⟩
-  · intro x y
-    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective (I := Ideal.span {f}) x
-    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective (I := Ideal.span {f}) y
-    change l ((X * a) * b) = l (a * (X * b))
-    congr 1; ring
-  · intro y hy
-    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective (I := Ideal.span {f}) y
-    refine Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton.mpr (h2 b fun a => ?_))
-    have := hy (Ideal.Quotient.mk (Ideal.span {f}) a)
-    rw [mul_comm]
-    exact this
-
-theorem exists_bilin {k W : Type} [Field k] [AddCommGroup W] [Module k W] [FiniteDimensional k W]
-    (T : W →ₗ[k] W) :
-    ∃ B : W →ₗ[k] W →ₗ[k] k, (∀ x y, B (T x) y = B x (T y)) ∧ ∀ y, (∀ x, B x y = 0) → y = 0 := by
-  classical
-  have htor : Module.IsTorsion k[X] (Module.AEval' T) :=
-    Module.AEval.isTorsion_of_finiteDimensional k W T
-  obtain ⟨ι, _, p, hp, n, ⟨e⟩⟩ := Module.equiv_directSum_of_isTorsion htor
-  choose B hB1 hB2 using fun i => exists_bilin_cyclic (p i ^ n i) (pow_ne_zero _ (hp i).ne_zero)
-  let π : ∀ i, W →ₗ[k] (k[X] ⧸ Submodule.span k[X] {p i ^ n i}) := fun i =>
-    (((DirectSum.component k[X] ι _ i).comp e.toLinearMap).restrictScalars k).comp
-      (Module.AEval'.of T).toLinearMap
-  have hπ : ∀ i x, π i x = e (Module.AEval'.of T x) i := fun i x => rfl
-  have hT : ∀ i x, π i (T x) = (X : k[X]) • π i x := by
-    intro i x
-    rw [hπ, hπ, ← Module.AEval'.X_smul_of, map_smul]
-    rfl
-  refine ⟨∑ i, (B i).compl₁₂ (π i) (π i), ?_, ?_⟩
-  · intro x y
-    simp only [LinearMap.sum_apply, LinearMap.compl₁₂_apply, hT, hB1]
-  · intro y hy
-    have h0 : e (Module.AEval'.of T y) = 0 := by
-      ext i
-      rw [← hπ, DirectSum.zero_apply]
-      refine hB2 i _ fun z => ?_
-      have := hy ((Module.AEval'.of T).symm (e.symm (DirectSum.lof k[X] ι _ i z)))
-      simp only [LinearMap.sum_apply, LinearMap.compl₁₂_apply] at this
-      rw [Finset.sum_eq_single i] at this
-      · rw [hπ i ((Module.AEval'.of T).symm _)] at this
-        simpa using this
-      · intro j _ hj
-        rw [hπ j ((Module.AEval'.of T).symm _)]
-        simp [DirectSum.lof_eq_of, DirectSum.of_eq_of_ne _ _ _ hj]
-      · simp
-    simpa using h0
-
 open Polynomial in
 private theorem exists_nondegenerate_X_symmetric_form_quotient {k : Type} [Field k] (f : k[X]) (hf : f ≠ 0) :
     ∃ G : (k[X] ⧸ (k[X] ∙ f)) →ₗ[k] (k[X] ⧸ (k[X] ∙ f)) →ₗ[k] k,
@@ -131,7 +137,7 @@ private theorem exists_nondegenerate_X_symmetric_form_quotient {k : Type} [Field
     obtain ⟨a, rfl⟩ := hsurj x
     obtain ⟨b, rfl⟩ := hsurj y
     obtain ⟨c, rfl⟩ := hsurj z
-    rw [← Submodule.Quotient.mk_add, hg, hg, hg, add_mul, map_add]
+    rw [← Submodule.Quotient.mk_add, hg, hg, hg, add_mul, map_add (f := _)]
   · intro c x y
     obtain ⟨a, rfl⟩ := hsurj x
     obtain ⟨b, rfl⟩ := hsurj y
@@ -140,7 +146,7 @@ private theorem exists_nondegenerate_X_symmetric_form_quotient {k : Type} [Field
     obtain ⟨a, rfl⟩ := hsurj x
     obtain ⟨b, rfl⟩ := hsurj y
     obtain ⟨c, rfl⟩ := hsurj z
-    rw [← Submodule.Quotient.mk_add, hg, hg, hg, mul_add, map_add]
+    rw [← Submodule.Quotient.mk_add, hg, hg, hg, mul_add, map_add (f := _)]
   · intro c x y
     obtain ⟨a, rfl⟩ := hsurj x
     obtain ⟨b, rfl⟩ := hsurj y
@@ -197,8 +203,8 @@ private theorem exists_nondegenerate_X_symmetric_form_torsion {k : Type} [Field 
       rw [DirectSum.of_eq_of_ne _ _ _ hji, map_zero]
     · simp
 
-open Polynomial in
 
+open Polynomial in
 theorem _root_.GlobalTheory.SimilarTranspose.main : ∀ (k ι : Type) [Field k] [Fintype ι] [DecidableEq ι] (A : Matrix ι ι k),
     ∃ P : Matrix ι ι k, IsUnit P ∧ P * A = A.transpose * P := by
   intro k ι _ _ _ A

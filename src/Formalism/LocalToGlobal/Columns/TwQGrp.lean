@@ -1,5 +1,52 @@
-import Formalism.LocalToGlobal.Columns.TwQCmp
-import Formalism.LocalToGlobal.Columns.TwQThetaOpen
+module
+
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SatakeComb
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -80,9 +127,6 @@ def qbK (c : Kv) : Subgroup (GL (Fin n) Kv) where
       rw [_root_.mul_sub, hh]; noncomm_ring
     rw [e]
     exact qbDiv_neg (qbDiv_mul_left ha2 ha3)
-
-theorem mem_qbK {c : Kv} {k : GL (Fin n) Kv} : k ∈ qbK c ↔ qbInt (k : Matrix (Fin n) (Fin n) Kv) ∧
-    qbInt ((k⁻¹ : GL (Fin n) Kv) : Matrix (Fin n) (Fin n) Kv) ∧ qbDiv c ((k : Matrix (Fin n) (Fin n) Kv) - 1) := Iff.rfl
 
 theorem qbK_conj {c : Kv} {k h : GL (Fin n) Kv} (hk : k ∈ qbK c) (h1 : qbInt (h : Matrix (Fin n) (Fin n) Kv))
     (h2 : qbInt ((h⁻¹ : GL (Fin n) Kv) : Matrix (Fin n) (Fin n) Kv)) : h⁻¹ * k * h ∈ qbK c := by

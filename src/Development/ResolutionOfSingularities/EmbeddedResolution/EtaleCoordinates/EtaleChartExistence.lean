@@ -1,8 +1,51 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.Foundations.Schemes.AffineOpens
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
+public import Development.ResolutionOfSingularities.Foundations.Schemes.AffineOpens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory CategoryTheory.Limits Opposite AlgebraicGeometry TopologicalSpace
@@ -116,14 +159,14 @@ private theorem exists_etale_eval₂Hom_of_submersivePresentation {k S : Type u}
         | add q₁ q₂ h₁ h₂ =>
             obtain ⟨x, hx⟩ := h₁
             obtain ⟨y, hy⟩ := h₂
-            exact ⟨x + y, by rw [map_add, hx, hy, ← map_add]⟩
+            exact ⟨x + y, by rw [map_add (f := _), hx, hy, ← map_add (f := _)]⟩
         | mul_X q t hq =>
             obtain ⟨x, hx⟩ := hq
             exact ⟨x * MvPolynomial.X (e (Sum.inr t)), by rw [map_mul, hx, hΦr, ← map_mul]⟩
     | add z₁ z₂ h₁ h₂ =>
         obtain ⟨x, hx⟩ := h₁
         obtain ⟨y, hy⟩ := h₂
-        exact ⟨x + y, by rw [map_add, hx, hy]⟩
+        exact ⟨x + y, by rw [map_add (f := _), hx, hy]⟩
     | mul_X z s hz =>
         obtain ⟨x, hx⟩ := hz
         exact ⟨x * MvPolynomial.X (e (Sum.inl s)), by rw [map_mul, hx, hΦl]⟩
@@ -144,7 +187,7 @@ private theorem exists_etale_eval₂Hom_of_submersivePresentation {k S : Type u}
     | C a =>
         rw [hΦC, MvPolynomial.aeval_C, halg, MvPolynomial.aeval_C]
         simp
-    | add z₁ z₂ h₁ h₂ => simp only [map_add, h₁, h₂]
+    | add z₁ z₂ h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
     | mul_X z i hz => simp only [map_mul, hz, hcompX, MvPolynomial.aeval_X]
   have hpdX : ∀ (s : σ) (i : ι),
       MvPolynomial.pderiv s (Φ (MvPolynomial.X i)) =
@@ -169,8 +212,8 @@ private theorem exists_etale_eval₂Hom_of_submersivePresentation {k S : Type u}
     intro s q
     induction q using MvPolynomial.induction_on with
     | C a => rw [hΦC, MvPolynomial.pderiv_C, MvPolynomial.pderiv_C, map_zero]
-    | add q₁ q₂ h₁ h₂ => simp only [map_add, h₁, h₂]
-    | mul_X q i hq => simp only [map_mul, MvPolynomial.pderiv_mul, map_add, hq, hpdX]
+    | add q₁ q₂ h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
+    | mul_X q i hq => simp only [map_mul, MvPolynomial.pderiv_mul, map_add (f := _), hq, hpdX]
   have hsurjW : Function.Surjective
       (MvPolynomial.aeval (R := MvPolynomial (ULift.{u} (Fin n)) k)
         (fun s => P.val (e (Sum.inl s)))) := by
@@ -221,13 +264,13 @@ private theorem exists_etale_eval₂Hom_of_submersivePresentation {k S : Type u}
   show Algebra.Etale (MvPolynomial (ULift.{u} (Fin n)) k) S
   infer_instance
 
-private theorem homOfLE_comp_map_comp_affineSpaceFinToSpec {X : Scheme.{u}} {k : Type u} [Field k]
+theorem homOfLE_comp_map_comp_affineSpaceFinToSpec {X : Scheme.{u}} {k : Type u} [Field k]
     {p : X ⟶ Spec (CommRingCat.of k)} {U : X.Opens} {m : ℕ} (c : EtaleChart p U m)
     {V : X.Opens} (hVU : V ≤ U) :
     (X.homOfLE hVU ≫ c.map) ≫ affineSpaceFinToSpec k m = V.ι ≫ p := by
   rw [Category.assoc, c.comp_struct, ← Category.assoc, Scheme.homOfLE_ι]
 
-private theorem etale_homOfLE_comp_map {X : Scheme.{u}} {k : Type u} [Field k]
+theorem etale_homOfLE_comp_map {X : Scheme.{u}} {k : Type u} [Field k]
     {p : X ⟶ Spec (CommRingCat.of k)} {U : X.Opens} {m : ℕ} (c : EtaleChart p U m)
     {V : X.Opens} (hVU : V ≤ U) :
     AlgebraicGeometry.Etale (X.homOfLE hVU ≫ c.map) := by
@@ -247,7 +290,7 @@ theorem EtaleChart.restrict_map {X : Scheme.{u}} {k : Type u} [Field k]
     {V : X.Opens} (hVU : V ≤ U) :
     (c.restrict hVU).map = X.homOfLE hVU ≫ c.map := rfl
 
-private theorem homOfVector_comp_affineSpaceFinToSpec {X : Scheme.{u}} {k : Type u} [Field k]
+theorem homOfVector_comp_affineSpaceFinToSpec {X : Scheme.{u}} {k : Type u} [Field k]
     (p : X ⟶ Spec (CommRingCat.of k)) (U : X.Opens) {m : ℕ}
     (v : ULift.{u} (Fin m) → U.toScheme.presheaf.obj (op ⊤)) :
     AffineSpace.homOfVector (U.ι ≫ p) v ≫ affineSpaceFinToSpec k m = U.ι ≫ p := by

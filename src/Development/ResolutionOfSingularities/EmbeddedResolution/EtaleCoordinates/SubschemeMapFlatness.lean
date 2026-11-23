@@ -1,6 +1,52 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.IdealSheafOpenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
+module
+
+import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.StrictTransformSubscheme
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.IdealSheafOpenRestriction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
@@ -25,7 +71,6 @@ def subschemeMapOfComap {X Y : Scheme.{u}} (g : Y ⟶ X) (Z : X.IdealSheafData) 
     (Z.comap g).subscheme ⟶ Z.subscheme :=
   (exists_comp_subschemeι_eq_subschemeι_comp g Z).choose
 
-@[reassoc]
 theorem subschemeMapOfComap_comp {X Y : Scheme.{u}} (g : Y ⟶ X) (Z : X.IdealSheafData) :
     subschemeMapOfComap g Z ≫ Z.subschemeι = (Z.comap g).subschemeι ≫ g :=
   (exists_comp_subschemeι_eq_subschemeι_comp g Z).choose_spec
@@ -166,23 +211,7 @@ private theorem ideal_le_of_basicOpen_cover {X : Scheme.{u}} (A B : X.IdealSheaf
 
 theorem idealSheafData_eq_of_forall_restrictIdeal_eq {X : Scheme.{u}} (I J : X.IdealSheafData)
     (h : ∀ x : X, ∃ U : X.Opens, x ∈ U ∧ restrictIdeal I U = restrictIdeal J U) : I = J := by
-  have hloc : ∀ W : X.affineOpens, ∀ x ∈ (W : X.Opens),
-      ∃ f : Γ(X, (W : X.Opens)), x ∈ X.basicOpen f ∧
-        I.ideal (X.affineBasicOpen f) = J.ideal (X.affineBasicOpen f) := by
-    intro W x hx
-    obtain ⟨U, hxU, hU⟩ := h x
-    have hU' : I.comap U.ι = J.comap U.ι := hU
-    obtain ⟨f, hfU, hxf⟩ := W.2.exists_basicOpen_le (⟨x, hxU⟩ : ↥U) hx
-    refine ⟨f, hxf, ?_⟩
-    have hbo : I.comap (X.basicOpen f).ι = J.comap (X.basicOpen f).ι := by
-      rw [← Scheme.homOfLE_ι X hfU, Scheme.IdealSheafData.comap_comp,
-        Scheme.IdealSheafData.comap_comp, hU']
-    exact ideal_eq_of_comap_opensι_eq I J (X.basicOpen f) (W.2.basicOpen f) hbo
-  refine Scheme.IdealSheafData.ext
-    (funext fun W => le_antisymm (ideal_le_of_basicOpen_cover I J W (hloc W)) ?_)
-  refine ideal_le_of_basicOpen_cover J I W (fun x hx => ?_)
-  obtain ⟨f, hxf, hf⟩ := hloc W x hx
-  exact ⟨f, hxf, hf.symm⟩
+  apply FunctorialResolution.EmbeddedResolution.eq_of_locally_restrictIdeal_eq <;> assumption
 
 theorem mem_of_subschemeMapOfComap_apply_mem {X Y : Scheme.{u}} (g : Y ⟶ X) (Z : X.IdealSheafData)
     (A : Set X) (W : Z.subscheme.Opens) (W' : (Z.comap g).subscheme.Opens)

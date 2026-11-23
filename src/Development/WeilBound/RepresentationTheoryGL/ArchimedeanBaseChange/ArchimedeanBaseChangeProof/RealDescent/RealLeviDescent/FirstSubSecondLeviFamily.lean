@@ -1,4 +1,48 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.LeviCommutantWordReduction
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.LeviCommutantWordReduction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,9 +78,6 @@ theorem Intw.sub {f f' g g'} (h : Intw π f g) (h' : Intw π f' g') : Intw π (f
 theorem Intw.mul {f f' g g'} (h : Intw π f g) (h' : Intw π f' g') : Intw π (f * f') (g * g') := fun x => by
   simp [h' x, h (f' x)]
 
-theorem Intw.smul {f g} (c : ℂ) (h : Intw π f g) : Intw π (c • f) (c • g) := fun x => by
-  simp [h x]
-
 theorem Intw.zero : Intw π (0 : Module.End ℂ V) 0 := fun x => by simp
 
 theorem Intw.algebraMap (c : ℂ) : Intw π (algebraMap ℂ (Module.End ℂ V) c) (algebraMap ℂ (Module.End ℂ W) c) :=
@@ -63,14 +104,6 @@ theorem Intw.ofFn {t : ℕ} {f : Fin t → Module.End ℂ V} {g : Fin t → Modu
     Intw π (List.ofFn f).prod (List.ofFn g).prod := by
   have := Intw.listMap (List.finRange t) h
   simpa [List.ofFn_eq_map] using this
-
-theorem Intw.lift {X : Type} {G : X → Module.End ℂ V} {G' : X → Module.End ℂ W} (h : ∀ p, Intw π (G p) (G' p))
-    (z : FreeAlgebra ℂ X) : Intw π (FreeAlgebra.lift ℂ G z) (FreeAlgebra.lift ℂ G' z) := by
-  induction z using FreeAlgebra.induction with
-  | grade0 r => simpa using Intw.algebraMap (π := π) r
-  | grade1 p => simpa using h p
-  | mul a b ha hb => simpa using ha.mul hb
-  | add a b ha hb => simpa using ha.add hb
 
 theorem Intw.qminor {F : Fin n → Fin n → Module.End ℂ V} {G : Fin n → Fin n → Module.End ℂ W}
     (h : ∀ a b, Intw π (F a b) (G a b)) {t : ℕ} (r c : Fin t → Fin n) (u : ℂ) :
@@ -109,7 +142,7 @@ def qOp {V : Type} [AddCommGroup V] [Module ℂ V] (B : Submodule ℂ V) (f : Mo
 theorem qOp_intw {V : Type} [AddCommGroup V] [Module ℂ V] (B : Submodule ℂ V) (f : Module.End ℂ V)
     (h : ∀ x ∈ B, f x ∈ B) : Intw B.mkQ f (qOp B f) := fun x => by
   unfold qOp
-  rw [dif_pos (show B ≤ B.comap f from fun y hy => h y hy)]
+  rw [dite_eq_left (show B ≤ B.comap f from fun y hy => h y hy)]
   rfl
 
 section Chains
@@ -199,7 +232,7 @@ theorem multiplicity_assembly_holds : MultiplicityAssembly := by
     | grade0 r => simp [Module.algebraMap_end_apply]
     | grade1 p => simp [evCap, sc, hS5 p.1 p.2]
     | mul x y hx hy => rw [map_mul, map_mul, Module.End.mul_apply, hy, map_smul, hx, smul_smul, mul_comm]
-    | add x y hx hy => rw [map_add, map_add, LinearMap.add_apply, hx, hy, add_smul]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, hx, hy, add_smul]
   have hkill : ∀ l : Lt n, l.1 = false → inUU lev l → xL E1 E2 l v = 0 := by
     intro l hl _
     have hlt : l.2.1.1 < l.2.1.2 := l.2.2

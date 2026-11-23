@@ -1,7 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CocycleNormalForm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HhGroup
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HhSmall
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CocycleNormalForm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HhGroup
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HhSmall
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
 private theorem exists_strictHenselian_absolutely_closed_local_ring {k A ι : Type} [CommRing k] [CommRing A] [Fintype ι] (π : A → k) (μ : k → A)
@@ -13,8 +60,10 @@ private theorem exists_strictHenselian_absolutely_closed_local_ring {k A ι : Ty
   have h3 : ∀ (a : A) c, m (π a * c) = a * m c := h2
   refine ⟨m.mapMatrix, fun Y => rfl, fun M Y => ?_, fun M Y => ?_⟩
   · ext a b
+
     simp only [AddMonoidHom.mapMatrix_apply, Matrix.map_apply, Matrix.mul_apply, map_sum, h3]
   · ext a b
+
     simp only [AddMonoidHom.mapMatrix_apply, Matrix.map_apply, Matrix.mul_apply, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [mul_comm (Y a c), h3, mul_comm]
@@ -78,7 +127,7 @@ theorem UpperTheory.V.Alg.obs_correct :
     obtain ⟨⟨y1, y2⟩, -⟩ := Y.2
     refine ⟨?_, fun a b e => ?_⟩
     · have : (T Y.1).transpose = T Y.1.transpose := by rw [← T0, ← T0, Matrix.transpose_map]
-      rw [this, Tl, Tr, Jres, ← map_add, y1, map_zero]
+      rw [this, Tl, Tr, Jres, ← map_add (f := _), y1, map_zero]
     · have : T 0 a b = 0 := by rw [map_zero]; rfl
       rw [← T0, Matrix.map_apply, y2 a b e, ← this, ← T0]
       rfl
@@ -103,7 +152,7 @@ theorem UpperTheory.V.Alg.obs_correct :
       simp only [mul_assoc]
     rw [hf]
     simp only
-    rw [sub_mul, mul_sub, mul_sub, TT, Tl, Tr, rtres, rtres, e, e', map_sub, map_add]
+    rw [sub_mul, mul_sub, mul_sub, TT, Tl, Tr, rtres, rtres, e, e', map_sub, map_add (f := _)]
     abel
   have fone : f 1 = 1 := by
     obtain ⟨u, -, hu, -⟩ := g3 _ (fH 1)

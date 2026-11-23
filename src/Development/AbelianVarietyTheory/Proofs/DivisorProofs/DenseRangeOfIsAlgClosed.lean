@@ -1,5 +1,51 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.TwoClassFrameHasLevelSetting
-import Development.AbelianVarietyTheory.Definitions.Divisors.BlockPairCycPow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Field.Approximation
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -166,7 +212,7 @@ theorem mem_fix (τ : E →+* PadicAlgCl l) (σ : PadicAlgCl l ≃ₐ[ℚ_[l]] P
   induction hy using IntermediateField.adjoin_induction with
   | mem y hy => obtain ⟨x, rfl⟩ := hy; exact h x
   | algebraMap q => exact σ.commutes q
-  | add a b _ _ ha hb => rw [map_add, ha, hb]
+  | add a b _ _ ha hb => rw [map_add (f := _), ha, hb]
   | inv a _ ha => rw [map_inv₀, ha]
   | mul a b _ _ ha hb => rw [map_mul, ha, hb]
 
@@ -248,7 +294,11 @@ theorem exists_bridge {E : Type} (Ω : Type) [Field E] [NumberField E] [Field Ω
   obtain ⟨j, hj⟩ : ∃ j : Ω →+* PadicAlgCl l, j.comp (algebraMap E Ω) = τ := by
     letI : Algebra E (PadicAlgCl l) := τ.toAlgebra
     haveI : Algebra.IsAlgebraic E Ω := IsAlgClosure.isAlgebraic
-    let j : Ω →ₐ[E] PadicAlgCl l := IsAlgClosed.lift
+    let j : Ω →ₐ[E] PadicAlgCl l := (by
+      refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+      solve_by_elim* (maxDepth := 2) only [*,
+        @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+        @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
     exact ⟨j, RingHom.ext fun x => j.commutes x⟩
   subst hj
   obtain ⟨e, h1, h2, h3⟩ := exists_equiv (E := E) j

@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BrauerDegreeZero
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RealInducedCharacters.Induced
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BrauerDegreeZero
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RealInducedCharacters.Induced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.Published
 
 noncomputable section
@@ -50,10 +97,10 @@ theorem inducedRep_cyclic_trace (G : Type) [Group G] [Fintype G] (H : Subgroup G
     · subst hk
       rw [Pi.single_eq_same, mul_one, dot_conj H χ hti0 (σ : G)]
       unfold dot
-      rw [dif_pos σ.2]
+      rw [dite_eq_left σ.2]
     · rw [Pi.single_eq_of_ne hk, mul_zero]
       unfold dot
-      rw [dif_neg]
+      rw [dite_eq_right]
       rw [memiff k i0 _ hσ]
       exact hk
   · rw [eq_top_iff]
@@ -70,12 +117,12 @@ theorem inducedRep_cyclic_trace (G : Type) [Group G] [Fintype G] (H : Subgroup G
           rw [Pi.single_eq_same, mul_one, inv_mul_cancel, one_mul]
         · rw [Pi.single_eq_of_ne hk, mul_zero]
           unfold dot
-          rw [dif_neg]
+          rw [dite_eq_right]
           rw [memiff k i _ hti]
           exact hk
       have hne : dot H χ (t i0) ≠ 0 := by
         unfold dot
-        rw [dif_pos hti0]
+        rw [dite_eq_left hti0]
         exact Units.ne_zero _
       have : Pi.single i (1 : ℂ) = (dot H χ (t i0))⁻¹ • indRep H χ t ht hc (t i) (Pi.single i0 1) := by
         rw [hval, smul_smul, inv_mul_cancel₀ hne, one_smul]

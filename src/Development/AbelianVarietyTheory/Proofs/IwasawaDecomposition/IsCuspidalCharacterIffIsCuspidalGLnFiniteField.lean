@@ -1,11 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.BlockTriangularOfSubOne
+public import Formalism.PadicSubsetSums.CentralIdempotents.GaloisConjCentralIdempotent
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChiIdemMulLvlIdemBaseNeZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasLabelTransportEquiv
 import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoeffZeroNeOfMonicIrr
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CanonListLength
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.BlockTriangularOfSubOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChiIdemMulLvlIdemBaseNeZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasLabelTransportEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory Polynomial
 
 noncomputable section
@@ -59,8 +100,8 @@ theorem mem_unipRadical_twoBlocks_iff {d a : ℕ} (had : a ≤ d) (x : Gn g d) :
       simp only [Fin.ext_iff]
       split_ifs with h1 h2 h2 <;> first | rfl | omega
 
-open scoped Classical in
 
+open scoped Classical in
 theorem res_one_one_eq {d a : ℕ} (had : a ≤ d) (χ : Gn g d → ℂ) :
     res a (d - a) χ 1 1 =
       ((g : ℂ) ^ (a * (d - a)))⁻¹ * ∑ u : unipRadical (ZMod g) (twoBlocks d a), χ u := by
@@ -71,8 +112,8 @@ theorem res_one_one_eq {d a : ℕ} (had : a ≤ d) (χ : Gn g d → ℂ) :
   simp only [Finset.mem_filter, Finset.mem_univ, true_and, Units.val_one]
   exact (mem_unipRadical_twoBlocks_iff had x).symm
 
-open scoped Classical in
 
+open scoped Classical in
 theorem res_character_eq_zero_iff {d a : ℕ} (had : a ≤ d) (V : FDRep ℂ (Gn g d)) :
     res a (d - a) (fun x => V.character x) 1 1 = 0 ↔
       ∀ v : V, (∀ u ∈ unipRadical (ZMod g) (twoBlocks d a), V.ρ u v = v) → v = 0 := by
@@ -209,7 +250,15 @@ theorem isCusp_character_iff_isCuspidal : ∀ (g : ℕ) [Fact g.Prime] (d : ℕ)
     let P := GlobalTheory.SerOSys.TranspLabel.permGL (K := ZMod g) σ
     have key : V.ρ P⁻¹ v = 0 := hw _ fun u hu => by
       have h1 := hv _ (glEquiv_mem_unip b z hz σ hσ hu)
-      rw [GlobalTheory.SerOSys.TranspLabel.glEquiv_perm] at h1
+      have hperm : glEquiv (ZMod g) σ u = P * u * P⁻¹ := by
+        apply Units.ext
+        rw [Units.val_mul, Units.val_mul]
+        show Matrix.reindex σ σ (u : Matrix (Fin d) (Fin d) (ZMod g)) =
+          σ.symm.toPEquiv.toMatrix * (u : Matrix (Fin d) (Fin d) (ZMod g)) *
+            σ.toPEquiv.toMatrix
+        rw [PEquiv.toMatrix_toPEquiv_mul, PEquiv.mul_toMatrix_toPEquiv]
+        rfl
+      rw [hperm] at h1
       calc V.ρ u (V.ρ P⁻¹ v) = V.ρ (P⁻¹ * (P * u * P⁻¹)) v := by
             rw [show P⁻¹ * (P * u * P⁻¹) = u * P⁻¹ by group, map_mul, Module.End.mul_apply]
         _ = V.ρ P⁻¹ v := by rw [map_mul, Module.End.mul_apply, h1]

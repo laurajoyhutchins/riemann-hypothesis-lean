@@ -1,6 +1,58 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ExistsReduction
+import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+
+@[expose] public section
+
 open MeasureTheory Formalism.MainNotions.S GlobalTheory.RowLev NumberField IsDedekindDomain Matrix
 open scoped InnerProductSpace ComplexOrder TensorProduct Pointwise Classical
 
@@ -41,6 +93,7 @@ theorem exists_gen (S : Subring A) (Λ : Submodule S (Fin n → A)) {k : Type} [
   let μ : Fin n → Λ := fun i => ε • g (Pi.single i 1)
   have h1 : ∀ a : Fin n → S, c (∑ i, a i • μ i) = fun i => r (a i) := by
     intro a
+
     rw [map_sum]
     ext j
     simp [μ, map_smulₛₗ, hg, hrε, Finset.sum_apply, Pi.single_apply]
@@ -202,6 +255,7 @@ theorem hform_adj (s : A →+* A) {J : Matrix (Fin n) (Fin n) A} (hJ : IsUnit J.
     Matrix.dotProduct_mulVec]
   congr 1
   ext i
+
   simp [cT, Matrix.vecMul, Matrix.mulVec, dotProduct, map_sum, mul_comm]
 
 noncomputable def glue (s : A →+* A) (J : Matrix (Fin n) (Fin n) A) (e : A)
@@ -276,6 +330,7 @@ theorem exists_unitary_lift : ∀ (A : Type) [CommRing A] (s : A →+* A) (S : S
       simp [Matrix.mulVec, dotProduct]
     · rw [hcz, hca]
       ext i
+
       simp [Matrix.mulVec, dotProduct, map_sum]
   have hFmem : ∀ P, ∀ y ∈ Λ, F P *ᵥ y ∈ Λ := fun P y hy => by
     obtain ⟨z, hz, -⟩ := hFΛ P ⟨y, hy⟩
@@ -316,7 +371,7 @@ theorem exists_unitary_lift : ∀ (A : Type) [CommRing A] (s : A →+* A) (S : S
       apply Subtype.ext
       change glue s J ε (F N) (F N') *ᵥ (y : Fin n → A) = _
       rw [hglue, hz]; rfl
-    rw [this, map_add, map_add, map_smulₛₗ, map_smulₛₗ, hcz, hN, hrε']
+    rw [this, map_add (f := _), map_add (f := _), map_smulₛₗ, map_smulₛₗ, hcz, hN, hrε']
     simp [hrε, hrε']
   · intro y hy
     refine ⟨-y + F N *ᵥ y + adj s J (F N') *ᵥ y,

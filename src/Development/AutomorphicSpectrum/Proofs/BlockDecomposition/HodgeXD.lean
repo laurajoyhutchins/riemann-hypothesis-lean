@@ -1,8 +1,47 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.NLeA
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ChartGrConst
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.CosieveBot
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -69,7 +108,7 @@ def Dsum {I : Type w} [DecidableEq I] (E : I → Cx.{w} K) : Cx.{w} K where
     induction x using DirectSum.induction_on with
     | zero => simp
     | of i x => simp [← DirectSum.lof_eq_of K, DirectSum.lmap_lof, (E i).dd]
-    | add x y hx hy => simp only [map_add, hx, hy, add_zero]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, add_zero]
 
 variable {ι : Type} [DecidableEq ι]
 
@@ -99,7 +138,7 @@ def Dsum.map {I : Type w} [DecidableEq I] {E E' : I → Cx.{w} K} (f : ∀ i, Cx
     | of i x =>
       change DirectSum.lmap _ (DirectSum.lmap _ _) = DirectSum.lmap _ (DirectSum.lmap _ _)
       simp [← DirectSum.lof_eq_of K, DirectSum.lmap_lof, (f i).comm]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def sumSy {I : Type w} [DecidableEq I] (A : I → Sy.{w} K ι) : Sy.{w} K ι where
   K S := Dsum fun i => (A i).K S
@@ -110,14 +149,14 @@ def sumSy {I : Type w} [DecidableEq I] (A : I → Sy.{w} K ι) : Sy.{w} K ι whe
     | of i x =>
       change DirectSum.lmap _ _ = _
       simp [← DirectSum.lof_eq_of K, DirectSum.lmap_lof, (A i).res_id]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   res_comp h h' n x := by
     induction x using DirectSum.induction_on with
     | zero => simp
     | of i x =>
       change DirectSum.lmap _ (DirectSum.lmap _ _) = DirectSum.lmap _ _
       simp [← DirectSum.lof_eq_of K, DirectSum.lmap_lof, (A i).res_comp]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 structure XD (K : Type) [Field K] where
   C₁ : Type 1

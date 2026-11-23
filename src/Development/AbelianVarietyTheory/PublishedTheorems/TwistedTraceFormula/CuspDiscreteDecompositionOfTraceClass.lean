@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsAuxiliaryPlaceNotMemFinset
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsCompactOperatorOfIsHilbertSchmidt
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsClosedEmbeddingOfLocallyCompact
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonarchimedeanGroupOfIsCompactIsOpen
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMapInfFinEquivEqProd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCompOfIsTraceClass
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsCompactOperatorOfIsHilbertSchmidt
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsClosedEmbeddingOfLocallyCompact
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.TraceKernelDecomposition
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMapInfFinEquivEqProd
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonarchimedeanGroupOfIsCompactIsOpen
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCompOfIsTraceClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -135,21 +177,6 @@ theorem isTraceClass_of_isHilbertSchmidt (hDM : Published.DixmierMalliavinFactor
   · rintro a g - ⟨hg, t⟩
     have c := continuous_of_mem_ccAd hg
     exact ⟨Submodule.smul_mem _ a hg, by rw [RcuspOp, hu.repOp_smul c.1 c.2 a]; exact t.smul a⟩
-
-theorem L2cusp_le_L2disc (h : IsDiscreteSum (Rcusp V μ)) : L2cusp V μ ≤ L2discG V μ := fun F hF => by
-  have hW := isSubrep_L2cusp V μ
-  refine (h.disc_eq_top.ge.trans (disc_le (U := (L2discG V μ).comap (L2cusp V μ).subtype)
-    ((isSubrep_disc (π := RG V μ)).1.preimage continuous_subtype_val) fun X hX => ?_) : ⊤ ≤ _)
-    (Submodule.mem_top (x := ⟨F, hF⟩))
-  refine Submodule.map_le_iff_le_comap.1 (IsIrredSubrep.le_disc ⟨hW.isSubrep_rep_iff.1 hX.1,
-    fun e => hX.2.1 (Submodule.map_injective_of_injective (Submodule.injective_subtype _) (e.trans (Submodule.map_bot _).symm)), fun U hU hs => ?_⟩)
-  have e : (U.comap (L2cusp V μ).subtype).map (L2cusp V μ).subtype = U :=
-    Submodule.map_comap_eq_self (hU.trans (LinearMap.map_le_range))
-  rcases hX.2.2 (U.comap (L2cusp V μ).subtype) ((Submodule.comap_mono hU).trans
-    (Submodule.comap_map_eq_of_injective (Submodule.injective_subtype _) X).le)
-    (hW.isSubrep_rep_iff.2 (e.symm ▸ hs)) with h0 | h0
-  · exact .inl (by rw [← e, h0, Submodule.map_bot])
-  · exact .inr (by rw [← e, h0])
 
 theorem multIn_L2cusp_lt (h : IsDiscreteSum (Rcusp V μ)) {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     {π : GA D V →* (H →L[ℂ] H)} (hπ : IsIrrUnitary π) : multIn π (RG V μ) (L2cusp V μ) < Cardinal.aleph0 :=

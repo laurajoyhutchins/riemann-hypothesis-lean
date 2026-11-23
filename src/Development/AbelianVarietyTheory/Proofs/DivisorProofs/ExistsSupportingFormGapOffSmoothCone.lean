@@ -1,10 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.OrdGeOfForall
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmoothConeInteriorDefiniteBalancedForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothConeFaceOfInteriorCommonPoint
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonnegSumSmulIntBilinFormToRealMemPsdCone
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmoothConeInteriorDefiniteBalancedForm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothConeFaceOfInteriorCommonPoint
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonnegSumSmulIntBilinFormToRealMemPsdCone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.Poinc
 
@@ -30,7 +70,7 @@ theorem exists_abs_apply_le (ha : Submodule.span ℤ (Set.range a) = ⊤) (x y :
       refine ⟨1, fun β hs hp => ?_⟩
       have h1 := hp (a i + a j)
       have h2 := hp (a i - a j)
-      simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply, hs (a j) (a i)] at h1 h2
+      simp only [map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply, hs (a j) (a i)] at h1 h2
       have h3 := Finset.single_le_sum (f := fun i => β (a i) (a i)) (fun i _ => hp _) (Finset.mem_univ i)
       have h4 := Finset.single_le_sum (f := fun i => β (a i) (a i)) (fun i _ => hp _) (Finset.mem_univ j)
       rw [abs_le]
@@ -40,7 +80,7 @@ theorem exists_abs_apply_le (ha : Submodule.span ℤ (Set.range a) = ⊤) (x y :
       obtain ⟨C, hC⟩ := h1
       obtain ⟨C', hC'⟩ := h2
       refine ⟨C + C', fun β hs hp => ?_⟩
-      rw [map_add, Nat.cast_add, add_mul]
+      rw [map_add (f := _), Nat.cast_add, add_mul]
       exact (abs_add_le _ _).trans (add_le_add (hC β hs hp) (hC' β hs hp))
     | smul n y _ h1 =>
       obtain ⟨C, hC⟩ := h1
@@ -52,7 +92,7 @@ theorem exists_abs_apply_le (ha : Submodule.span ℤ (Set.range a) = ⊤) (x y :
     obtain ⟨C, hC⟩ := h1
     obtain ⟨C', hC'⟩ := h2
     refine ⟨C + C', fun β hs hp => ?_⟩
-    rw [map_add, LinearMap.add_apply, Nat.cast_add, add_mul]
+    rw [map_add (f := _), LinearMap.add_apply, Nat.cast_add, add_mul]
     exact (abs_add_le _ _).trans (add_le_add (hC β hs hp) (hC' β hs hp))
   | smul n x _ h1 =>
     obtain ⟨C, hC⟩ := h1
@@ -73,6 +113,7 @@ theorem exists_abs_lin_le [Module.Free ℤ X] [Module.Finite ℤ X] (ha : Submod
   choose C hC using exists_abs_apply_le ha
   refine ⟨∑ i, ∑ j, C (b i) (b j) * (lam (E i j)).natAbs, fun β hs hp => ?_⟩
   conv_lhs => rw [hE β]
+
   simp only [map_sum, map_smul, smul_eq_mul]
   push_cast
   rw [Finset.sum_mul]
@@ -103,7 +144,7 @@ theorem exists_ray_bound (hF : IsPolFanOn bar φ X) :
 theorem exists_cone_nat [IsDedekindDomain O] [CharZero O] [Module.Finite ℤ O] (hF : IsPolFanOn bar φ X)
     {β : LinearMap.BilinForm ℤ X} (hβ : β ∈ balForms bar X) (hp : ∀ y, 0 ≤ β y y) :
     ∃ (s : ℕ) (δ : Fin s → LinearMap.BilinForm ℤ X) (n : Fin s → ℕ), IsCone bar φ δ ∧ β = ∑ i, n i • δ i := by
-  have hB : toReal β ∈ psdCone bar X := by
+  have hB : toReal β ∈ psdCone (bar := bar) (X := X) := by
     simpa using ConeSub.sum_smul_toReal_mem_psdCone O bar X 1 ![β] ![1] (by simp [hβ]) (by simp [hp]) (by simp)
   obtain ⟨m, γ, c, hγ, hc, hsum⟩ := hF.cover _ hB
   obtain ⟨nZ, hnZ⟩ := Cover.coeff_int hγ.mem hγ.basis hβ hsum
@@ -171,8 +212,9 @@ theorem exists_gap : ∀ (O : Type) [CommRing O] [IsDedekindDomain O] [CharZero 
     rw [intCone_evalZ_sum hδ.linear, Finset.mul_sum]
     have e : (D * ∑ l, (∑ i, n i • δ i) (a l) (a l) + lam (∑ i, n i • δ i) : ℤ) =
         ∑ i, (n i : ℤ) * (D * ∑ l, δ i (a l) (a l) + lam (δ i)) := by
+
       simp only [LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_nsmul, nsmul_eq_mul, mul_add,
-        Finset.sum_add_distrib, Finset.mul_sum]
+      Finset.sum_add_distrib, Finset.mul_sum]
       rw [Finset.sum_comm]
       congr 1
       exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring

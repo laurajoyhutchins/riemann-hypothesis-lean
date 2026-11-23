@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.RowsDegF
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.RowsDeg
+import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.RowsNDn
+import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.RowsRpowPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +100,7 @@ theorem rows_Dr_le_HHZ (D : D7) (large₂ : SizeData₂ D) (hrd : 0 < D.host.rdE
   have hs1 := rows_one_le_sizeZ (D := D) large₂.sc.b c Z
   calc ∏ τ, max 1 (absDl D Z D.R.rS τ ^ 2)
       ≤ ∏ τ : D.what₂.Tau, (H2 * max 1 (absDl D Z D.R.rS τ / H2)) ^ 2 :=
-        Finset.prod_le_prod (fun τ _ => le_trans zero_le_one (le_max_left _ _)) fun τ _ => each τ
+        Finset.prod_le_prod₀ (fun τ _ => le_trans zero_le_one (le_max_left _ _)) fun τ _ => each τ
     _ = (H2 ^ D.R.f * ∏ τ : D.what₂.Tau, max 1 (absDl D Z D.R.rS τ / H2)) ^ 2 := by
         rw [Finset.prod_pow, Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, D.what₂.card_Tau]
     _ ≤ (H2 ^ D.R.f * sizeZ D large₂.sc.b c Z) ^ 2 := by
@@ -64,7 +108,7 @@ theorem rows_Dr_le_HHZ (D : D7) (large₂ : SizeData₂ D) (hrd : 0 < D.host.rdE
           (Finset.prod_nonneg fun τ _ => le_trans zero_le_one (le_max_left _ _)))
         apply mul_le_mul_of_nonneg_left _ (by positivity)
         unfold sizeZ
-        exact Finset.prod_le_prod (fun τ _ => le_trans zero_le_one (le_max_left _ _)) fun τ _ => single τ
+        exact Finset.prod_le_prod₀ (fun τ _ => le_trans zero_le_one (le_max_left _ _)) fun τ _ => single τ
     _ = (H2 ^ D.R.f) ^ 2 * sizeZ D large₂.sc.b c Z ^ 2 := by ring
     _ ≤ large₂.sc.b ^ (c ^ 2 * (D.R.m : ℝ) ^ 3 * D.R.f) * sizeZ D large₂.sc.b c Z ^ 4 := by
         apply mul_le_mul _ (pow_le_pow_right₀ hs1 (by norm_num)) (by positivity) (by positivity)
@@ -163,21 +207,6 @@ section Fam
 variable {eps : ℝ} (Fm : FamP eps) (C1 : ℝ) (X : ∀ x, Fm.x1 < x → ∀ i : Fm.Ix x, TermTie (Fm.D x i))
   (Y : ∀ x (hx : Fm.x1 < x) (i : Fm.Ix x) (u u' : (Fm.D x i).what₂.Word),
     LoopTie (Fm.D x i) (Fm.L x i) (X x hx i) u u' C1)
-
-theorem rows_KBoundF_of (hAdm : VanishingOnXAndXPlus.AdmF Fm C1 X Y) : rows_KBoundF Fm C1 X Y := by
-  intro Cg cb Cu cT CT C0 A
-  obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, hall⟩ := hAdm
-  obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, h27, _⟩ := hall Cg cb Cu cT CT C0 A
-  obtain ⟨cH, x27, H27⟩ := h27
-  refine ⟨max (max 1 CT) (|cH| + 2), fun c hc => ⟨x27, fun x hx i hx1 u u' hH => ?_⟩⟩
-  have k1 : 1 ≤ c := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hc
-  have k2 : CT ≤ c := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hc
-  have k3 : |cH| + 2 ≤ c := le_trans (le_max_right _ _) hc
-  exact rows_KBound_of _ hH
-    (rows_stHH_mono (by linarith [le_abs_self cH]) (by linarith [neg_abs_le cH]) (H27 x hx i u u')) k1 k2
-
-theorem rows_DegF_of' (hAdm : VanishingOnXAndXPlus.AdmF Fm C1 X Y) (hAmp : rows_AmpF Fm C1) (hT : rows_TiesF Fm C1 X Y) :
-    rows_DegF Fm C1 X Y := rows_DegF_of Fm C1 X Y hAdm hAmp hT (rows_KBoundF_of Fm C1 X Y hAdm)
 
 end Fam
 

@@ -1,9 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSheetAreaCompare
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSheetImageArea
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PProjectionFormula
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSheetAreaCompare
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSheetImageArea
+public import Mathlib.Topology.Separation.CompletelyRegular
 import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.IsAddHaarMeasureHausdorffMeasureEuclideanSpaceCo
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PProjectionFormula
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -72,8 +119,8 @@ theorem exists_sheet_nhds {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix (Fi
 
 end SheetAreaCompare
 
-open SheetAreaCompare in
 
+open SheetAreaCompare in
 theorem SheetAreaCompare.proof (h₁ : SheetImageArea.Statement) : SheetAreaCompare.Statement := by
   classical
   intro n d J A
@@ -174,8 +221,11 @@ theorem SheetAreaCompare.proof (h₁ : SheetImageArea.Statement) : SheetAreaComp
         · by_cases hx : ∃ s, IsSheetAt J A x s
           · obtain ⟨k, hk⟩ := hEcover x hx
             rw [Set.indicator_of_mem hxf]
+            have hle : (E k ∩ fibre J A y).indicator (fun x => ENNReal.ofReal (t x)) x ≤
+                ∑' k, (E k ∩ fibre J A y).indicator (fun x => ENNReal.ofReal (t x)) x :=
+              le_tsum (fun k => (E k ∩ fibre J A y).indicator (fun x => ENNReal.ofReal (t x)) x) k
             exact (Set.indicator_of_mem (show x ∈ E k ∩ fibre J A y from ⟨hk, hxf⟩)
-              (fun x => ENNReal.ofReal (t x))).symm.le.trans (ENNReal.le_tsum k)
+              (fun x => ENNReal.ofReal (t x))).symm.le.trans hle
           · have : t x = 0 := by simp only [ht, dif_neg hx]
             rw [Set.indicator_of_mem hxf, this, ENNReal.ofReal_zero]
             exact zero_le

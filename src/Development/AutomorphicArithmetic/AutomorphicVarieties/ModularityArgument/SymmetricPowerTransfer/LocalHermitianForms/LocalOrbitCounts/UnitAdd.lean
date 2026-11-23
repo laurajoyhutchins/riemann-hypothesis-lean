@@ -1,13 +1,67 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.DatIso
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.FixPSmul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.FixPMul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.PKappa
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.SumShift
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.KapMove
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.NormOneIsCoboundaryUnramifiedQuadratic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.IrreducibleParity.NotEvenIrr
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.DatIso
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.FixPMul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.FixPSmul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.HsLaw
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.KapMove
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.NonsqMul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.HsLaw
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.RootEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.PKappa
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.RootEx
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.SqrtO
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.SumShift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open QuadraticAlgebra UpperTheory.V.Z.Sym UpperTheory.V.Z.Sym.Loc
 
@@ -71,7 +125,7 @@ private theorem int_rep {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuat
     rw [← IsLocalRing.residue_eq_zero_iff]
     simp only [P, Polynomial.eval_sub, Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_C]
     rw [hc]
-    simp only [map_sub, map_pow, map_add, map_mul]
+    simp only [map_sub, map_pow, map_add (f := _), map_mul]
     linear_combination hab
   have hd : P.derivative.eval x0 = 2 * x0 := by
     simp only [P, Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero,
@@ -201,7 +255,7 @@ private theorem choice {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
     · show s0⁻¹ * algebraMap O K (s * a2) = s0⁻¹ * (algebraMap O K a2 * algebraMap O K s)
       rw [map_mul, mul_comm (algebraMap O K s)]
     · rw [hT, IsUnit.unit_spec]
-      simp only [map_add, map_mul, map_pow, map_ofNat]
+      simp only [map_add (f := _), map_mul, map_pow, map_ofNat]
       ring
   · have hm1 : (u0 : O) - 1 ^ 2 ∈ IsLocalRing.maximalIdeal O := by
       rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
@@ -240,8 +294,8 @@ private theorem choice {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
         linear_combination (ci ^ 2 * h2i ^ 2 * (1 + ε * s ^ 2) ^ 2) * hc
           - ((c * ci + 1) * h2i ^ 2 * (1 + ε * s ^ 2) ^ 2) * hci - ((ε * s ^ 2) * (2 * h2i + 1)) * h2
       have k2 := congrArg (algebraMap O K) k1
-      simp only [map_sub, map_add, map_mul, map_pow, map_neg, map_one] at k2
-      simp only [map_sub, map_add, map_mul, map_pow, map_neg, map_one]
+      simp only [map_sub, map_add (f := _), map_mul, map_pow, map_neg, map_one] at k2
+      simp only [map_sub, map_add (f := _), map_mul, map_pow, map_neg, map_one]
       linear_combination k2
     · rw [hL.2.2.2 _ _ hΔ0 hsq, hL.2.2.2 _ _ hΔ0 hsq]
     · show s0⁻¹ * algebraMap O K (ci * h2i * (1 + ε * s ^ 2))
@@ -256,8 +310,8 @@ private theorem choice {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
           + ((1 + ε * s ^ 2) - (1 + 2 * (ε * s ^ 2)) * ((1 + ε * s ^ 2) * u1i)) * h2
           - (1 + 2 * (ε * s ^ 2)) * h1i
       have k2 := congrArg (algebraMap O K) k1
-      simp only [map_add, map_mul, map_pow, map_zero, map_ofNat, map_one] at k2
-      simp only [map_add, map_mul, map_pow, map_zero, map_ofNat, map_one]
+      simp only [map_add (f := _), map_mul, map_pow, map_zero, map_ofNat, map_one] at k2
+      simp only [map_add (f := _), map_mul, map_pow, map_zero, map_ofNat, map_one]
       linear_combination k2
 
 private theorem root_tr {K : Type} [Field K] {τ : K} {u : Etau K τ} (hu : u ^ 2 = -ω) (hn : QuadraticAlgebra.norm u = 1) :
@@ -442,7 +496,7 @@ theorem UpperTheory.V.Z.Sym.Loc.kapM :
   have htr : QuadraticAlgebra.trace (⟨algebraMap O K xr, algebraMap O K yr⟩ : Etau K τ)
       = algebraMap O K (2 * xr + ((ε : O) * s ^ 2 - 2) * yr) := by
     show 2 * algebraMap O K xr + τ * algebraMap O K yr = _
-    rw [map_add, map_mul, map_mul, hτ0, map_ofNat]
+    rw [map_add (f := _), map_mul, map_mul, hτ0, map_ofNat]
   have ht2 := root_tr hu2 hnorm
   have ht0u : IsUnit (2 * xr + ((ε : O) * s ^ 2 - 2) * yr) := by
     have h5 : (2 * xr + ((ε : O) * s ^ 2 - 2) * yr) ^ 2 = u0 := by

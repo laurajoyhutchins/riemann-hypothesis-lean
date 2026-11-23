@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.HeckeTheorem
+module
+
+public import GroundTheory.GlobalFields.TateThesis.HeckeTheoremFE
+public import GroundTheory.GlobalFields.TateThesis.HeckeTheorem
+import GroundTheory.GlobalFields.TateThesis.HeckeTheoremTrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField InfinitePlace IsDedekindDomain MeasureTheory Complex Topology Filter Set
 open scoped NumberField.AdeleRing Real
@@ -22,8 +72,8 @@ theorem discrNormConductor_one : (1 : HeckeCharacter K).discrNormConductor = |(d
   rw [discrNormConductor, conductor_eq_top_of_forall one_toIdele_eq_cpow, Ideal.absNorm_top]
   simp
 
-open Classical in
 
+open Classical in
 theorem gammaFactor_one (s : ℂ) :
     (1 : HeckeCharacter K).gammaFactor s =
       Gammaℝ s ^ nrRealPlaces K * Gammaℂ s ^ nrComplexPlaces K := by
@@ -167,16 +217,6 @@ theorem normOneClassMeasure_univ_toReal_eq :
   rw [← h, Real.sqrt_eq_rpow, ← mul_assoc, ← Real.rpow_add ha]
   norm_num
 
-open NumberField.Units in
-
-theorem normOneClassMeasure_univ_toReal_eq_classNumber :
-    (normOneClassMeasure K univ).toReal = 2 ^ nrRealPlaces K * (2 * π) ^ nrComplexPlaces K *
-      regulator K * classNumber K / torsionOrder K := by
-  rw [normOneClassMeasure_univ_toReal_eq, dedekindZeta_residue_def]
-  have h1 : 0 < Real.sqrt |(discr K : ℝ)| :=
-    Real.sqrt_pos.2 (abs_pos.2 (Int.cast_ne_zero.2 (discr_ne_zero K)))
-  have h2 : (0 : ℝ) < torsionOrder K := Nat.cast_pos.2 (torsionOrder_pos K)
-  field_simp
 
 theorem completedDedekindZeta_one_sub {s : ℂ} (hs₀ : s ≠ 0) (hs₁ : s ≠ 1) :
     completedDedekindZeta K (1 - s) = completedDedekindZeta K s := by

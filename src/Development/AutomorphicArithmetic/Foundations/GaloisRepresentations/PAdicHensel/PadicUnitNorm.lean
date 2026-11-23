@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.CodiffUnit
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.HermitianHassePrincipleHolds
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.TraceDefinitePairsEqAutomorphicTrace
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.HermitianHassePrincipleHolds
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.TraceDefinitePairsEqAutomorphicTrace
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.DatumToG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,7 +94,7 @@ def IsoEx : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (A : 
   ∃ a : GL (Fin n) (FiniteAdeleRing (𝓞 E) E),
     (a.val.map (cF E))ᵀ * (Matrix.diagonal fun i => ((A.dg n i : 𝓞 E) : E)).map (algebraMap E (FiniteAdeleRing (𝓞 E) E)) * a.val = 1 ∧
     ∀ (w : HeightOneSpectrum (𝓞 E)) (q : ℕ), q.Prime → A.Good q → (q : 𝓞 E) ∈ w.asIdeal →
-      GeneralLinearGroup.map (pLoc E w) a ∈ GlobalTheory.LFun.KGL w n
+      GeneralLinearGroup.map (pLoc E w) a ∈ GlobalTheory.LFun.KGL w (n := n)
 
 def PadMap : Prop := ∀ (F : Type) [Field F] [NumberField F] (w : HeightOneSpectrum (𝓞 F)),
   ∃ (v : HeightOneSpectrum ℤ) (_ : v.adicCompletion ℚ →+* w.adicCompletion F),
@@ -113,8 +150,8 @@ def InfCongr : Prop := ∀ (n : ℕ) (G G' : Matrix (Fin n) (Fin n) ℂ), G.IsHe
 def mat {E : Type} [Field E] [NumberField E] [IsCMField E] {A : Arith E} {n p : ℕ} [Fact p.Prime] (S : Setup A n p) (x : S.G.C) :
     Matrix (Fin n) (Fin n) E := x
 
-open Classical in
 
+open Classical in
 def DefSign : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (A : Arith E) (n p : ℕ) [Fact p.Prime] (S : Setup A n p)
   (B : DForm S.G), (∀ a b, IsCMField.complexConj E ((mat S B.β * (A.H n)⁻¹) a b) = (mat S B.β * (A.H n)⁻¹) b a) ∧
     (mat S B.β * (A.H n)⁻¹).det ≠ 0 ∧ ∀ (τ : E →+* ℂ) (x : Fin n → ℂ), x ≠ 0 →

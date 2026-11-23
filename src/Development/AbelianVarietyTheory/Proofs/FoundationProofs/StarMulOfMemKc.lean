@@ -1,16 +1,57 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalRingCardinality.DataCD
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.CartanCoshPower
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousExptPY
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PolarJacobianBlockDiagConjInvariant
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSvd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SinhcAdMulVecOfAdSqEigen
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AdMatSqMulVecAdSqEigenvectorMatrixUnitP
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetAdSqEigenvectorMatrixUnitPNeZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ProdSinhcRootValueOfMatrixUnitP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonemptyCompactDualHaar
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.CartanCoshPower
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousExptPY
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonemptyCompactDualHaar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AdMatSqMulVecAdSqEigenvectorMatrixUnitP
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetAdSqEigenvectorMatrixUnitPNeZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSvd
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PolarJacobianBlockDiagConjInvariant
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ProdSinhcRootValueOfMatrixUnitP
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SinhcAdMulVecOfAdSqEigen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.CartanInt
@@ -208,7 +249,7 @@ theorem polJ_le_exp (B : Matrix (Fin p) (Fin q) ℂ) : polJ (pOf B) ≤
   have hA : ∏ i ∈ Finset.range m, shc (2 * s i) * shc (s i) ^ (2 * D) ≤
       Real.exp ((2 + 2 * (D : ℝ)) * ∑ i ∈ Finset.range m, s i) := by
     rw [Finset.mul_sum, Real.exp_sum]
-    refine Finset.prod_le_prod (fun i _ => mul_nonneg (hs _) (pow_nonneg (hs _) _)) fun i _ => ?_
+    refine Finset.prod_le_prod₀ (fun i _ => mul_nonneg (hs _) (pow_nonneg (hs _) _)) fun i _ => ?_
     have a1 := shc_le_exp (2 * s i)
     have a2 := shc_le_exp (s i)
     rw [abs_of_nonneg (by linarith [h0 i])] at a1 a2
@@ -219,10 +260,10 @@ theorem polJ_le_exp (B : Matrix (Fin p) (Fin q) ℂ) : polJ (pOf B) ≤
       if i < j then (shc (s i - s j) * shc (s i + s j)) ^ 2 else 1) ≤
       Real.exp (4 * (((m : ℝ) - 1) * ∑ i ∈ Finset.range m, s i)) := by
     rw [← sum_sum_ite_lt, Finset.mul_sum, Real.exp_sum]
-    refine Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j _ => by split_ifs <;> positivity)
+    refine Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j _ => by split_ifs <;> positivity)
       fun i _ => ?_
     rw [Finset.mul_sum, Real.exp_sum]
-    refine Finset.prod_le_prod (fun j _ => by split_ifs <;> positivity) fun j _ => ?_
+    refine Finset.prod_le_prod₀ (fun j _ => by split_ifs <;> positivity) fun j _ => ?_
     split_ifs
     · have a1 := (shc_le_exp (s i - s j)).trans (Real.exp_le_exp.2
         (show |s i - s j| ≤ s i + s j from abs_le.2 ⟨by linarith [h0 i], by linarith [h0 j]⟩))

@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementU
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.IsTransSys
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -20,10 +62,6 @@ def FacShape : Prop :=
       (P + Q ≠ 0 → P - Q ≠ 0 → UnitAt 0 (C (px W Q) - xT W P)) ∧
       ((P + Q = 0 ∨ P - Q = 0) → Q + Q ≠ 0 → UnitAt 1 (C (px W Q) - xT W P)) ∧
       (P - Q = 0 → Q + Q = 0 → UnitAt 2 (C (px W Q) - xT W P))
-
-def FacShapeZero : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] (W : WeierstrassCurve K),
-    IntCurve W → ∀ xQ : K, ‖xQ‖ ≤ 1 → UnitAt 0 (C xQ * X ^ 2 - Formalism.L2.Th1.A.xS W)
 
 def TransPower : Prop :=
   ∀ (K : Type) [NormedField K] [DecidableEq K] (W : WeierstrassCurve K)
@@ -57,14 +95,5 @@ def ParSumTwo : Prop :=
   ∀ (A : Type) [AddCommGroup A] [Finite A] (M₀ m : A → ℝ),
     (∀ P Q : A, Q ≠ 0 → M₀ (P + Q) + M₀ (P - Q) - 2 * M₀ P = 2 * m Q) →
     (∀ Q : A, Q ≠ 0 → m Q = 0) ∧ ∀ P : A, M₀ P = M₀ 0
-
-def TransPar : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [DecidableEq K] (W : WeierstrassCurve K),
-    IntCurve W →
-    ∀ (T : Type) [AddCommGroup T] (π : T →+ W.toAffine.Point) (G : T → K⟦X⟧), IntPts W π →
-    IsTransSys W π G →
-    (∀ t, π t ≠ 0 → OneUnit (C (constantCoeff (G t))⁻¹ * G t)) →
-    ∀ M : T → ℝ, (∀ t, M t = if π t = 0 then 0 else Real.log ‖constantCoeff (G t)‖) →
-    ∀ P Q : T, π Q ≠ 0 → M (P + Q) + M (P - Q) - 2 * M P = 2 * M Q
 
 end Formalism.L2.Th1.E

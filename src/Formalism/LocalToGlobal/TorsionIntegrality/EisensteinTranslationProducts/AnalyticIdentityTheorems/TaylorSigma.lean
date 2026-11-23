@@ -1,10 +1,60 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.AnalyticIdentityTheoremsZetaFacts
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaConv
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaBasic
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaLog
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.AnalyticIdentityTheoremsZetaFacts
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaBasic
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaConv
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaLog
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Filter Topology
@@ -13,15 +63,15 @@ namespace Formalism.L2.Th1.F
 
 namespace TaylorSigmaUniqueness
 
-open PowerSeries in
 
-lemma formal_unique (P U V : PowerSeries ℂ) (hV : X * derivative ℂ V = -(X * P))
-    (hV0 : constantCoeff V = 0) (hU : X * derivative ℂ U = X * (V * U))
+open PowerSeries in
+lemma formal_unique (P U V : PowerSeries ℂ) (hV : X * derivative V = -(X * P))
+    (hV0 : constantCoeff V = 0) (hU : X * derivative U = X * (V * U))
     (hU0 : constantCoeff U = 1) : U = B.fExp (B.sigS P) := by
-  have hV' : derivative ℂ V = -P := by
+  have hV' : derivative V = -P := by
     apply mul_left_cancel₀ (X_ne_zero (R := ℂ))
     rw [hV, mul_neg]
-  have hU' : derivative ℂ U = V * U := mul_left_cancel₀ (X_ne_zero (R := ℂ)) hU
+  have hU' : derivative U = V * U := mul_left_cancel₀ (X_ne_zero (R := ℂ)) hU
   have hVp : V = -B.prim P := by
     refine derivative.ext ?_ ?_
     · rw [hV', map_neg]
@@ -30,7 +80,7 @@ lemma formal_unique (P U V : PowerSeries ℂ) (hV : X * derivative ℂ V = -(X *
   have hS0 : constantCoeff (B.sigS P) = 0 := by
     rw [B.sigS, map_neg, B.constantCoeff_prim, neg_zero]
   have hS0' : constantCoeff (-B.sigS P) = 0 := by rw [map_neg, hS0, neg_zero]
-  have hSd : derivative ℂ (B.sigS P) = V := by
+  have hSd : derivative (B.sigS P) = V := by
     rw [B.sigS, map_neg, hVp]
     exact congrArg Neg.neg (B.dz_prim _)
   have key : U * (C.mvExp (-B.sigS P) : PowerSeries ℂ) = 1 := by
@@ -104,8 +154,8 @@ lemma ode_v (L : PeriodPair) :
 
 end TaylorSigmaUniqueness
 
-open TaylorSigmaUniqueness in
 
+open TaylorSigmaUniqueness in
 theorem taylorSigma_of (hr : TaylorRing) (hd : TaylorDeriv) : TaylorSigma := by
   intro L
   obtain ⟨hadd, hC, hX, hgerm⟩ := hr
@@ -117,13 +167,13 @@ theorem taylorSigma_of (hr : TaylorRing) (hd : TaylorDeriv) : TaylorSigma := by
     have := (hadd (fun z => z) (u L) hid hu).2
     rw [hX] at this
     exact this
-  have eU : PowerSeries.X * PowerSeries.derivative ℂ (taylor0 (u L))
+  have eU : PowerSeries.X * PowerSeries.derivative (R := ℂ) (taylor0 (u L))
       = PowerSeries.X * (taylor0 (AnalyticIdentityTheoremsZetaFacts.zetaExcept L 0) * taylor0 (u L)) := by
     have hvu : AnalyticAt ℂ (fun z => AnalyticIdentityTheoremsZetaFacts.zetaExcept L 0 z * u L z) 0 := hv.mul hu
     rw [← hd.1 _ hu, ← hX, ← (hadd _ _ hid hu.deriv).2, ← (hadd _ _ hv hu).2,
       ← (hadd _ _ hid hvu).2]
     exact hgerm _ _ (ode_u L)
-  have eV : PowerSeries.X * PowerSeries.derivative ℂ (taylor0 (AnalyticIdentityTheoremsZetaFacts.zetaExcept L 0))
+  have eV : PowerSeries.X * PowerSeries.derivative (R := ℂ) (taylor0 (AnalyticIdentityTheoremsZetaFacts.zetaExcept L 0))
       = -(PowerSeries.X * pSeries L) := by
     have hneg : taylor0 (fun z => (-1 : ℂ) * (z * L.weierstrassPExcept 0 z))
         = -(PowerSeries.X * pSeries L) := by
@@ -182,8 +232,8 @@ lemma dblInt_eq (e : PowerSeries ℂ) : C.dblInt e = B.prim (B.prim e) := by
 
 end TaylorSigmaUniqueness
 
-open TaylorSigmaUniqueness in
 
+open TaylorSigmaUniqueness in
 theorem taylorSgStar'_of (h : TaylorSgStar) : TaylorSgStar' := by
   intro L
   rw [h L, B.sgStar, B.sigma, C.sgStar, C.lam, dblInt_eq, mul_assoc]

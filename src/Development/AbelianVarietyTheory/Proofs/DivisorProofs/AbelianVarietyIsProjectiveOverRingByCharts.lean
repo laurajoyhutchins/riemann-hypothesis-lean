@@ -1,11 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormChart
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsLineBundleExtension
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ForallGeometricallyIntegralOfSmoothOfGeometrical
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRelAmpleOfIsProjBy
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormChartLineBundleBaseChangeFieldExtensionStatement
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsLbIsoPullAffineSpace
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecNonzeroLocusEqOfIsAffineOpenOfFactorial
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecOfFinite
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.FinFlatChartOfOpenImmersion
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsProjectiveOverRingByChartsAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRelAmpleOfIsProjBy
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.VeryAmpleByPwOfAffineLoci
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormChart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormChartLineBundleBaseChangeFieldExtensionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import Development.AbelianVarietyTheory.Definitions.Divisors.MapSmulOfIsHausdorff
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqOfLbIso
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAmpleLBOfRelAmpleOfIsAffine
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
+import Development.AbelianVarietyTheory.PublishedTheorems.Landherr₂.DimEqZero
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj CategoryTheory.MonObj Pointwise
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -84,14 +138,14 @@ theorem exists_normChart : ∀ (K : Type) [Field K] (A : Over (Sp K)) [GrpObj A]
   have : IsLocallyNoetherian (V ⊗ B).left :=
     LocallyOfFiniteType.isLocallyNoetherian (j ▷ B).left
   obtain ⟨N, n, hN, hn⟩ := GlobalTheory.FlatNorm.exists_norm_lb _ _ (π ▷ B).left (L.pull ((fst W B ≫ a) * snd W B).left)
-    (GlobalTheory.secPull s _) (pull_isLB hL _)
+    (GlobalTheory.secPull s _) (LB.isLB_pull hL _)
   rw [GlobalTheory.nonzeroLocus_secPull, hs] at hn
   obtain ⟨N', hN', hφ⟩ := GlobalTheory.exists_lineBundle_extension _ _ (j ▷ B).left hj (ufd_stalk (A ⊗ B).hom) N hN
   obtain ⟨N₀, hN₀, hψ⟩ := GlobalTheory.exists_lbIso_pull_affineSpace K B (ufd_stalk B.hom) g N' hN'
   have e : (snd V B).left = (j ▷ B).left ≫ (snd A B).left := by
     rw [← Over.comp_left, whiskerRight_snd]
   have H : LBIso N (N₀.pull (snd V B).left) :=
-    LBIso.trans hN (pull_isLB hN' _) (pull_isLB hN₀ _) (LBIso.symm hφ)
+    LBIso.trans hN (LB.isLB_pull hN' _) (LB.isLB_pull hN₀ _) (LBIso.symm hφ)
       (LBIso.chartPull (GlobalTheory.chartPullPull N' _) (chartPullSame N₀ _ _ _ _ fun _ => e) hψ)
   exact ⟨N₀, hN₀, W, V, π, a, U, N, n, hfin, inferInstance, inferInstance, inferInstance, hU, ⟨_, hxU⟩, hN, H, hn⟩
 
@@ -101,7 +155,7 @@ theorem isProjBy_of_cover_baseChange {K Ω : Type} [Field K] [Field Ω] (i : K �
     (ha : ∀ j, IsAffineOpen (Out.nonzeroLocus (t j))) : GlobalTheory.AbLaw.IsProjBy A.hom := by
   have : IsProper B.hom := MorphismProperty.of_isPullback (P := @IsProper) h inferInstance
   have : CompactSpace B.left := QuasiCompact.compactSpace_of_compactSpace B.hom
-  have hN := pull_isLB hN₀ φ
+  have hN := LB.isLB_pull hN₀ φ
   obtain ⟨F, hF⟩ := isCompact_univ.elim_finite_subcover (fun j => (Out.nonzeroLocus (t j) : Set B.left))
     (fun j => (Out.nonzeroLocus (t j)).isOpen) fun x _ => by
       have hx : x ∈ ⨆ j, Out.nonzeroLocus (t j) := by rw [hc]; trivial
@@ -130,7 +184,7 @@ theorem isProjBy_of_isAbelianScheme : ∀ (K : Type) [Field K] (A : Over (Sp K))
       smooth := MorphismProperty.of_isPullback (P := @Smooth) sqB hA.smooth
       proper := MorphismProperty.of_isPullback (P := @IsProper) sqB hA.proper
       geomConnected := MorphismProperty.of_isPullback (P := @GeometricallyConnected) sqB hA.geomConnected }
-  obtain ⟨I, t, hcov, ha⟩ := exists_affine_loci_of_normChart Ω B hB _ (pull_isLB hN₀ _) (GlobalTheory.T.normChartLineBundle_baseChange_field_extension K Ω A hA N₀ hN₀ hc)
+  obtain ⟨I, t, hcov, ha⟩ := exists_affine_loci_of_normChart Ω B hB _ (LB.isLB_pull hN₀ _) (GlobalTheory.T.normChartLineBundle_baseChange_field_extension K Ω A hA N₀ hN₀ hc)
   exact isProjBy_of_cover_baseChange _ A sqB hN₀ t hcov ha
 end GlobalTheory.ProjField
 end

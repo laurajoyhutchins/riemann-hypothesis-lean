@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.ThetaInZIsThetaLog
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementE
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementE
+public import Formalism.GaussJetBounds.StatementS
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.GrowthSums.StatementA
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementAB
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementG
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -41,93 +89,6 @@ def ThmAEntryCM : Prop :=
             gam l * (Wcap l d TT nu1 nu2 size s : ℝ))) +
           Fnum l d (fun s => (Dl d TT nu1 size s : ℝ)) -
           ((d : ℝ) * N0 * N1) * (Real.logb l (a : ℝ) + 1))
-
-def ThmAGaussCM : Prop :=
-  Formalism.L2.Th1.CM.CM2 → Formalism.L2.Th1.CM.CM3 →
-  ∀ (dK : ℕ) (L : PeriodPair), Squarefree dK → dK % 4 = 3 → Formalism.L2.Th1.CM.HasCMBy dK L →
-  ∀ (l : ℕ) [Fact l.Prime], 5 ≤ l → ¬ l ∣ dK → (¬ ∃ a : ZMod l, a ^ 2 = -(dK : ZMod l)) →
-  ∀ ι : ℂ ≃+* ℂ_[l],
-  ∃ g2 g3 ε : MaximalUnramifiedExtension l, Formalism.L2.Th1.CM.IsGoodModel l L ι g2 g3 ∧ ‖ε‖ = 1 ∧
-    (∀ n, ‖PowerSeries.coeff n (thetaS l g2 g3 ε)‖ ≤ 1) ∧
-  ∀ σ : MaximalUnramifiedExtension l →+* MaximalUnramifiedExtension l, UnrOK (MaximalUnramifiedExtension l) l σ →
-  ∀ F : MvPowerSeries (Fin 2) (MaximalUnramifiedExtension l), IsLawOfLog l F →
-  ∀ s2 : MaximalUnramifiedExtension l, (∀ α : MaximalUnramifiedExtension l, ‖α‖ = 1 → σ (σ α) = α → NormRel l σ (phFF l g2 g3 s2 ε) α) →
-  ∀ (d N0 N1 : ℕ) [NeZero d], 2 ≤ d → Even d →
-  ∀ (ιr : Type) [Fintype ιr] [DecidableEq ιr] (om oms : ιr → MaximalUnramifiedExtension l), OwOK d σ om oms →
-    TrDual d σ om oms → (∃ ζ : MaximalUnramifiedExtension l, IsPrimitiveRoot ζ (l ^ d - 1)) →
-  ∀ U0 Φ : MvPowerSeries (Bool × ιr × Fin N0 × Fin N1) ℂ_[l], Integral U0 →
-    MvPowerSeries.constantCoeff Φ = 0 →
-    Simeq Φ (sumE (MvPowerSeries.map (MaximalUnramifiedExtension l).subtype (cob F (phFF l g2 g3 s2 ε)))) →
-    ∀ (TT : Finset (ZMod d)) (colN : ZMod d → ℕ) (p : ∀ s, Fin (colN s) → ℕ)
-      (hp : ∀ s c, p s c ≤ N0), (∀ s c, 1 ≤ p s c) → ∀ (I : ∀ s c, Fin (p s c) → Fin N1),
-    ∀ (nu1 nu2 size : ZMod d → ℕ), (∀ s, nu1 s = colN s) →
-      (∀ s, nu2 s = (Finset.univ.filter (fun c => 2 ≤ p s c)).card) → (∀ s, size s = ∑ c, p s c) →
-    ∀ a : ℕ, 1 ≤ a → (∀ s, size s ≤ a) → 2 * Real.logb l a + 2 ≤ (N0 : ℝ) - 1 →
-    ∀ n : (ZMod d × Fin N0 × Fin N0) →₀ ℕ,
-      ‖MvPolynomial.coeff n (frameJet colN p hp I
-          (thetaInZ l (MaximalUnramifiedExtension l).subtype σ om oms (Formalism.DworkPowerSeriesWeights.mvExp (-Φ) * U0)))‖ ≤
-        ‖(l : ℂ_[l])‖ ^ ((∑ s ∈ TT, (topTerm l d TT nu1 nu2 s -
-            gam l * (Wcap l d TT nu1 nu2 size s : ℝ))) +
-          Fnum l d (fun s => (Dl d TT nu1 size s : ℝ)) -
-          ((d : ℝ) * N0 * N1) * (Real.logb l (a : ℝ) + 1))
-
-def OneLetterGaussCM : Prop :=
-  Formalism.L2.Th1.CM.CM2 → Formalism.L2.Th1.CM.CM3 →
-  ∀ (dK : ℕ) (L : PeriodPair), Squarefree dK → dK % 4 = 3 → Formalism.L2.Th1.CM.HasCMBy dK L →
-  ∀ (l : ℕ) [Fact l.Prime], 5 ≤ l → ¬ l ∣ dK → (¬ ∃ a : ZMod l, a ^ 2 = -(dK : ZMod l)) →
-  ∀ ι : ℂ ≃+* ℂ_[l],
-  ∃ g2 g3 ε : MaximalUnramifiedExtension l, Formalism.L2.Th1.CM.IsGoodModel l L ι g2 g3 ∧ ‖ε‖ = 1 ∧
-    (∀ n, ‖PowerSeries.coeff n (thetaS l g2 g3 ε)‖ ≤ 1) ∧
-  ∀ σ : MaximalUnramifiedExtension l →+* MaximalUnramifiedExtension l, UnrOK (MaximalUnramifiedExtension l) l σ →
-  ∀ F : MvPowerSeries (Fin 2) (MaximalUnramifiedExtension l), IsLawOfLog l F →
-  ∀ s2 : MaximalUnramifiedExtension l, (∀ α : MaximalUnramifiedExtension l, ‖α‖ = 1 → σ (σ α) = α → NormRel l σ (phFF l g2 g3 s2 ε) α) →
-  ∀ (N0 N1 C : ℕ) (U0 Φ : MvPowerSeries (Fin N0 × Fin N1) ℂ_[l]), Integral U0 →
-    MvPowerSeries.constantCoeff Φ = 0 →
-    Simeq Φ (∑ x : Fin N0 × Fin N1, at1 x (PowerSeries.map (MaximalUnramifiedExtension l).subtype (phFF l g2 g3 s2 ε))) →
-  ∀ (p : Fin C → ℕ) (hp : ∀ c, p c ≤ N0) (I : ∀ c, Fin (p c) → Fin N1) (a : ℕ), 1 ≤ a →
-    (∑ c, p c) ≤ a → ∀ n : (Fin N0 × Fin N0) →₀ ℕ,
-    ‖MvPolynomial.coeff n (frameJetOne p hp I
-        (MvPowerSeries.subst (fun x => at1 x (expF ℂ_[l] l)) (Formalism.DworkPowerSeriesWeights.mvExp (-Φ) * U0)))‖ ≤
-      ‖(l : ℂ_[l])‖ ^ (rho l * ((∑ c, p c : ℕ) : ℝ) -
-        ((N0 : ℝ) * N1) * (Real.logb l (a : ℝ) + 1))
-
-def KernelCM : Prop :=
-  Formalism.L2.Th1.CM.CM2 → Formalism.L2.Th1.CM.CM3 →
-  ∀ (dK : ℕ) (L : PeriodPair), Squarefree dK → dK % 4 = 3 → Formalism.L2.Th1.CM.HasCMBy dK L →
-  ∀ (l : ℕ) [Fact l.Prime], 5 ≤ l → ¬ l ∣ dK → (¬ ∃ a : ZMod l, a ^ 2 = -(dK : ZMod l)) →
-  ∀ ι : ℂ ≃+* ℂ_[l],
-  ∃ g2 g3 ε : MaximalUnramifiedExtension l, Formalism.L2.Th1.CM.IsGoodModel l L ι g2 g3 ∧ ‖ε‖ = 1 ∧
-    (∀ n, ‖PowerSeries.coeff n (thetaS l g2 g3 ε)‖ ≤ 1) ∧
-  ∀ σ : MaximalUnramifiedExtension l →+* MaximalUnramifiedExtension l, UnrOK (MaximalUnramifiedExtension l) l σ →
-  ∀ F : MvPowerSeries (Fin 2) (MaximalUnramifiedExtension l), IsLawOfLog l F →
-  ∀ s2 : MaximalUnramifiedExtension l, (∀ α : MaximalUnramifiedExtension l, ‖α‖ = 1 → σ (σ α) = α → NormRel l σ (phFF l g2 g3 s2 ε) α) →
-  ∀ (ν r0 r1 : ℕ) [NeZero ν] (om oms : Fin ν → MaximalUnramifiedExtension l), OwOK (2 * ν) σ om oms →
-    TrDual (2 * ν) σ om oms →
-  ∀ U0 Φ : MvPowerSeries (Bool × Fin ν × Fin r0 × Fin r1) ℂ_[l], Integral U0 →
-    MvPowerSeries.constantCoeff Φ = 0 →
-    Simeq Φ (sumE (MvPowerSeries.map (MaximalUnramifiedExtension l).subtype (cob F (phFF l g2 g3 s2 ε)))) →
-    ∀ (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ) (hts : ∀ s, Fin (colN s) → ℕ)
-      (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1) n,
-      ‖MvPolynomial.coeff n (frameJet colN hts hp I (thetaInZ (d := 2 * ν) l (MaximalUnramifiedExtension l).subtype σ om oms (Formalism.DworkPowerSeriesWeights.mvExp (-Φ) * U0)))‖ ≤
-          (l : ℝ) ^ (-(excessGain (l : ℝ) TT (dSet TT) (fun s => (alG TT colN hts s : ℝ))
-            (fun s => (capG TT colN hts s : ℝ))
-            (deLoss l r0 r1 TT (alG TT colN hts) (lsG TT colN hts)))) ∧
-      ‖MvPolynomial.coeff n (frameJet colN hts hp I (thetaInZ (d := 2 * ν) l (MaximalUnramifiedExtension l).subtype σ om oms (Formalism.DworkPowerSeriesWeights.mvExp (-Φ) * U0)))‖ ≤
-          (l : ℝ) ^ (-(gainG (l : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
-            (fun s => (capG TT colN hts s : ℝ))
-            (deLoss l r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) -
-            ∑ s ∈ TT \ oddT TT, (alG TT colN hts s : ℝ))) ∧
-      ∀ i : ℕ, 1 ≤ i →
-        ‖(l : ℂ_[l]) ^ (∑ s : ZMod (2 * ν), ∑ c : Fin (colN s),
-            (if s.val % 2 = 0 then
-              min (hts s c) i -
-                ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card
-            else ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card)) *
-          MvPolynomial.coeff n
-            (frameJet colN hts hp I (thetaInZ (d := 2 * ν) l (MaximalUnramifiedExtension l).subtype σ om oms (Formalism.DworkPowerSeriesWeights.mvExp (-Φ) * U0)))‖ ≤
-          (l : ℝ) ^ (-(gainG (l : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
-            (fun s => (capG TT colN hts s : ℝ))
-            (deLoss l r0 r1 TT (alG TT colN hts) (lsG TT colN hts))))
 
 def FieldDataCM : Prop :=
   ∀ (l : ℕ) [Fact l.Prime], 5 ≤ l →

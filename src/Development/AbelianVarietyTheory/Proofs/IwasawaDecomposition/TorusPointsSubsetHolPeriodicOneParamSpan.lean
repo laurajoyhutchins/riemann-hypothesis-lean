@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MonoSpMapRingOfIntegersAlt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPerHolOne
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AnalyticDictionaryIsPointPeriodOrigin
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ContinuousOnThetaFrameValueHolomorphicFamily
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPerHolOne
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AnalyticDictionaryIsPointPeriodOrigin
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ContinuousOnThetaFrameValueHolomorphicFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -85,12 +128,12 @@ private theorem isHolTo_comp_continuousLinearMap {V : Type} [NormedAddCommGroup 
     unfold valAt'
     by_cases hb : ⊤ ≤ (f b ≫ g) ⁻¹ᵁ U
     · have hb' : ⊤ ≤ f b ⁻¹ᵁ g ⁻¹ᵁ U := hb
-      rw [dif_pos hb, dif_pos hb']
+      rw [dite_eq_left hb, dite_eq_left hb']
       unfold valAt
       rw [Scheme.Hom.comp_appLE]
       rfl
     · have hb' : ¬ ⊤ ≤ f b ⁻¹ᵁ g ⁻¹ᵁ U := hb
-      rw [dif_neg hb, dif_neg hb']
+      rw [dite_eq_right hb, dite_eq_right hb']
   exact ⟨h1, h2.congr fun b _ => key b⟩
 
 theorem isHolTo_expPt {m : ℂ → Λ →+ ℂ} (hm : ∀ x, Differentiable ℂ fun s => m s x) :
@@ -126,7 +169,7 @@ theorem isHolTo_expPt {m : ℂ → Λ →+ ℂ} (hm : ∀ x, Differentiable ℂ 
     refine AddMonoidAlgebra.induction_linear u ?_ ?_ ?_
     · simp
     · intro f g hf hg
-      simp only [map_add]
+      simp only [map_add (f := _)]
       exact hf.add hg
     · intro a c
       simp only [hψs]
@@ -166,6 +209,7 @@ theorem mem_closure_oneParam [Module.Free ℤ Λ] [Module.Finite ℤ Λ]
     ext x
     simp
     conv_lhs => rw [← b.sum_repr x]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_zsmul, zsmul_eq_mul]
@@ -229,8 +273,8 @@ end GlobalTheory.PeriodSpan.TorusExp
 
 namespace GlobalTheory.PeriodSpan
 
-open TorusExp in
 
+open TorusExp in
 theorem torusPts_subset_perHolSub (X : Scheme.{0}) (G : Over X) [GrpObj G] (y : Sp ℂ ⟶ X)
     (E : TorusExtension ((Over.pullback y).obj G)) :
     torusPts G y E ⊆ (perHolSub G y : Set (Over.mk y ⟶ G)) := by

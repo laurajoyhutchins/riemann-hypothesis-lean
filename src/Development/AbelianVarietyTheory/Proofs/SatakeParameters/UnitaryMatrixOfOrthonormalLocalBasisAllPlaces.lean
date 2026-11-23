@@ -1,15 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BeData
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsConstantCoeffOne
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
-import Formalism.LocalRingCardinality.FactDelDualNabla
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsKurFrobTauEmbPosPl
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormLeOneOfValuationLeOne
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepFrame
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepTrace
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsConstantCoeffOne
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsRepFrame
+public import Formalism.SharpRestriction.Divisibility.OrbitPlaces
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormLeOneOfValuationLeOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsKurFrobTauEmbPosPl
 import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.LocalRingCardinality.FactDelDualNabla
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepFrame
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepTrace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -169,7 +213,7 @@ theorem IntIn.smul {e : D.host.E} (he : ‖ρ e‖ ≤ 1) {B : Matrix (Fin N') (
 
 theorem IntIn.add {B C : Matrix (Fin N') (Fin N) D.host.E} (hB : IntIn ρ Q' P B) (hC : IntIn ρ Q' P C) :
     IntIn ρ Q' P (B + C) := fun b a => by
-  rw [Matrix.mul_add, Matrix.add_mul, Matrix.add_apply, map_add]
+  rw [Matrix.mul_add, Matrix.add_mul, Matrix.add_apply, map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hB b a) (hC b a))
 
 theorem IntIn.zero : IntIn ρ Q' P (0 : Matrix (Fin N') (Fin N) D.host.E) := fun b a => by
@@ -241,6 +285,7 @@ variable {K : Type} [Field K] {κ ν ι : Type} [Fintype κ] [Fintype ν] [Finty
 theorem subst_lin {a : ν → MvPowerSeries ι K} (hs : MvPowerSeries.HasSubst a) (w : ν → K) :
     MvPowerSeries.subst a (∑ j, MvPowerSeries.C (w j) * MvPowerSeries.X j : MvPowerSeries ν K) =
       ∑ j, MvPowerSeries.C (w j) * a j := by
+
   rw [← MvPowerSeries.coe_substAlgHom hs, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [MvPowerSeries.coe_substAlgHom hs, MvPowerSeries.subst_mul hs, MvPowerSeries.subst_X hs, MvPowerSeries.subst_C]
@@ -277,6 +322,7 @@ theorem subst_atLin {s : Type} [Fintype s] [Finite s] (m : s → ν → ℂ_[p])
   simp_rw [Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => ?_
+
   rw [← mul_assoc, ← map_mul, h k j, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, mul_assoc]
@@ -311,6 +357,7 @@ theorem rho_yy (i : Fin r) (j : (Bool × HH D) × Fin N × Fin N') :
     rho D lam (tauPl D j.1) (yy D P P' b i j) = ∑ k, lamBc D lam b k i * cA D lam P P' j k := by
   rw [Fintype.sum_prod_type, Finset.sum_eq_single (tauPl D j.1)]
   · rw [Fintype.sum_prod_type]
+
     simp only [yy, map_sum, map_mul, cA, if_true, lamBc_eq]
     refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
     ring
@@ -323,6 +370,7 @@ theorem rho_conj_yy (i : Fin r) (j : (Bool × HH D) × Fin N × Fin N') :
     rho D lam (tauPl D j.1) (D.host.conj (yy D P P' b i j)) = ∑ k, lamB D lam b k i * cB D lam P P' j k := by
   rw [Fintype.sum_prod_type, Finset.sum_eq_single (tauPl D j.1)]
   · rw [Fintype.sum_prod_type]
+
     simp only [yy, map_sum, map_mul, cB, if_true, lamB_eq, conj_conj]
     refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
     ring
@@ -334,6 +382,7 @@ theorem rho_conj_yy (i : Fin r) (j : (Bool × HH D) × Fin N × Fin N') :
 theorem conj_yy (i : Fin r) (j : (Bool × HH D) × Fin N × Fin N') :
     D.host.conj (yy D P P' b i j) =
       (((P' (tauPl D j.1)).map D.host.conj).transpose * b i * P (tauPl D j.1)) j.2.2 j.2.1 := by
+
   simp only [yy, map_sum, map_mul, conj_conj, Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
@@ -376,6 +425,7 @@ theorem sum_cB_cA (hU : ∀ z, ((P (tauPl D z)).map D.host.conj).transpose * P (
           rho D lam (tauPl D z) (∑ x, D.host.conj (P (tauPl D z) x a') * P (tauPl D z) x a) := by
       rw [Fintype.sum_prod_type, Finset.sum_eq_single (tauPl D z)]
       · rw [Fintype.sum_prod_type]
+
         rw [map_sum, map_sum, Finset.sum_mul_sum]
         refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
         simp only [map_mul, cA, cB, if_true]
@@ -403,8 +453,8 @@ end Main
 
 end GlobalTheory.KerStd.UnitaryMat
 
-open GlobalTheory.KerStd.UnitaryMat in
 
+open GlobalTheory.KerStd.UnitaryMat in
 theorem GlobalTheory.KerStd.unitary_of_orthonormal : ∀ (D : D7) (p : ℕ) [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) (σ : MaximalUnramifiedExtension p →+* MaximalUnramifiedExtension p), UnrOK (MaximalUnramifiedExtension p) p σ → 5 ≤ p → IsResidueClassZero D p → hP D p = 0 → ∀ (N N' : ℕ) (L : Submodule (𝓞 D.host.E) (Fin N → D.host.E)) (L' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E)) (P : D.what₂.Tau → Matrix (Fin N) (Fin N) D.host.E) (P' : D.what₂.Tau → Matrix (Fin N') (Fin N') D.host.E), admitted D N N' L L' → StdBases D lam L P → StdBases D lam L' P' → ∀ (r : ℕ) (b : Fin r → Matrix (Fin N') (Fin N) D.host.E), LocBasis D p (YYl D L L') b → TaylorLogMetric.Orthonormal D b → ∃ γ : Fin r → (OrbitPlaces.Pl D × Fin N × Fin N') → MaximalUnramifiedExtension p, (∀ i j, ‖γ i j‖ ≤ 1 ∧ σ (σ (γ i j)) = γ i j) ∧ (∀ j j', ∑ i, σ (γ i j) * γ i j' = if j = j' then 1 else 0) ∧ ∀ (c : ℂ_[p]) (G : MvPowerSeries (D.what₂.Tau × Fin N' × Fin N) ℂ_[p]), (MvPowerSeries.subst (fun v : OrbitPlaces.Pl D × Fin N × Fin N' => (MvPowerSeries.C c * MvPowerSeries.X v : MvPowerSeries (OrbitPlaces.Pl D × Fin N × Fin N') ℂ_[p])) (stdSer D lam (fun _ => 1) P P' G) : MvPowerSeries (OrbitPlaces.Pl D × Fin N × Fin N') ℂ_[p]) = MvPowerSeries.subst (fun i => (∑ j, MvPowerSeries.C (γ i j : ℂ_[p]) * MvPowerSeries.X j : MvPowerSeries (OrbitPlaces.Pl D × Fin N × Fin N') ℂ_[p])) (thOrth D lam c b G) := by
   intro D p _ lam σ hσ h5 hc h0 N N' L L' P P' hadm hP hP' r b hb ho
   have hon : LamONB D lam b := Formalism.L2.KerInert.RepFrame.lamONB_of_cols D lam b

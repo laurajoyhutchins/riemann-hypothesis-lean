@@ -1,4 +1,46 @@
-import Formalism.PieriBlockIdeals.StatementLD
+module
+
+public import Formalism.PieriBlockIdeals.StatementLD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -40,18 +82,6 @@ def Depth2Dual : Prop :=
     depth2 (fun a => -ξ (Fin.rev a)) (fun a => M - lam (Fin.rev a)) (fun a => M - μ (Fin.rev a)) = depth2 ξ lam μ ∧
       (Antitone ξ → Antitone fun a => -ξ (Fin.rev a))
 
-def DnShift : Prop :=
-  ∀ (p w i q c : ℕ) (lam2 : Fin q → ℕ), (∀ b, lam2 b ≤ w) →
-    Dn p (w + c) i (fun b => lam2 b + c) = Dn p w i lam2
-
-def DnLastIndep : Prop :=
-  ∀ (p w i q M M' : ℕ) (lam2 : Fin q → ℕ), w ≤ M → (∀ b, w ≤ lam2 b ∧ lam2 b ≤ M) → M ≤ M' →
-    Dn p (M' - w) i (fun b : Fin q => M' - lam2 (Fin.rev b)) = Dn p (M - w) i (fun b : Fin q => M - lam2 (Fin.rev b))
-
-def LemmaDLastGraded_rank2 : Prop :=
-  ∀ (l w y M : ℕ) (ξ : Fin (1 + 1) → ℤ), l.Prime → w ≤ y → y ≤ M → Antitone ξ →
-    LemmaDLastGradedAt l 1 1 w M (fun _ : Fin 1 => y) ξ
-
 def PeelBoundLast : Prop :=
   BranchingBoundLastGradedOneRow → ∀ (l q w M : ℕ) (lam2 : Fin q → ℕ) (ξ : Fin (q + 1) → ℤ), l.Prime → Antitone lam2 →
     (∀ b, w ≤ lam2 b ∧ lam2 b ≤ M) → Antitone ξ →
@@ -72,7 +102,7 @@ def PeelRows : Prop :=
     (∀ a b, a ≤ b → b < n + s → lam b ≤ lam a) → lam 0 + (n + s) ≤ h + lam (n + s - 1) + 1 → Antitone ξ →
     ∀ (I : ℤ) (e : ℕ), ExpUpTo l n lam ξ I e → ExpUpTo l (n + s) lam ξ I (e + s * ((h - 1) / (l - 1)))
 
-def blockCost (l n t I : ℕ) (lam : ℕ → ℕ) : ℕ :=
+noncomputable def blockCost (l n t I : ℕ) (lam : ℕ → ℕ) : ℕ :=
   (Finset.range (I + 1)).sup fun i =>
     padicValInt l (Dn t (lam 0 - lam n) i fun b : Fin n => lam 0 - res n lam (Fin.rev b))
 

@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.PermutesRefl
-import Formalism.LocalToGlobal.ProjectiveLattices.UnFree
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsCmEndomorphismCommConjugationStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsCmCurveHomOfPureTypeVectorStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CmEllipticCurveHomExistsPureTypeVectorStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.PermutesRefl
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CmEllipticCurveHomExistsPureTypeVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsCmCurveHomOfPureTypeVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsCmEndomorphismCommConjugationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Formalism.LocalToGlobal.ProjectiveLattices.AlgebraMapCAt
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +81,7 @@ theorem bar_rt : H.bar H.rt = -H.rt := by
 
 theorem cmHost_bar_halfIntegerGenerator : H.bar H.w0 = 1 - H.w0 := by
   have h := congrArg H.bar H.two_weight_eq_one_add_root
-  rw [map_mul, map_add, map_one, bar_rt, map_ofNat] at h
+  rw [map_mul, map_add (f := _), map_one, bar_rt, map_ofNat] at h
   apply mul_left_cancel₀ (two_ne_zero (α := 𝓞 E))
   linear_combination h + H.two_weight_eq_one_add_root
 
@@ -108,12 +154,12 @@ section Lin
 variable {D : Datum H} {g : ℕ} {ty : Fin g → (E →+* ℂ)} {P : D.La →+ (Fin g → ℂ)} (hP : IsPeriod D ty P)
 
 theorem period_wE {a : D.La} (ha : a ∈ lat hP H.rt0) (s : ℤ × ℤ) : P (wE H s • a) = wC H s • P a := by
-  rw [wE, wC, add_smul, map_add, mul_smul, Int.cast_smul_eq_zsmul, Int.cast_smul_eq_zsmul, map_zsmul, map_zsmul,
+  rw [wE, wC, add_smul, map_add (f := _), mul_smul, Int.cast_smul_eq_zsmul, Int.cast_smul_eq_zsmul, map_zsmul, map_zsmul,
     period_w0_smul hP ha, add_smul, mul_smul, Int.cast_smul_eq_zsmul, Int.cast_smul_eq_zsmul]
 
 theorem period_bar_wE {a : D.La} (ha : a ∈ lat hP (-H.rt0)) (s : ℤ × ℤ) :
     P (H.bar (wE H s) • a) = wC H s • P a := by
-  rw [wE, wC, map_add, map_mul, map_intCast, map_intCast, cmHost_bar_halfIntegerGenerator, add_smul, map_add, mul_smul, Int.cast_smul_eq_zsmul,
+  rw [wE, wC, map_add (f := _), map_mul, map_intCast, map_intCast, cmHost_bar_halfIntegerGenerator, add_smul, map_add (f := _), mul_smul, Int.cast_smul_eq_zsmul,
     Int.cast_smul_eq_zsmul, map_zsmul, map_zsmul, sub_smul, one_smul, map_sub,
     period_w0_smul hP ha, add_smul, mul_smul, Int.cast_smul_eq_zsmul, Int.cast_smul_eq_zsmul]
   congr 2
@@ -148,7 +194,7 @@ theorem ex_smul (s : 𝓞 E) (z : ℂ) (a : (F.Di i).La) :
     F.ex i P (z • P (s • a)) = F.ex i P (z • P a) ≫ Xo.univ.t.act.act s := by
   rw [← F.ex_lin i P hP]
   congr 1
-  funext k
+  ext k
   simp only [Pi.smul_apply, smul_eq_mul, hP.1]
   ring
 
@@ -156,7 +202,7 @@ include hP in
 theorem eq_of_ex {a b : (F.Di i).La} (h : ∀ z : ℂ, F.ex i P (z • P a) = F.ex i P (z • P b)) : a = b := by
   refine sub_eq_zero.1 (eq_zero_of_line hP fun z => (F.ex_ker i P hP _).1 ?_)
   have e' := F.ex_add i P hP (z • P (a - b)) (z • P b)
-  rw [← smul_add, ← map_add, sub_add_cancel, h] at e'
+  rw [← smul_add, ← map_add (f := _), sub_add_cancel, h] at e'
   exact mul_eq_right.1 e'.symm
 
 theorem exists_lin (h₁ : 1 ≤ D.p + D.q) (h₂ : σ (baseKA l).ρ = H.rt0) (h₃ : IsTypeFn H D.p D.q ty) (h₄ : l.A = 1)
@@ -202,7 +248,7 @@ theorem exists_lin (h₁ : 1 ≤ D.p + D.q) (h₂ : σ (baseKA l).ρ = H.rt0) (h
   choose Φ hΦ hex using key
   refine ⟨{ toFun := Φ, map_add' := fun a b => ?_, map_smul' := fun s a => ?_ }, hΦ, fun a z => (hex a z).symm⟩
   · refine eq_of_ex F hP' fun z => ?_
-    rw [map_add, smul_add, F.ex_add i' P' hP', ← hex, ← hex, ← hex, Submodule.coe_add, map_add, smul_add,
+    rw [map_add (f := _), smul_add, F.ex_add i' P' hP', ← hex, ← hex, ← hex, Submodule.coe_add, map_add (f := _), smul_add,
       F.ex_add i P hP, MonObj.comp_mul]
   · refine eq_of_ex F hP' fun z => ?_
     rw [RingHom.id_apply, ex_smul F hP', ← hex, ← hex, Submodule.coe_smul, ex_smul F hP, Category.assoc]
@@ -237,7 +283,7 @@ theorem exists_conj_lattice_map : ∀ (E : Type) [Field E] [NumberField E] [IsCM
     exact ⟨⟨a, ha⟩, ⟨b, hb⟩, e.symm⟩
   have hΦ : ∀ (a : lat hP H.rt0) (b : lat hP (-H.rt0)),
       LinearMap.ofIsCompl hc Φp Φm (a.1 + b.1) = Φp a + Φm b := fun a b => by
-    rw [map_add, LinearMap.ofIsCompl_apply_left, LinearMap.ofIsCompl_apply_right]
+    rw [map_add (f := _), LinearMap.ofIsCompl_apply_left, LinearMap.ofIsCompl_apply_right]
   refine ⟨LinearMap.ofIsCompl hc Φp Φm, (injective_iff_map_eq_zero _).2 fun x hx => ?_, fun x => ?_, fun x => ?_,
     fun n s _ hA a ha b hb => ?_⟩
   · obtain ⟨a, b, rfl⟩ := hdec x

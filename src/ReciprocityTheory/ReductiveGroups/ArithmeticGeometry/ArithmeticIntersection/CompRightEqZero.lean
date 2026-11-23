@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.Degree.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.Multilinear.Basic
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AI
 
@@ -10,7 +57,7 @@ def mix {V : Type*} {n : ℕ} (k : ℕ) (x y : V) : Fin n → V :=
   fun i => if (i : ℕ) < k then x else y
 
 def IsSymmForm {V : Type*} [AddCommGroup V] [Module ℝ V] {n : ℕ}
-    (I : MultilinearMap ℝ (fun _ : Fin n => V) ℝ) : Prop :=
+    (I : MultilinearMap (RingHom.id ℝ) (fun _ : Fin n => V) ℝ) : Prop :=
   ∀ (σ : Equiv.Perm (Fin n)) (v : Fin n → V), I (v ∘ σ) = I v
 
 def word {VW : Type*} (D k i : ℕ) (x₁ x₂ a : VW) : Fin D → VW :=
@@ -32,13 +79,13 @@ structure FibreSquare (D : ℕ) where
   VW : Type u
   [acgW : AddCommGroup VW]
   [modW : Module ℝ VW]
-  I : MultilinearMap ℝ (fun _ : Fin (D + 1) => V) ℝ
-  IW : MultilinearMap ℝ (fun _ : Fin (D + 2) => VW) ℝ
+  I : MultilinearMap (RingHom.id ℝ) (fun _ : Fin (D + 1) => V) ℝ
+  IW : MultilinearMap (RingHom.id ℝ) (fun _ : Fin (D + 2) => VW) ℝ
   p₁ : V →ₗ[ℝ] VW
   p₂ : V →ₗ[ℝ] VW
   ξ : V
   A : V
-  Φ : MultilinearMap ℝ (fun _ : Fin D => VW) ℝ
+  Φ : MultilinearMap (RingHom.id ℝ) (fun _ : Fin D => VW) ℝ
   symm : IsSymmForm I
   symmW : IsSymmForm IW
   comp_right_eq_zero_alt : ∀ v : Fin (D + 2) → V, IW (fun j => p₂ (v j)) = 0
@@ -48,22 +95,5 @@ structure FibreSquare (D : ℕ) where
     IW (Fin.cons (p₁ ξ) (Fin.cons (p₁ ξ) T)) - IW (Fin.cons (p₂ ξ) (Fin.cons (p₂ ξ) T)) = Φ T
 
 attribute [instance] FibreSquare.acgV FibreSquare.modV FibreSquare.acgW FibreSquare.modW
-
-def FibreSquare.F {D : ℕ} (S : FibreSquare D) (c : ℝ) : ℝ :=
-  S.I (fun _ => S.A - c • S.ξ)
-
-def APrimeStatement : Prop :=
-  ∀ (D : ℕ) (S : FibreSquare.{u} D) (k : ℕ), 1 ≤ k → 2 * k ≤ D + 1 →
-    S.I (mix (2 * k) S.ξ S.A) =
-      -∑ i ∈ Finset.range k, S.Φ (word D k i (S.p₁ S.ξ) (S.p₂ S.ξ) (S.p₁ S.A))
-
-def ThmAIffStatement : Prop :=
-  ∀ (D : ℕ) (S : FibreSquare.{u} D) (J κ : ℕ → ℝ),
-    (∀ c : ℝ, S.F c + S.F (-c) = (tsgPoly D κ (volPoly D J)).eval c) ↔
-      ∀ k : ℕ, 1 ≤ k → 2 * k ≤ D + 1 →
-        ∑ i ∈ Finset.range k, S.Φ (word D k i (S.p₁ S.ξ) (S.p₂ S.ξ) (S.p₁ S.A)) = κ k * J (2 * k - 1)
-
-def InhabitStatement : Prop :=
-  ∃ S : FibreSquare.{0} 1, S.I (fun _ => S.ξ) ≠ 0
 
 end ReciprocityTheory.ChartRestriction.G.AI

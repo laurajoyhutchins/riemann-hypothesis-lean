@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatIffOfSelfDual
+module
+
+
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GluedHermitianLatticeUnique
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.FlatSpaceComponents
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPoint
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatSelfDualOfUnimod
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatIffOfSelfDual
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +88,7 @@ theorem fin_cA (z : Formalism.L2.Theta.AE D) :
   | zero => simp only [map_zero]
   | tmul a e =>
     simp [cA, cjA, finPart, swapAE, Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sigR, Formalism.UG.sigR]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem finE_unitary (V : HSp D) (g : GA D V) :
     Formalism.UG.cT (cjA D) (finE V g).val * V.gram.map (inc D) * (finE V g).val = V.gram.map (inc D) := by
@@ -83,12 +126,15 @@ theorem imageSt (D : D7) : ImageSt D := by
     rw [mem_hat_lat, mem_hat_lat, inv_mul_mulVec]
   have hgram : GlobalTheory.StdFrames.gramOf V (finE V d * β) = 1 :=
     (gram_mul (cjA D) (V.gram.map (inc D)) (finE V d) β (finE_unitary V d)).trans hβ
-  refine ⟨⟨lat (finE V d * β), GlobalTheory.NormSum.AdLattice.lat_isLattice _, hcar⟩, fun Λ' hΛ' hc => ?_⟩
+  have hlat := GlobalTheory.NormSum.AdLattice.lat_isLattice (finE V d * β)
+  refine ⟨⟨lat (finE V d * β), hlat.toIsLattice, hcar⟩, fun Λ' hΛ' hc => ?_⟩
+  have hhat : hat (D := D) Λ' = hat (lat (finE V d * β)) := by
+    ext y
+    exact ((carries_iff _ _ _).1 hc y).trans (((carries_iff _ _ _).1 hcar y).symm)
   have heq : Λ' = lat (finE V d * β) := by
     ext x
-    rw [← inc_mem_hat_iff hΛ' x, ← inc_mem_hat_iff (GlobalTheory.NormSum.AdLattice.lat_isLattice (finE V d * β)) x]
-    rw [carries_iff] at hc hcar
-    rw [hc, hcar]
+    rw [← inc_mem_hat_iff hlat x, ← hhat]
+    exact ⟨inc_mem_hat, GlobalTheory.GlueUnique.mem_of_inc_mem_hat hΛ'.fg⟩
   rw [heq]
   exact isSelfDualC_lat (by rw [hgram]; exact unimod_one)
 

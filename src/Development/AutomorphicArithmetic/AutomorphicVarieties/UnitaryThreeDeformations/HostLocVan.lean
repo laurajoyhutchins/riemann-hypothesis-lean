@@ -1,9 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsHostFrame
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.DyadicCharacterPowerNeOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.HostOk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNormalised
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsHostFrame
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.DyadicCharacterPowerNeOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.HostOk
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix IsLocalRing ReciprocityTheory.Gal UpperTheory.V.HV UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.UnitaryThreeInertia
 
@@ -31,7 +78,9 @@ private theorem vanish_zmod (hTD : LocalTateDuality) (hEC : LocalEulerChar) (F �
     have key : ∀ φ ∈ H0 ((twDual χ rho).comp (MonoidHom.id _)), φ = 0 := by
       intro φ hφ
       have h1 : twDual χ rho γ φ = φ := (Representation.mem_invariants _ φ).mp hφ γ
-      ext x
+      change (φ : Module.Dual (ZMod (l ^ 1)) M) = 0
+      apply LinearMap.ext
+      intro x
       obtain ⟨m, rfl⟩ := hγ.2 x
       have h3 := congrArg (fun ψ : TDual (ZMod (l ^ 1)) M => ψ (rho γ m)) h1
       simp only [twDual_apply, hχ, Units.val_one, one_mul] at h3
@@ -93,25 +142,25 @@ private theorem vanish_k (hTD : LocalTateDuality) (hEC : LocalEulerChar) (F Ω :
     obtain ⟨m, hm⟩ := (mem_coboundaries1 rho' _).1 hB
     exact (mem_coboundaries1 _ _).2 ⟨m, hm⟩
 
-private theorem gb_ext {k : Type} [CommRing k] {j : ℤ} {X Y : Gb k j} (h : X.val = Y.val) : X = Y :=
+private theorem gb_ext {k : Type} [CommRing k] {j : ℤ} {X Y : Gb (k := k) j} (h : X.val = Y.val) : X = Y :=
   Subtype.ext h
 
-private theorem gb_finite (k : Type) [CommRing k] [Finite k] (j : ℤ) : Finite (Gb k j) :=
-  Finite.of_injective (fun X : Gb k j => X.val) fun _ _ h => gb_ext h
+private theorem gb_finite (k : Type) [CommRing k] [Finite k] (j : ℤ) : Finite (Gb (k := k) j) :=
+  Finite.of_injective (fun X : Gb (k := k) j => X.val) fun _ _ h => gb_ext h
 
 private theorem gRep_bij {k D : Type} [Field k] [Finite k] [Group D] (η : D →* ℤˣ) (Ψ : D →* kˣ) {j : ℤ}
     (hj : j ≠ 0) (x : D) (hη : η x = 1) (hΨ : Ψ x ^ 2 ≠ 1) :
-    Function.Bijective fun m : Gb k j => gRep η Ψ j x m - m := by
+    Function.Bijective fun m : Gb (k := k) j => gRep η Ψ j x m - m := by
   haveI := gb_finite k j
   rw [← Finite.injective_iff_bijective]
   have h1 : Ψ x ≠ 1 := fun h => hΨ (by rw [h, one_pow])
-  have hker : ∀ m : Gb k j, gRep η Ψ j x m = m → m = 0 := by
+  have hker : ∀ m : Gb (k := k) j, gRep η Ψ j x m = m → m = 0 := by
     intro m hm
     apply gb_ext
     ext a b
     show m.val a b = 0
     by_cases hab : wt a b = j
-    · have e := congrArg (fun X : Gb k j => X.val a b) hm
+    · have e := congrArg (fun X : Gb (k := k) j => X.val a b) hm
       simp only [gRep_val, adRep_baseLift_apply, hη, if_true] at e
       have hne : (Ψ x ^ wt a b : kˣ) ≠ 1 := by
         have h0 : wt a b ≠ 0 := hab ▸ hj
@@ -127,7 +176,7 @@ private theorem gRep_bij {k D : Type} [Field k] [Finite k] [Group D] (η : D →
       rcases mul_eq_zero.1 e' with h | h
       · exact absurd (Units.ext (sub_eq_zero.1 h)) hne
       · exact h
-    · exact Subtype.property (p := fun X => X ∈ gw k j) m a b hab
+    · exact Subtype.property (p := fun X => X ∈ gw (R := k) j) m a b hab
   intro m m' h
   have h' : gRep η Ψ j x m - m = gRep η Ψ j x m' - m' := h
   refine sub_eq_zero.1 (hker _ ?_)
@@ -139,7 +188,7 @@ private theorem gRep_cont {k D D' : Type} [CommRing k] [Group D] [TopologicalSpa
     (φ : D' →* D) (hφ : Continuous φ) : ContAction (G := D') ((gRep η Ψ j).comp φ) := by
   unfold ReciprocityTheory.Gal.ContAction
   apply IsLocallyConstant.continuous
-  have h1 : IsLocallyConstant fun p : D' × Gb k j => ((η (φ p.1), Ψ (φ p.1)), p.2) :=
+  have h1 : IsLocallyConstant fun p : D' × Gb (k := k) j => ((η (φ p.1), Ψ (φ p.1)), p.2) :=
     ((hη.comp_continuous (hφ.comp continuous_fst)).prodMk (hΨ.comp_continuous (hφ.comp continuous_fst))).prodMk
       ((IsLocallyConstant.iff_continuous _).2 continuous_snd)
   rw [IsLocallyConstant.iff_eventually_eq] at h1 ⊢

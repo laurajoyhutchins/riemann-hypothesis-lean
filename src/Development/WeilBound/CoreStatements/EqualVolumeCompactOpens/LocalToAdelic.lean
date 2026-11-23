@@ -1,6 +1,57 @@
-import GroundTheory.HeightsAndTheta.Heights.StrongApproximation.Assembly
-import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.ExistsDualBasis
-import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.CptLact
+module
+
+public import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.EqVolSDOf
+public import GroundTheory.HeightsAndTheta.Heights.StrongApproximation.Statements
+public import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.DiagMulVecTmul
+public import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.ExistsDualBasis
+public import GroundTheory.HeightsAndTheta.Heights.StrongApproximation.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.MeasInvStatementPfA
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +78,7 @@ theorem mem_hat_iff {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
       show b v ⊗ₜ x i = b v • ((1 : v.adicCompletion (maximalRealSubfield E)) ⊗ₜ[maximalRealSubfield E] x i)
       rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
     | zero => simp only [Pi.zero_apply, map_zero]; exact (GlobalTheory.SelfDualGenus.locLattice v Λ).zero_mem
-    | add x y _ _ hx hy => simp only [Pi.add_apply, map_add]; exact (GlobalTheory.SelfDualGenus.locLattice v Λ).add_mem hx hy
+    | add x y _ _ hx hy => simp only [Pi.add_apply, map_add (f := _)]; exact (GlobalTheory.SelfDualGenus.locLattice v Λ).add_mem hx hy
     | neg x _ hx => simp only [Pi.neg_apply, map_neg]; exact (GlobalTheory.SelfDualGenus.locLattice v Λ).neg_mem hx
   · intro h
     obtain ⟨k, z, l, hz, hl, e⟩ := exists_dualBasis (F := maximalRealSubfield E) hΛ
@@ -77,7 +128,8 @@ theorem localToAdelic : LocalToAdelic := by
       ∃ A : Matrix (Fin r) (Fin r) (Adf (maximalRealSubfield E) E), ∀ v, A.map (compAt E v) = M v := by
     intro M hM
     refine ⟨1 + ∑ w ∈ hfin.toFinset, (M w - 1).map (singleV E w), fun v => Matrix.ext fun i j => ?_⟩
-    simp only [Matrix.map_apply, Matrix.add_apply, Matrix.sum_apply, map_add, map_sum]
+
+    simp only [Matrix.map_apply, Matrix.add_apply, Matrix.sum_apply, map_add (f := _), map_sum]
     rw [Finset.sum_eq_single v (fun w _ hw => (hv w).2.1 v hw.symm _) (fun h => by
       rw [hM v (by simpa using h)]; simp), (hv v).1, Matrix.one_apply, apply_ite (compAt E v), map_one, map_zero,
       Matrix.sub_apply, Matrix.one_apply]

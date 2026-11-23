@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsChowNorm
+module
+
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormEval
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsChowNorm
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.Nilpotent
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Vertical
@@ -39,7 +94,7 @@ def polyTensorEquiv (R A : Type*) [CommRing R] [CommRing A] [Algebra R A] (n : �
       rw [smul_tmul', smul_eq_mul, polyTensorAlgEquiv_tmul, polyTensorAlgEquiv_tmul, RingHom.id_apply,
         Algebra.smul_def q, MvPolynomial.algebraMap_def, map_mul, mul_smul_comm]
     | add s t hs ht =>
-      rw [smul_add, map_add, map_add, hs, ht, smul_add]
+      rw [smul_add, map_add (f := _), map_add (f := _), hs, ht, smul_add]
 
 def polyBasis {ι : Type*} (b : Module.Basis ι R A) (n : ℕ) :
     Module.Basis ι (MvPolynomial (Fin n) R) (MvPolynomial (Fin n) A) :=
@@ -55,34 +110,7 @@ end Basis
 theorem normForm_eq_det {R A : Type*} [CommRing R] [CommRing A] [Algebra R A] {n : ℕ} {ι : Type*}
     [Fintype ι] [DecidableEq ι] (b : Module.Basis ι R A) (x : Fin n → A) :
     normForm A x = (∑ j, (X j : MvPolynomial (Fin n) R) • (Algebra.leftMulMatrix b (x j)).map C).det := by
-  let bP := polyBasis b n
-  let M : Fin n → Matrix ι ι R := fun j => Algebra.leftMulMatrix b (x j)
-  have hM : ∀ j k, x j * b k = ∑ i, M j i k • b i := fun j k => by
-    simp only [M, Algebra.leftMulMatrix_eq_repr_mul]
-    exact (b.sum_repr (x j * b k)).symm
-  have key : ∀ (q : MvPolynomial (Fin n) R) (a : A),
-      q • (C a : MvPolynomial (Fin n) A) = MvPolynomial.map (algebraMap R A) q * C a := fun q a => by
-    rw [Algebra.smul_def, MvPolynomial.algebraMap_def]
-  have hmat : Algebra.leftMulMatrix bP (∑ j, X j * C (x j) : MvPolynomial (Fin n) A) =
-      ∑ j, (X j : MvPolynomial (Fin n) R) • (M j).map C := by
-    refine Matrix.ext fun i k => ?_
-    rw [Algebra.leftMulMatrix_eq_repr_mul, polyBasis_apply]
-    have hsum : (∑ j, X j * C (x j) : MvPolynomial (Fin n) A) * C (b k) =
-        ∑ i', (∑ j, (X j : MvPolynomial (Fin n) R) * C (M j i' k)) • bP i' := by
-      calc (∑ j, X j * C (x j) : MvPolynomial (Fin n) A) * C (b k)
-          = ∑ j, ∑ i', (X j : MvPolynomial (Fin n) A) * C (M j i' k • b i') := by
-            rw [Finset.sum_mul]
-            refine Finset.sum_congr rfl fun j _ => ?_
-            rw [mul_assoc, ← C_mul, hM j k, map_sum, Finset.mul_sum]
-        _ = ∑ i', ∑ j, (X j : MvPolynomial (Fin n) A) * C (M j i' k • b i') := Finset.sum_comm
-        _ = ∑ i', (∑ j, (X j : MvPolynomial (Fin n) R) * C (M j i' k)) • bP i' := by
-            refine Finset.sum_congr rfl fun i' _ => ?_
-            rw [polyBasis_apply, key, map_sum, Finset.sum_mul]
-            refine Finset.sum_congr rfl fun j _ => ?_
-            rw [map_mul, map_X, map_C, Algebra.smul_def, C_mul, mul_assoc]
-    rw [hsum, bP.repr_sum_self, Matrix.sum_apply]
-    simp [Matrix.map_apply]
-  rw [normForm, Algebra.norm_eq_matrix_det bP, hmat]
+  apply GroundTheory.Heights₂.Heights.Vertical.normForm_eq_det <;> assumption
 
 section Embeddings
 
@@ -118,6 +146,7 @@ theorem normForm_map_eq_prod [FiniteDimensional E L] [Algebra.IsSeparable E L] [
       simp only [Algebra.leftMulMatrix_eq_repr_mul]
       exact (b.sum_repr (z * b k)).symm
     have h2 := congrArg (e j) h1
+
     rw [map_mul, map_sum] at h2
     simp only [hPij, Algebra.smul_def, map_mul, AlgHom.commutes] at h2 ⊢
     rw [← h2, mul_comm]
@@ -129,10 +158,12 @@ theorem normForm_map_eq_prod [FiniteDimensional E L] [Algebra.IsSeparable E L] [
   have hconj : Λᵀ * P.map C = P.map C * diagonal D := by
     refine Matrix.ext fun k j => ?_
     rw [mul_diagonal, Matrix.mul_apply]
+
     simp only [hΛ, transpose_apply, RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.sum_apply,
-      Matrix.smul_apply, smul_eq_mul, map_sum, map_mul, map_X, map_C, D, embForm]
+    Matrix.smul_apply, smul_eq_mul, map_sum, map_mul, map_X, map_C, D, embForm]
     calc ∑ i, (∑ l, X l * C (algebraMap E K (Algebra.leftMulMatrix b (x l) i k))) * C (P i j)
         = ∑ l, X l * C (∑ i, algebraMap E K (Algebra.leftMulMatrix b (x l) i k) * P i j) := by
+
           simp only [Finset.sum_mul, map_sum, Finset.mul_sum, map_mul, mul_assoc]
           exact Finset.sum_comm
       _ = C (P k j) * ∑ l, X l * C (e j (x l)) := by
@@ -189,6 +220,7 @@ theorem totalDegree_embForm_le (σ : L →ₐ[E] K) (x : Fin n → L) : (embForm
 
 theorem eval_embForm_alt (σ : L →ₐ[E] K) (ht : ∑ j, algebraMap E L (t j) * x j = 1) :
     eval (fun j => algebraMap E K (t j)) (embForm σ x) = 1 := by
+
   rw [eval_embForm, ← map_one σ, ← ht, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, AlgHom.commutes]
@@ -265,7 +297,7 @@ theorem isUnit_of_map_isUnit {p : MvPolynomial (Fin n) E} (h : IsUnit (p.map (al
     IsUnit p := by
   obtain ⟨r, hr, hpr⟩ := isUnit_iff_eq_C_of_isReduced.mp h
   have hc : ∀ m, m ≠ 0 → p.coeff m = 0 := fun m hm => by
-    have := congrArg (coeff m) hpr
+    have := congrArg (AddMonoidAlgebra.coeff · m) hpr
     rw [coeff_map, coeff_C, if_neg (Ne.symm hm)] at this
     exact (algebraMap E K).injective (by rw [this, map_zero])
   have hp : p = C (p.coeff 0) := by
@@ -276,7 +308,7 @@ theorem isUnit_of_map_isUnit {p : MvPolynomial (Fin n) E} (h : IsUnit (p.map (al
     · exact hc m (Ne.symm h0)
   have h0 : p.coeff 0 ≠ 0 := by
     intro h0
-    have := congrArg (coeff 0) hpr
+    have := congrArg (AddMonoidAlgebra.coeff · 0) hpr
     rw [coeff_map, h0, map_zero, coeff_C, if_pos rfl] at this
     exact hr.ne_zero this.symm
   rw [hp]
@@ -286,8 +318,8 @@ end Forms
 
 end NormFormIrreducible
 
-open NormFormIrreducible in
 
+open NormFormIrreducible in
 theorem NormFormIrreducible.proof : NormFormIrreducible.Statement := by
   intro E L _ _ _ _ _ _ n x t hgen ht
   let _ : Field L := (isField_of_isIntegral_of_isField' (R := E) (Field.toIsField E)).toField
@@ -295,7 +327,11 @@ theorem NormFormIrreducible.proof : NormFormIrreducible.Statement := by
   let K := AlgebraicClosure E
   have hprod := normForm_map_eq_prod (E := E) (L := L) (K := K) x
   have hirr : ∀ σ : L →ₐ[E] K, Irreducible (embForm σ x) := fun σ => irreducible_embForm σ ht
-  let σ₀ : L →ₐ[E] K := IsAlgClosed.lift
+  let σ₀ : L →ₐ[E] K := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   refine irreducible_iff.mpr ⟨fun hu => ?_, fun F G hFG => ?_⟩
   · have := hu.map (MvPolynomial.map (algebraMap E K))
     rw [hprod] at this

@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.ProdList
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.ProdList
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -92,7 +137,7 @@ theorem tri_bij {σ : Type*} (w : σ → ℕ) (ψ : MvPolynomial σ ℤ →+* Mv
       rw [vars_neg] at ht
       exact (mem_supported.1 hq) (Finset.mem_coe.2 ht)
     · have hqe' : ψ q = ((ε⁻¹ : ℤˣ) : ℤ) • p := hqe
-      rw [map_add, map_neg, map_zsmul, hψ, hqe', smul_add, smul_smul, ← Units.val_mul,
+      rw [map_add (f := _), map_neg, map_zsmul, hψ, hqe', smul_add, smul_smul, ← Units.val_mul,
         inv_mul_cancel, Units.val_one, one_smul, add_neg_cancel_right]
   choose ε' q hq hψq using hpre
   let φ : MvPolynomial σ ℤ →+* MvPolynomial σ ℤ :=
@@ -120,7 +165,7 @@ theorem tri_bij {σ : Type*} (w : σ → ℕ) (ψ : MvPolynomial σ ℤ →+* Mv
 theorem uni_inj {M I : Type*} (L : M ≃ I) (w : M → ℕ) (f : M → I →₀ ℤ)
     (h1 : ∀ m, f m (L m) = 1) (hlt : ∀ m n, f m (L n) ≠ 0 → m = n ∨ w m < w n) :
     Function.Injective (Finsupp.linearCombination ℤ f) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   by_contra hne
   have hsupp : a.support.Nonempty := Finsupp.support_nonempty_iff.2 hne
@@ -190,9 +235,19 @@ theorem uni_exists {M I C : Type*} (L : M ≃ I) (c : M → C) (w : M → ℕ) (
       rcases Finset.mem_union.1 (Finsupp.support_add hm) with hm1 | hm1
       · rw [Finsupp.support_single_ne_zero _ one_ne_zero, Finset.mem_singleton] at hm1
         rw [hm1]
-      · obtain ⟨i, hi, hmi⟩ := Finset.mem_biUnion.1 (Finsupp.support_finset_sum hm1)
+      · have hex' : ∃ i ∈ v.support, m ∈ (v i • g i).support := by
+          by_contra h
+          have hz : (∑ i ∈ v.support, v i • g i) m = 0 := by
+            rw [Finset.sum_apply']
+            apply Finset.sum_eq_zero
+            intro i hi
+            apply Finsupp.notMem_support_iff.mp
+            exact fun hmi => h ⟨i, hi, hmi⟩
+          exact Finsupp.mem_support_iff.mp hm1 hz
+        obtain ⟨i, hi, hmi⟩ := hex'
         exact hg1 i hi m (Finsupp.support_smul hmi)
-    · rw [map_add, map_sum, Finsupp.linearCombination_single, one_smul]
+
+    · rw [map_add (f := _), map_sum, Finsupp.linearCombination_single, one_smul]
       rw [Finset.sum_congr rfl (fun i hi => by rw [map_smul, hg2 i hi])]
       have hsum : ∑ i ∈ v.support, v i • Finsupp.single i (1 : ℤ) = v := by
         conv_rhs => rw [← Finsupp.sum_single v]

@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Group.ModularCharacter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +102,7 @@ theorem lcount_mul (Γ : Subgroup H) (K : Set H) (δ : Γ) (x : H) :
 
 theorem measurable_lcount (Γ : Subgroup H) [Countable Γ] {K : Set H} (hK : IsCompact K) :
     Measurable (lcount Γ K) :=
-  Measurable.ennreal_tsum fun _ =>
+  Measurable.tsum fun _ =>
     ((measurable_one : Measurable (1 : H → ℝ≥0∞)).indicator hK.measurableSet).comp (measurable_const_mul _)
 
 theorem measurable_lwt (Γ : Subgroup H) [Countable Γ] {K : Set H} (hK : IsCompact K) :
@@ -184,7 +235,8 @@ theorem haar_map_inv_of_lattice (μ : Measure H) [IsHaarMeasure μ] (Γ : Subgro
   let c : ℝ≥0∞ := haarScalarFactor μ.inv μ
   have hc : μ.inv = c • μ := isMulLeftInvariant_eq_smul μ.inv μ
   have h2 : map Inv.inv (map Inv.inv μ) = c ^ 2 • μ := by
-    rw [← inv_def μ, hc, Measure.map_smul, ← inv_def μ, hc, smul_smul, pow_two]
+    rw [← inv_def μ, hc, Measure.map_smul c continuous_inv.measurable.aemeasurable,
+      ← inv_def μ, hc, smul_smul, pow_two]
   have μeq : μ = c ^ 2 • μ := by
     rw [map_map continuous_inv.measurable continuous_inv.measurable] at h2
     simpa only [inv_involutive, Function.Involutive.comp_self, Measure.map_id] using h2
@@ -197,13 +249,6 @@ theorem haar_map_inv_of_lattice (μ : Measure H) [IsHaarMeasure μ] (Γ : Subgro
   have e3 : c = 1 := (ENNReal.pow_right_strictMono two_ne_zero).injective e2
   change μ.inv = μ
   rw [hc, e3, one_smul]
-
-theorem haar_map_conj_of_lattice (μ : Measure H) [IsHaarMeasure μ] (Γ : Subgroup H) [Countable Γ]
-    [DiscreteTopology Γ] {K : Set H} (hK : IsCompact K) (hcov : ∀ x : H, ∃ s ∈ Γ, s * x ∈ K) (n : H) :
-    μ.map (fun x => n⁻¹ * x * n) = μ := by
-  have e : (fun x => n⁻¹ * x * n) = (· * n) ∘ (n⁻¹ * ·) := rfl
-  rw [e, ← map_map (measurable_mul_const n) (measurable_const_mul n⁻¹), map_mul_left_eq_self μ n⁻¹,
-    haar_map_mul_right_of_lattice μ Γ hK hcov n]
 
 end Lattice
 
@@ -220,8 +265,8 @@ theorem one_le_of_iterate_bounded (μ : Measure H) [IsHaarMeasure μ] {f : H →
     induction n with
     | zero => simp
     | succ n ih =>
-      rw [Function.iterate_succ, ← map_map (hf.iterate n).measurable hf.measurable, hc, Measure.map_smul,
-        ih, smul_smul, pow_succ']
+      rw [Function.iterate_succ, ← map_map (hf.iterate n).measurable hf.measurable, hc,
+        Measure.map_smul c (hf.iterate n).measurable.aemeasurable, ih, smul_smul, pow_succ']
   have hVpos : 0 < μ V := measure_pos_of_mem_nhds μ hV1
   have hLtop : μ L ≠ ∞ := hL.measure_lt_top.ne
   have hle : ∀ n : ℕ, μ V ≤ c ^ n * μ L := by
@@ -257,9 +302,9 @@ theorem haar_map_equiv_of_bounded (μ : Measure H) [IsHaarMeasure μ] (α : H �
     have e : μ.map (⇑α.symm ∘ ⇑α) = μ := by
       have : (⇑α.symm ∘ ⇑α) = id := funext fun x => α.symm_apply_apply x
       rw [this, Measure.map_id]
-    rw [← map_map (show Measurable (⇑α.symm) from α.symm.continuous.measurable)
-      (show Measurable (⇑α) from α.continuous.measurable), hc, Measure.map_smul, hc',
-      smul_smul] at e
+    have hαsymm : Measurable (⇑α.symm) := α.symm.continuous.measurable
+    rw [← map_map hαsymm (show Measurable (⇑α) from α.continuous.measurable), hc,
+      Measure.map_smul c hαsymm.aemeasurable, hc', smul_smul] at e
     exact e.symm
   obtain ⟨W, hW, hW1⟩ := exists_compact_mem_nhds (1 : H)
   have hWpos : 0 < μ W := measure_pos_of_mem_nhds μ hW1

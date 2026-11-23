@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsLineOfAddAddEqZero
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsLineOfAddAddEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Algebra
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -9,20 +64,22 @@ section Def
 
 variable {K : Type*} [Field K]
 
-open scoped Classical in
 
+open scoped Classical in
 def HasRationalTorsion (W : WeierstrassCurve K) (L : Type*) [Field L] [Algebra K L] (n : ℕ) :
-    Prop :=
-  ∀ (x y : L) (h : (W.baseChange L).toAffine.Nonsingular x y), n • Point.some x y h = 0 →
+    Prop := by
+  classical
+  exact ∀ (x y : L) (h : (W.baseChange L).toAffine.Nonsingular x y), n • Point.some x y h = 0 →
     x ∈ (algebraMap K L).range ∧ y ∈ (algebraMap K L).range
 
 variable {W : WeierstrassCurve K} {L : Type*} [Field L] [Algebra K L] {m n : ℕ}
 
-theorem hasRationalTorsion_iff [DecidableEq L] : HasRationalTorsion W L n ↔
+theorem hasRationalTorsion_iff [inst : DecidableEq L] : HasRationalTorsion W L n ↔
     ∀ (x y : L) (h : (W.baseChange L).toAffine.Nonsingular x y), n • Point.some x y h = 0 →
       x ∈ (algebraMap K L).range ∧ y ∈ (algebraMap K L).range := by
-  unfold HasRationalTorsion
-  convert Iff.rfl
+  have h : inst = Classical.decEq L := Subsingleton.elim _ _
+  subst inst
+  rfl
 
 theorem HasRationalTorsion.of_dvd (h : HasRationalTorsion W L n) (hmn : m ∣ n) :
     HasRationalTorsion W L m := by
@@ -57,9 +114,6 @@ end Def
 def splitCurve {R : Type*} [CommRing R] (A B : R) : WeierstrassCurve R :=
   ⟨0, -(A + B), 0, A * B, 0⟩
 
-def legendreCurve {R : Type*} [CommRing R] (l : R) : WeierstrassCurve R :=
-  ⟨0, -(1 + l), 0, l, 0⟩
-
 def deuringCurve {R : Type*} [CommRing R] (a b : R) : WeierstrassCurve R :=
   ⟨a, 0, b, 0, 0⟩
 
@@ -72,12 +126,6 @@ theorem splitCurve_Δ (A B : R) : (splitCurve A B).Δ = 16 * A ^ 2 * B ^ 2 * (A 
 
 theorem splitCurve_c₄ (A B : R) : (splitCurve A B).c₄ = 16 * (A ^ 2 - A * B + B ^ 2) := by
   simp only [splitCurve, c₄, b₂, b₄]; ring
-
-theorem legendreCurve_Δ (l : R) : (legendreCurve l).Δ = 16 * l ^ 2 * (l - 1) ^ 2 := by
-  simp only [legendreCurve, Δ, b₂, b₄, b₆, b₈]; ring
-
-theorem legendreCurve_c₄ (l : R) : (legendreCurve l).c₄ = 16 * (l ^ 2 - l + 1) := by
-  simp only [legendreCurve, c₄, b₂, b₄]; ring
 
 theorem deuringCurve_Δ (a b : R) : (deuringCurve a b).Δ = b ^ 3 * (a ^ 3 - 27 * b) := by
   simp only [deuringCurve, Δ, b₂, b₄, b₆, b₈]; ring
@@ -168,8 +216,8 @@ section Forms
 variable {K : Type*} [Field K] [CharZero K] {L : Type*} [Field L] [Algebra K L] [IsAlgClosed L]
   {W : WeierstrassCurve K} [W.IsElliptic]
 
-omit [CharZero K] in
 
+omit [CharZero K] in
 theorem HasRationalTorsion.exists_point_of_root (h : HasRationalTorsion W L 3) {x : L}
     (hx : (W.baseChange L).Ψ₃.eval x = 0) :
     ∃ x₀ y₀ : K, algebraMap K L x₀ = x ∧ W.toAffine.Nonsingular x₀ y₀ ∧ W.Ψ₃.eval x₀ = 0 := by
@@ -226,8 +274,8 @@ theorem HasRationalTorsion.exists_deuringCurve (h : HasRationalTorsion W L 3) :
   field_simp
   linear_combination 9 * b * hz₀
 
-omit [CharZero K] [IsAlgClosed L] in
 
+omit [CharZero K] [IsAlgClosed L] in
 theorem HasRationalTorsion.mem_range_of_root (h : HasRationalTorsion W L 2) (h₁ : W.a₁ = 0)
     (h₃ : W.a₃ = 0) {x : L} (hx : x ^ 3 + algebraMap K L W.a₂ * x ^ 2 + algebraMap K L W.a₄ * x
       + algebraMap K L W.a₆ = 0) : x ∈ (algebraMap K L).range := by
@@ -254,7 +302,7 @@ theorem HasRationalTorsion.exists_splitCurve (h : HasRationalTorsion W L 2) :
   obtain ⟨f, hf⟩ := exists_root_quadratic (algebraMap K L ((C₁ • W).a₂ + e))
     (algebraMap K L ((C₁ • W).a₄ + (C₁ • W).a₂ * e + e ^ 2))
   obtain ⟨f, rfl⟩ := h'.mem_range_of_root h₁ h₃ (x := f) (by
-    simp only [map_add, map_mul, map_pow] at hf
+    simp only [map_add (f := _), map_mul, map_pow] at hf
     linear_combination he + (f - algebraMap K L e) * hf)
   have he' : e ^ 3 + (C₁ • W).a₂ * e ^ 2 + (C₁ • W).a₄ * e + (C₁ • W).a₆ = 0 := by
     apply (algebraMap K L).injective
@@ -274,8 +322,8 @@ theorem HasRationalTorsion.exists_splitCurve (h : HasRationalTorsion W L 2) :
   · linear_combination hf'
   · linear_combination he'
 
-omit [CharZero K] in
 
+omit [CharZero K] in
 theorem HasRationalTorsion.isSquare_neg {A B : K} [(splitCurve A B).IsElliptic]
     (h : HasRationalTorsion (splitCurve A B) L 4) : ∃ a : K, a ^ 2 = -A := by
   classical

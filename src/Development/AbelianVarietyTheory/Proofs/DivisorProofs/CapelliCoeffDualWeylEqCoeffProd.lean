@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalPol
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BranchingAdmissibleFacts
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalPol
+public import Formalism.BranchSandwichDivisors.BranchIsometryProofs.BranchMap
+public import Development.AbelianVarietyTheory.Definitions.Foundations.TracePowApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BranchingAdmissibleFacts
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Foundations.GelfA
+
+@[expose] public section
+
 open Formalism.CohomologicalDescent.DepthNonnegative GlobalTheory.ExpFrame Formalism.CohomologicalDescent.LD GlobalTheory.CapelliLink
 
 noncomputable section
@@ -31,6 +80,7 @@ theorem capDet_intertwine {R S M M' : Type*} [CommRing R] [CommRing S] [AddCommG
     (E' : Fin n → Fin n → Module.End S M') (h : ∀ i j x, ψ (E i j x) = E' i j (ψ x)) (u : ℤ) (x : M) :
     ψ (Formalism.BranchingDeterminantCap.capDet E u x) = Formalism.BranchingDeterminantCap.capDet E' u (ψ x) := by
   unfold Formalism.BranchingDeterminantCap.capDet Formalism.BranchingDeterminantCap.bmPi Formalism.BranchingDeterminantCap.bmM
+
   simp only [LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_zsmul]
   refine Finset.sum_congr rfl fun α _ => ?_
   congr 1
@@ -78,6 +128,7 @@ theorem eval_capPoly (O : Type) [CommRing O] (N : ℕ) {M : Type} [AddCommGroup 
     rfl
   rw [← key]
   unfold capPoly Formalism.BranchingDeterminantCap.capDet Formalism.BranchingDeterminantCap.bmPi Formalism.BranchingDeterminantCap.bmM
+
   simp only [map_sum, map_mul, map_intCast, map_list_prod, List.map_ofFn, Finset.smul_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   have hev : ∀ p, ev p = p.eval₂ (RingHom.id _) (v : Module.End O M) := fun _ => rfl
@@ -90,7 +141,7 @@ theorem eval_capPoly (O : Type) [CommRing O] (N : ℕ) {M : Type} [AddCommGroup 
     rw [hev, hΨ]
     simp only [Function.comp_apply, entry, Formalism.BranchingDeterminantCap.bmF, id]
     split_ifs
-    · simp only [Polynomial.map_add, Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C, Polynomial.eval₂_add,
+    · simp only [Polynomial.map_add (f := _), Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C, Polynomial.eval₂_add,
         Polynomial.eval₂_sub, Polynomial.eval₂_X, Polynomial.eval₂_C, RingHom.id_apply, map_natCast, RingHom.coe_coe, Polynomial.map_natCast,
         Polynomial.eval₂_natCast]
       push_cast
@@ -110,13 +161,14 @@ theorem coeff_eq_of_int (P : Type) [CommRing P] [IsDomain P] [CharZero P] (L : �
     refine Set.Infinite.mono ?_ (Set.infinite_range_of_injective (Int.cast_injective (α := P)))
     rintro _ ⟨v, rfl⟩
     have hv := h v
-    simp only [Set.mem_setOf_eq, IsRoot, Q, eval_finset_sum, eval_monomial]
+    simp only [Set.mem_setOf_eq, IsRoot, Q, eval_finsetSum, eval_monomial]
     rw [← sub_eq_zero, ← Finset.sum_sub_distrib] at hv
     rw [← hv]
     refine Finset.sum_congr rfl fun j _ => ?_
     ring
   have := congrArg (fun q : Polynomial P => q.coeff i) hQ
-  simp only [Q, finset_sum_coeff, coeff_monomial, coeff_zero] at this
+  simp only [Q, finsetSum_coeff, coeff_monomial, coeff_zero] at this
+  simp only [Finsupp.single_apply] at this
   rw [Finset.sum_eq_single i (fun j _ hj => if_neg hj) (fun h' => absurd (Finset.mem_range.2 hi) h'), if_pos rfl] at this
   exact sub_eq_zero.1 this
 

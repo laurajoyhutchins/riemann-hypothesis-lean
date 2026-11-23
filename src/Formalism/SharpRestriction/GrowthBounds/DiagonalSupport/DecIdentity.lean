@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.SumMulSumProd
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.MembTop
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.RestValBdG
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.SumMulSumProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,7 +82,7 @@ theorem plane_dec (hA : ATL) (hS : ValSlice) (hC : ValComp) (hVB : ValBd p O Fr 
   refine ⟨?_, ?_, ?_, ?_⟩
   · rw [MvPolynomial.mem_supported]
     intro v hv'
-    obtain ⟨mo, hmo, hvmo⟩ := (MvPolynomial.mem_vars v).mp (Finset.mem_coe.mp hv')
+    obtain ⟨mo, hmo, hvmo⟩ := (MvPolynomial.mem_vars_iff_mem_support v).mp (Finset.mem_coe.mp hv')
     obtain ⟨mo', hmo', he⟩ := hsup mo hmo
     have hF' := (support_homComp δ _ mo' hmo').1
     have hne : mo' ((j, v.1), v.2) ≠ 0 := by
@@ -82,7 +123,7 @@ theorem normal_dec (hA : ATL) (hS : ValSlice) (hVB : ValBd p O Fr deg Y N₁ G' 
   refine ⟨?_, ?_, fun u hu => ⟨?_, ?_⟩⟩
   · rw [MvPolynomial.mem_supported]
     intro v hv'
-    obtain ⟨mo, hmo, hvmo⟩ := (MvPolynomial.mem_vars v).mp (Finset.mem_coe.mp hv')
+    obtain ⟨mo, hmo, hvmo⟩ := (MvPolynomial.mem_vars_iff_mem_support v).mp (Finset.mem_coe.mp hv')
     obtain ⟨mo', hmo', he⟩ := hsup mo hmo
     have hne : mo' ((j, v.1), v.2) ≠ 0 := by
       rw [← he]
@@ -102,6 +143,7 @@ theorem dec_identity {N1 N2 : ℕ} (A' : Fin N1 → ZMod J → MvPolynomial (ℤ
           nmEmb O r K (B' (finProdFinEquiv.symm q).2 (((t : ℤ)) : ZMod J))) =
       PhiPl Fr p O K J (∑ i, ∏ j, rename (fun v : ℤ × Fin r => ((j, v.1), v.2)) (A' i j)) *
         PhiNo Fr p O K J (∑ i, ∏ j, rename (fun v : ℤ × Fin K => ((j, v.1), v.2)) (B' i j)) := by
+
   simp only [map_sum, map_prod, PhiPl_seg, PhiNo_seg]
   rw [sum_mul_sum_prod]
   refine Finset.sum_congr rfl fun q _ => ?_

@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Imports
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.HeightsSet
@@ -16,8 +69,8 @@ open Classical
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-open Classical in
 
+open Classical in
 def wt (T : Finset K) : (Σ k, ι k) → ℕ := fun p ↦ if p.1 ∈ T then 1 else 0
 
 def proj (T : Finset K) : MRing ι →+* MRing ι :=
@@ -38,7 +91,7 @@ theorem weight_eq_zero_iff {σ : Type*} (w : σ → ℕ) (d : σ →₀ ℕ) :
     rw [smul_eq_mul, h p (Finsupp.mem_support_iff.mp hp), mul_zero]
 
 theorem coeff_proj (T : Finset K) (f : MRing ι) (d : (Σ k, ι k) →₀ ℕ) :
-    coeff d (proj T f) = if ∀ p, d p ≠ 0 → p.1 ∉ T then coeff d f else 0 := by
+    AddMonoidAlgebra.coeff (proj T f) d = if ∀ p, d p ≠ 0 → p.1 ∉ T then AddMonoidAlgebra.coeff f d else 0 := by
   classical
   rw [proj_apply, coeff_weightedHomogeneousComponent]
   have : Finsupp.weight (wt T) d = 0 ↔ ∀ p, d p ≠ 0 → p.1 ∉ T := by
@@ -77,7 +130,8 @@ theorem proj_univ (f : MRing ι) : proj Finset.univ f = C (constantCoeff f) := b
 theorem proj_X_of_mem {T : Finset K} {k : K} (hk : k ∈ T) (i : ι k) :
     proj T (X ⟨k, i⟩ : MRing ι) = 0 := by
   ext d
-  rw [coeff_proj, coeff_zero, coeff_X]
+  rw [coeff_proj, coeff_X]
+  simp only [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
   split_ifs with h1 h2
   · subst h2
     exact absurd hk (h1 ⟨k, i⟩ (by simp))
@@ -141,8 +195,8 @@ theorem isHomogeneous_of_mem_minimalPrimes (T : Finset K) {J V : Ideal (MRing ι
 
 end CurveDivVertical
 
-open CurveDivVertical in
 
+open CurveDivVertical in
 theorem CurveDivVertical.full : CurveDivVertical.Statement := by
   classical
   intro K _ ι _ W s a hW hs hsW V hV hhor

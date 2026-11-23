@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IrreducibleOfIrreducibleMap
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ForallAevalLineVanishingIdealIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ProjPointIdealMemProjComponentsOfIsProjPureDim
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IrreducibleOfIrreducibleMap
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LeadingCoeffNonnegOfEventuallyEvalNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,23 +81,12 @@ theorem localLength_ne_top [IsNoetherianRing R] {J Q : Ideal R} [Q.IsPrime]
     Ideal.Quotient.mk_surjective]
   exact Module.length_ne_top
 
-theorem localLength_ne_zero {J Q : Ideal R} [Q.IsPrime] (h : J ≤ Q) : localLength J Q ≠ 0 := by
-  rw [localLength, Ne, Module.length_eq_zero_iff, Ideal.Quotient.subsingleton_iff]
-  refine ne_top_of_le_ne_top (IsLocalRing.maximalIdeal.isMaximal _).ne_top ?_
-  rw [← Localization.AtPrime.map_eq_maximalIdeal]
-  exact Ideal.map_mono h
-
-theorem localLength_self (Q : Ideal R) [Q.IsPrime] : localLength Q Q = 1 := by
-  rw [localLength, Localization.AtPrime.map_eq_maximalIdeal, Module.length_eq_one_iff,
-    isSimpleModule_iff_isCoatom, ← Ideal.isMaximal_def]
-  exact IsLocalRing.maximalIdeal.isMaximal _
-
 end Mult
 
 variable {k : Type} [Field k] {N : ℕ}
 
-open Classical in
 
+open Classical in
 def projCycle (J : Ideal (MvPolynomial (Fin N) k)) : Ideal (MvPolynomial (Fin N) k) →₀ ℕ :=
   Finsupp.ofSupportFinite
     (fun Q => if h : Q ∈ projComponents J then
@@ -72,18 +106,7 @@ theorem projCycle_apply_of_notMem {J Q : Ideal (MvPolynomial (Fin N) k)}
   rw [projCycle, Finsupp.ofSupportFinite_coe]
   exact dif_neg h
 
-theorem mem_support_projCycle {J Q : Ideal (MvPolynomial (Fin N) k)} :
-    Q ∈ (projCycle J).support ↔ Q ∈ projComponents J := by
-  rw [Finsupp.mem_support_iff]
-  refine ⟨fun h => by_contra fun h' => h (projCycle_apply_of_notMem h'), fun h h0 => ?_⟩
-  haveI : Q.IsPrime := h.1.1.1
-  refine localLength_ne_zero h.1.1.2 ?_
-  rw [← cast_projCycle_apply h, h0, Nat.cast_zero]
-
 def hyperplaneForm (u : Fin N → k) : MvPolynomial (Fin N) k := ∑ j, C (u j) * X j
-
-theorem isHomogeneous_hyperplaneForm (u : Fin N → k) : (hyperplaneForm u).IsHomogeneous 1 :=
-  IsHomogeneous.sum _ _ _ fun j _ => (isHomogeneous_X k j).C_mul _
 
 def hyperplaneSection (P : Ideal (MvPolynomial (Fin N) k)) (u : Fin N → k) :
     Ideal (MvPolynomial (Fin N) k) →₀ ℕ :=

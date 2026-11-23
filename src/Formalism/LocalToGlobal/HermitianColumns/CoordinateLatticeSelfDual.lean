@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+module
+
+public import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,15 +62,8 @@ def AdStep {n : ℕ} (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (U : Su
   ∃ κ ∈ U, ∃ η ∈ UPts σ J (Af F), (∀ w : HeightOneSpectrum (𝓞 F), w ≠ v → bc (prV (E := E) w) η = 1) ∧
     bc (inclE (F := F) (Af F)) γ * y' = y * η * κ
 
-def AdSame {n : ℕ} (U : Subgroup (GL (Fin n) (E ⊗[F] Af F)))
-    (y y' : GL (Fin n) (E ⊗[F] Af F)) (γ : GL (Fin n) E) : Prop :=
-  ∃ κ ∈ U, bc (inclE (F := F) (Af F)) γ * y' = y * κ
-
 def UAd (hc : CMData F E) (S : HSpace E) : Subgroup (GL (Fin S.rank) (E ⊗[F] AdeleRing (𝓞 F) F)) :=
   UPts hc.sig S.gram (AdeleRing (𝓞 F) F)
-
-def URe (S : HSpace E) (τ : E →+* ℂ) : Subgroup (GL (Fin S.rank) ℂ) :=
-  UJ (starRingEnd ℂ) (S.gram.map τ)
 
 theorem mem_dual (S : HSpace E) (L : Submodule (𝓞 E) S.V) (x : S.V) :
     x ∈ Formalism.HermitianLatticesTheory.dual S.hT L ↔ ∀ y ∈ L, S.hT y x ∈ (algebraMap (𝓞 E) E).range := by
@@ -56,20 +92,6 @@ theorem crdLat_dual (hc : CMData F E) (S : HSpace E) (L : Submodule (𝓞 E) S.V
 
 theorem coordinate_lattice_self_dual (hc : CMData F E) (S : HSpace E) : dualL hc S (crdLat S S.L0) = crdLat S S.L0 := by
   rw [← crdLat_dual, show Formalism.HermitianLatticesTheory.dual S.hT S.L0 = S.L0 from S.baseLattice_isUnimodular]
-
-theorem ClassTie.nonempty {hc : CMData F E} {S : HSpace E} {Lb : Submodule (𝓞 E) (Fin S.rank → E)}
-    {U : Subgroup (GL (Fin S.rank) (E ⊗[F] Af F))} {cls : Type} {stab : cls → Type}
-    [∀ c, Group (stab c)] {lat : cls → Submodule (𝓞 E) S.V} (X : ClassTie hc S Lb U stab lat) :
-    Nonempty cls :=
-  let ⟨c, _⟩ := X.y_bij.2 (Quotient.mk'' (1 : UAf hc S)); ⟨c⟩
-
-theorem ClassTie.card_stab {hc : CMData F E} {S : HSpace E} {Lb : Submodule (𝓞 E) (Fin S.rank → E)}
-    {U : Subgroup (GL (Fin S.rank) (E ⊗[F] Af F))} {cls : Type} {stab : cls → Type}
-    [∀ c, Group (stab c)] {lat : cls → Submodule (𝓞 E) S.V} (X : ClassTie hc S Lb U stab lat) (c : cls) :
-    Nat.card (stab c) = Nat.card {γ : UF hc S // bc (inclE (F := F) (Af F)) (γ : GL (Fin S.rank) E) ∈
-      U.map (MulAut.conj (X.y c : GL (Fin S.rank) (E ⊗[F] Af F))).toMonoidHom} := by
-  rw [Nat.card_congr (MonoidHom.ofInjective (X.stabI_inj c)).toEquiv]
-  exact Nat.card_congr (Equiv.subtypeEquivRight (fun γ => X.stabI_range c γ))
 
 end Formalism.L2.Herm
 

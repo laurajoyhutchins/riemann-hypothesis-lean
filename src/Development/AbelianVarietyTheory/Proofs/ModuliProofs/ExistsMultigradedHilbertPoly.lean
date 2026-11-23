@@ -1,8 +1,69 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.BernoulliPolynomials
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 namespace GlobalTheory.MultiHilbert
 
@@ -19,7 +80,7 @@ theorem EventuallyPoly.add {f g : (Fin r → ℕ) → ℚ} (hf : EventuallyPoly 
   obtain ⟨Φ, a, h⟩ := hf
   obtain ⟨Ψ, b, h'⟩ := hg
   refine ⟨Φ + Ψ, max a b, fun n hn => ?_⟩
-  rw [map_add, ← h n (fun k => (le_max_left _ _).trans (hn k)),
+  rw [map_add (f := _), ← h n (fun k => (le_max_left _ _).trans (hn k)),
     ← h' n (fun k => (le_max_right _ _).trans (hn k))]
 
 theorem eval_aeval_coord (x : Fin r → ℚ) (p : Fin r → MvPolynomial (Fin r) ℚ)
@@ -27,7 +88,7 @@ theorem eval_aeval_coord (x : Fin r → ℚ) (p : Fin r → MvPolynomial (Fin r)
     eval x (aeval p Φ) = eval (fun k => eval x (p k)) Φ := by
   induction Φ using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p n hp => simp only [map_mul, hp, aeval_X, eval_X]
 
 theorem EventuallyPoly.shift_add {f : (Fin r → ℕ) → ℚ} (hf : EventuallyPoly f) (e : Fin r → ℕ) :
@@ -62,7 +123,7 @@ theorem EventuallyPoly.of_shift_add {f : (Fin r → ℕ) → ℚ} (e : Fin r →
 theorem eval_polynomial_aeval_X (x : Fin r → ℚ) (k : Fin r) (p : Polynomial ℚ) :
     eval x (Polynomial.aeval (X k : MvPolynomial (Fin r) ℚ) p) = p.eval (x k) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => simp only [map_add, hp, hq, Polynomial.eval_add]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq, Polynomial.eval_add]
   | monomial n a => simp
 
 theorem eval_monomial_erase (x : Fin r → ℚ) (k : Fin r) (t : ℚ) (d : Fin r →₀ ℕ) (c : ℚ) :
@@ -97,7 +158,7 @@ theorem exists_antidifference (Φ : MvPolynomial (Fin r) ℚ) (k : Fin r) :
     obtain ⟨P, hP⟩ := hp
     obtain ⟨Q, hQ⟩ := hq
     refine ⟨P + Q, fun x => ?_⟩
-    rw [map_add, map_add, map_add, ← hP, ← hQ]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), ← hP, ← hQ]
     ring
 
 theorem EventuallyPoly.of_differences {f : (Fin r → ℕ) → ℚ}
@@ -172,7 +233,7 @@ theorem EventuallyPoly.of_differences {f : (Fin r → ℕ) → ℚ}
         intro u
         funext j
         split_ifs <;> simp
-      rw [map_sub, map_add, eval_aeval_coord, eval_aeval_coord, e3, e3, ← hP n hn]
+      rw [map_sub, map_add (f := _), eval_aeval_coord, eval_aeval_coord, e3, e3, ← hP n hn]
       linarith
   obtain ⟨P, hP⟩ := main Finset.univ
   exact ⟨P, N, fun n hn => by simpa using hP n hn⟩
@@ -200,7 +261,7 @@ theorem component_X_mul (i : σ) (n : M) (G : MvPolynomial σ K) :
       exact Nat.one_le_iff_ne_zero.2 (Finsupp.mem_support_iff.1 hi)
     have hw : Finsupp.weight w d = Finsupp.weight w (d - Finsupp.single i 1) + w i := by
       conv_lhs => rw [hd]
-      rw [map_add, Finsupp.weight_single, one_smul]
+      rw [map_add (f := _), Finsupp.weight_single, one_smul]
     simp only [hi, if_true, hw, add_left_inj]
   · simp only [hi, if_false, ite_self]
 
@@ -238,7 +299,7 @@ theorem component_mem_sup {I : Ideal (MvPolynomial σ K)}
       weightedHomogeneousComponent w n F ∈ I ⊔ Ideal.span {X i} := by
   intro F hF n
   obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hF
-  rw [map_add]
+  rw [map_add (f := _)]
   refine Submodule.add_mem_sup (hI a ha n) ?_
   rw [← Set.image_singleton] at hb ⊢
   exact component_mem_span_X w _ n hb
@@ -276,7 +337,7 @@ theorem finrank_sup_add_finrank_colonX {I : Ideal (MvPolynomial σ K)}
         (show F ∈ I ⊔ Ideal.span {X i} from hF')
       obtain ⟨G, rfl⟩ := Ideal.mem_span_singleton.1 hb
       have hc := IsWeightedHomogeneous.weightedHomogeneousComponent_same hF
-      rw [← hc, map_add, component_X_mul]
+      rw [← hc, map_add (f := _), component_X_mul]
       exact Submodule.add_mem_sup ⟨weightedHomogeneousComponent_mem _ _ _, hI a ha _⟩
         ⟨_, weightedHomogeneousComponent_mem _ _ _, rfl⟩
   have e2 : (weightedHomogeneousSubmodule K w (n + w i) ⊓ I.restrictScalars K) ⊓
@@ -325,7 +386,7 @@ theorem finite_colourPiece [Finite σ] (n : Fin r → ℕ) :
     intro F hF
     rw [F.as_sum]
     refine Submodule.sum_mem _ fun d hd => ?_
-    have : monomial d (coeff d F) = coeff d F • (monomial d (1 : K) : MvPolynomial σ K) := by
+    have : monomial d (AddMonoidAlgebra.coeff F d) = AddMonoidAlgebra.coeff F d • (monomial d (1 : K) : MvPolynomial σ K) := by
       rw [smul_monomial, smul_eq_mul, mul_one]
     rw [this]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨d, hF (mem_support_iff.1 hd), rfl⟩)

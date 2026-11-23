@@ -1,5 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtLeafSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.GaussHeights.GaussGenericHeight.GaussGenericStatements.GaussGenericLemmas.TranslationDomainMaps.MapDomainMemOfDvd
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtLeafSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.GaussHeights.GaussGenericHeight.GaussGenericStatements.GaussGenericLemmas.TranslationDomainMaps.MapDomainMemOfDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -64,8 +111,9 @@ private theorem diag_cS_Pimg (j₀ : Fin (N + 1)) (x : Fin N → Ω) (b : Fin (D
       rw [if_pos rfl, diag_X]
       rfl
     · rw [if_neg hi, map_neg, map_sum, mul_neg, Finset.mul_sum]
-      congr 1
-      refine Finset.sum_congr rfl fun k _ => ?_
+      apply congrArg Neg.neg
+      apply Finset.sum_congr rfl
+      intro k hk
       rw [map_mul, diag_X, hC, mul_assoc]
       rfl
   · rw [Pimg_succAbove, diag_X]
@@ -99,6 +147,7 @@ theorem lift_swap {K : Type} [Field K] [Algebra K Ω] (j₀ : Fin (N + 1)) (x : 
     · subst hi
       simp [he, eS]
     · have hei : e i ≠ 0 := fun h' => hi (e.injective (h'.trans he.symm))
+
       simp [hi, hei, eS, map_sum, map_neg]
   · rw [Pimg_succAbove, Pimg_succAbove, rename_X]
     rfl
@@ -118,9 +167,6 @@ noncomputable def translSEquiv (j₀ : Fin (N + 1)) (a : Fin (N + 1) → Ω) :
     (algHom_ext fun s => by by_cases h : blk s = 0 <;> simp [translS_X, h])
     (algHom_ext fun s => by by_cases h : blk s = 0 <;> simp [translS_X, h])
 
-@[simp] theorem translSEquiv_apply (j₀ : Fin (N + 1)) (a : Fin (N + 1) → Ω)
-    (g : MvPolynomial (SVar D N) Ω) : translSEquiv j₀ a g = translS j₀ a g := rfl
-
 theorem lift_transl {K : Type} [Field K] [Algebra K Ω] (j₀ : Fin (N + 1)) (x : Fin N → Ω)
     (a : Fin (N + 1) → K) (t : TVar D N) :
     translS j₀ (fun j => algebraMap K Ω (a j)) (Pimg j₀ x t) =
@@ -130,6 +176,7 @@ theorem lift_transl {K : Type} [Field K] [Algebra K Ω] (j₀ : Fin (N + 1)) (x 
   rcases Fin.eq_self_or_eq_succAbove j₀ j with rfl | ⟨k, rfl⟩ <;> by_cases hi : i = 0
   · subst hi
     simp [Pimg_self, translS, blk, col, MvPolynomial.algebraMap_apply]
+
   · simp [Pimg_self, translS, blk, col, hi, map_sum, map_neg]
   · subst hi
     simp [Pimg_succAbove, translS, blk, col, MvPolynomial.algebraMap_apply]

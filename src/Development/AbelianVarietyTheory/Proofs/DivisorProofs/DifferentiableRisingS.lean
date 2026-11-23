@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DTermOrigin
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.DefiningCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OmegaFactorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,7 +118,7 @@ theorem homFac_ne_zero {z : I → ℂ} (hz : z ∈ polydisc I) : homFac z ≠ 0 
 
 theorem contDiff_homFac : ContDiff ℂ ∞ (homFac : (I → ℂ) → ℂ) := by
   unfold homFac
-  exact contDiff_prod fun i _ => (contDiff_const.add (contDiff_apply ℂ ℂ i)).div_const _
+  exact contDiff_prod fun i _ => (contDiff_const.add (contDiff_apply ℂ (fun _ => ℂ) i)).div_const _
 
 theorem contDiffOn_logFac : ContDiffOn ℝ ∞ (logFac : (I → ℂ) → ℂ) (polydisc I) := by
   have h1 : ContDiff ℝ ∞ (homFac : (I → ℂ) → ℂ) := contDiff_homFac.restrict_scalars ℝ
@@ -88,11 +135,11 @@ theorem contDiffOn_modPt {Φ : Type} [Fintype Φ] (φ : I → E →+* ℂ) (e : 
   refine contDiffOn_pi.2 fun τ => ?_
   unfold modPt defCoord
   refine ContDiffOn.div ?_ ?_ fun z hz => one_add_ne_zero hz _
-  · exact (contDiff_const.add ((contDiff_apply ℂ ℂ _).mul contDiff_const)).contDiffOn
-  · exact (contDiff_const.add (contDiff_apply ℂ ℂ _)).contDiffOn
+  · exact (contDiff_const.add ((contDiff_apply ℂ (fun _ => ℂ) _).mul contDiff_const)).contDiffOn
+  · exact (contDiff_const.add (contDiff_apply ℂ (fun _ => ℂ) _)).contDiffOn
+
 
 omit [Fintype I] in
-
 theorem modPt_im_pos {Φ : Type} (φ : I → E →+* ℂ) (e : I ≃ Φ) (θ : E) (hθ : ∀ i, 0 < (φ i θ).im)
     {z : I → ℂ} (hz : z ∈ polydisc I) (τ : Φ) : 0 < (modPt φ e θ z τ).im := by
   unfold modPt defCoord
@@ -109,9 +156,5 @@ theorem modPt_im_pos {Φ : Type} (φ : I → E →+* ℂ) (e : I ≃ Φ) (θ : E
   simp only [Complex.add_im, Complex.add_re, Complex.mul_im, Complex.mul_re, Complex.conj_re, Complex.conj_im, Complex.one_re,
     Complex.one_im]
   nlinarith [mul_pos h2 (sub_pos.2 h1)]
-
-example (φ : E →+* ℂ) (x : E) :
-    eTerm (fun _ : Unit => φ) (fun _ => 1) 0 0 x = -2 * (starRingEnd ℂ (φ x)) * (φ x)⁻¹ ^ 3 := by
-  simp [eTerm, defCoord]
 
 end GlobalTheory.WeightTwoSum

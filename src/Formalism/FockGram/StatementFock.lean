@@ -1,4 +1,50 @@
-import Formalism.SmithDeterminants.StatementGram
+module
+
+public import Formalism.SmithDeterminants.StatementGram
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.Algebra.Star.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Matrix MvPolynomial
 
@@ -8,70 +54,5 @@ namespace Formalism.E
 
 def fock {R τ : Type*} [CommRing R] [StarRing R] (f g : MvPolynomial τ R) : R :=
   ∑ m ∈ f.support, f.coeff m * star (g.coeff m) * (Formalism.A.mfact m : R)
-
-def fockGram {R τ ι : Type*} [CommRing R] [StarRing R] (v : ι → MvPolynomial τ R) :
-    Matrix ι ι R :=
-  Matrix.of fun i j => fock (v i) (v j)
-
-def symMono {R σ τ : Type*} [CommRing R] {a : ℕ} (e : σ → MvPolynomial τ R) (s : Sym σ a) :
-    MvPolynomial τ R :=
-  ((s : Multiset σ).map e).prod
-
-def symFact {σ : Type*} [DecidableEq σ] {a : ℕ} (s : Sym σ a) : ℕ :=
-  Formalism.A.mfact (Multiset.toFinsupp (s : Multiset σ))
-
-def symPow {R σ : Type*} [CommRing R] [Fintype σ] [DecidableEq σ] (a : ℕ) (A : Matrix σ σ R) :
-    Matrix (Sym σ a) (Sym σ a) R :=
-  Matrix.of fun s t => coeff (Multiset.toFinsupp (t : Multiset σ))
-    (((s : Multiset σ).map fun i => ∑ j, C (A i j) * X j).prod)
-
-def symGram {R σ : Type*} [CommRing R] [Fintype σ] [DecidableEq σ] (a : ℕ)
-    (G : Matrix σ σ R) : Matrix (Sym σ a) (Sym σ a) R :=
-  symPow a G * Matrix.diagonal fun t => (symFact t : R)
-
-def FockSesq : Prop :=
-  ∀ (R τ : Type) [CommRing R] [StarRing R],
-    ∃ B : MvPolynomial τ R →ₗ[R] MvPolynomial τ R →ₗ⋆[R] R, ∀ f g, B f g = fock f g
-
-def FockHerm : Prop :=
-  ∀ (R τ : Type) [CommRing R] [StarRing R] (f g : MvPolynomial τ R),
-    star (fock f g) = fock g f
-
-def FockBridge : Prop :=
-  (∀ (τ : Type) (f g : MvPolynomial τ ℤ), Formalism.A.fockZ f g = fock f g) ∧
-  (∀ (τ : Type) (f g : MvPolynomial τ GaussianInt), Formalism.A.fockG f g = fock f g)
-
-def FockPerm : Prop :=
-  ∀ (R τ : Type) [CommRing R] [StarRing R] (a : ℕ) (x y : Fin a → MvPolynomial τ R),
-    (∀ s, (x s).IsHomogeneous 1) → (∀ t, (y t).IsHomogeneous 1) →
-    fock (∏ s, x s) (∏ t, y t) = (Matrix.of fun s t => fock (x s) (y t)).permanent
-
-def FockGramSym : Prop :=
-  ∀ (R σ τ : Type) [CommRing R] [StarRing R] [Fintype σ] [DecidableEq σ] (a : ℕ)
-    (e : σ → MvPolynomial τ R), (∀ i, (e i).IsHomogeneous 1) →
-    fockGram (symMono (a := a) e) = symGram a (fockGram e)
-
-def DetSymPow : Prop :=
-  ∀ (R σ : Type) [CommRing R] [Fintype σ] [DecidableEq σ] (a : ℕ) (A : Matrix σ σ R),
-    (symPow a A).det = A.det ^ (Fintype.card σ + a - 1).choose (Fintype.card σ)
-
-def DetSymGram : Prop :=
-  ∀ (R σ : Type) [CommRing R] [Fintype σ] [DecidableEq σ] (a : ℕ) (G : Matrix σ σ R),
-    (symGram a G).det =
-      G.det ^ (Fintype.card σ + a - 1).choose (Fintype.card σ) * ∏ t : Sym σ a, (symFact t : R)
-
-def DetFockSym : Prop :=
-  ∀ (R σ τ : Type) [CommRing R] [StarRing R] [Fintype σ] [DecidableEq σ] (a : ℕ)
-    (e : σ → MvPolynomial τ R), (∀ i, (e i).IsHomogeneous 1) →
-    (fockGram (symMono (a := a) e)).det =
-      (fockGram e).det ^ (Fintype.card σ + a - 1).choose (Fintype.card σ) *
-        ∏ t : Sym σ a, (symFact t : R)
-
-def FockStd : Prop :=
-  ∀ (R σ : Type) [CommRing R] [StarRing R] [Fintype σ] [DecidableEq σ] (a : ℕ),
-    fockGram (symMono (a := a) (X : σ → MvPolynomial σ R)) =
-      Matrix.diagonal (fun t => (symFact t : R)) ∧
-    (fockGram (symMono (a := a) (X : σ → MvPolynomial σ R))).det =
-      ∏ t : Sym σ a, (symFact t : R)
 
 end Formalism.E

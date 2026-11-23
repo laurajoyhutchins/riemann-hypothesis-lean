@@ -1,6 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.Step1KillXList
-import Formalism.SharpRestriction.LevelLetterCocycles.PadicValNatFactorialSucc
-import Formalism.SharpRestriction.LevelLetterCocycles.MultVNonneg
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExpRules
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterPolynomialDerivation
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -155,7 +200,7 @@ theorem lift_of_killing_polynomial [NeZero n] (hR : Formalism.MainNotions.Liftin
   have hms : liftingSection W T R a ν zc = Polynomial.aeval d R m₀ + Polynomial.aeval d R1 dz := rfl
   have key : Polynomial.aeval d R μ = pp ^ s₁ • μ + Polynomial.aeval d R1 (d μ) := by
     conv_lhs => rw [hsplit]
-    rw [map_add, map_mul, Polynomial.aeval_X, Polynomial.aeval_C, LinearMap.add_apply,
+    rw [map_add (f := _), map_mul, Polynomial.aeval_X, Polynomial.aeval_C, LinearMap.add_apply,
       Module.End.mul_apply, Module.algebraMap_end_apply, add_comm]
   set u := pp ^ N • liftingSection W T R a ν zc - pp ^ s₁ • μ with hudef
   have e1 : Polynomial.aeval d R u₀ = pp ^ N • Polynomial.aeval d R m₀ - Polynomial.aeval d R μ := by
@@ -177,7 +222,7 @@ theorem lift_of_killing_polynomial [NeZero n] (hR : Formalism.MainNotions.Liftin
     exact qLattice_add W T (qLattice_polynomial_derivation W T hDS hA hT c a R hu₀)
       (qLattice_mono W T (Nat.zero_le a) (qLattice_polynomial_derivation W T hDS hA hT c 0 R1 hyQ))
   have hdu : d u = Polynomial.aeval d (X * R) u₀ + Polynomial.aeval d (X * R1) y := by
-    rw [hu_eq, map_add, hXP, hXP]
+    rw [hu_eq, map_add (f := _), hXP, hXP]
   have hduN : d u ∈ W.N T := by
     rw [hdu]
     refine (W.N T).add_mem (hkill u₀ hu₀) ?_

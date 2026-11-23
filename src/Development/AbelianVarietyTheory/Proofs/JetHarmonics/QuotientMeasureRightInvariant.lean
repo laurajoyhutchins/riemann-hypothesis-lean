@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsNormalisedCutoffStatement
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.QuotientInvariantMeasurability.MeasurableMmRight
+public import Formalism.PeriodIntegrals.QuotInv
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsNormalisedCutoffStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
+import Formalism.HermitianCurvature.BesselNonvanishingReduction
+import Formalism.HermitianCurvature.StatementI
+
+@[expose] public section
 
 open BranchingSupport Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
@@ -45,49 +94,7 @@ private lemma continuous_mul_swap_pair {m : ℕ} :
 
 theorem ae_mem_of_quot {m : ℕ} {G S : Set (Matrix (Fin m) (Fin m) ℂ)} {μG μS ν : Measure (MtM m)}
     (h : QuotientSetting G S μG μS ν) : ∀ᵐ x ∂ν, Matrix.of x ∈ G := by
-  obtain ⟨hG, hS, hSG, hHG, hHS, -, -, hQ⟩ := h
-  have : SigmaFinite μS := hHS.1
-  have hBm : MeasurableSet {x : MtM m | Matrix.of x ∉ G} := measurableSet_not_mem hG
-  have hSm : MeasurableSet {x : MtM m | Matrix.of x ∈ S} := by
-    have h1 := (measurableSet_not_mem hS).compl
-    simpa only [Set.compl_setOf, not_not] using h1
-  have hf : Measurable ({x : MtM m | Matrix.of x ∉ G}.indicator (1 : MtM m → ℝ≥0∞)) :=
-    measurable_one.indicator hBm
-  have h0 := hQ _ hf
-  rw [lintegral_indicator_one hBm, hHG.2.2.1] at h0
-  have hinner : Measurable fun x : MtM m =>
-      ∫⁻ s, {x : MtM m | Matrix.of x ∉ G}.indicator (1 : MtM m → ℝ≥0∞)
-        (fun i j => (Matrix.of s * Matrix.of x) i j) ∂μS :=
-    Measurable.lintegral_prod_right (hf.comp continuous_mul_swap_pair.measurable)
-  have hae := (lintegral_eq_zero_iff hinner).mp h0.symm
-  have hSpos : μS {s : MtM m | Matrix.of s ∈ S} ≠ 0 := by
-    intro hz
-    apply hHS.2.1
-    rw [← Measure.measure_univ_eq_zero]
-    have hu := measure_union_le (μ := μS) {s : MtM m | Matrix.of s ∈ S} {s : MtM m | Matrix.of s ∈ S}ᶜ
-    rw [Set.union_compl_self] at hu
-    have hc : μS {s : MtM m | Matrix.of s ∈ S}ᶜ = 0 := hHS.2.2.1
-    rw [hz, hc, add_zero] at hu
-    exact le_antisymm hu zero_le
-  filter_upwards [hae] with x hx
-  by_contra hxG
-  apply hSpos
-  refine le_antisymm ?_ zero_le
-  refine le_trans ?_ (le_of_eq hx)
-  rw [← lintegral_indicator_one hSm]
-  refine lintegral_mono fun s => ?_
-  by_cases hs : Matrix.of s ∈ S
-  · have hs' : s ∈ {s : MtM m | Matrix.of s ∈ S} := hs
-    have hmem : (fun i j => (Matrix.of s * Matrix.of x) i j : MtM m) ∈ {x : MtM m | Matrix.of x ∉ G} :=
-      mul_not_mem_of_mem_of_not_mem hG hSG hs hxG
-    have e1 : {s : MtM m | Matrix.of s ∈ S}.indicator (1 : MtM m → ℝ≥0∞) s = 1 :=
-      Set.indicator_of_mem hs' _
-    have e2 : {x : MtM m | Matrix.of x ∉ G}.indicator (1 : MtM m → ℝ≥0∞)
-        (fun i j => (Matrix.of s * Matrix.of x) i j) = 1 := Set.indicator_of_mem hmem _
-    exact (e1.trans e2.symm).le
-  · have e1 : {s : MtM m | Matrix.of s ∈ S}.indicator (1 : MtM m → ℝ≥0∞) s = 0 :=
-      Set.indicator_apply_eq_zero.mpr fun h' => absurd h' hs
-    exact e1.trans_le zero_le
+  apply PI.QuotInvW.ae_mem_G <;> assumption
 
 theorem lintegral_eq_cutoff {m : ℕ} {G S : Set (Matrix (Fin m) (Fin m) ℂ)} {μG μS ν : Measure (MtM m)}
     (h : QuotientSetting G S μG μS ν) (φ : MtM m → ℝ≥0∞) (hφ : Measurable φ)

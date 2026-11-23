@@ -1,8 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataLevel
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ClosureUpperUni
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddPowOfMulSelfEqZero
-import Lemmata.GeneralBFactLeftTail.Imports
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.CongruenceLiftOfBasis
+public import Formalism.LocalRingCardinality.DataLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddPowOfMulSelfEqZero
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ClosureUpperUni
+public import Lemmata.GeneralBFactLeftTail.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,10 +59,6 @@ open NumberField IsDedekindDomain Matrix Formalism.UG Formalism.BasicNotions
 namespace Formalism.L2.G.Triv
 
 section Helpers
-
-theorem conj_pow' {G : Type} [Group G] (a b : G) (n : ℕ) : (a⁻¹ * b * a) ^ n = a⁻¹ * b ^ n * a := by
-  have := conj_pow (a := a⁻¹) (b := b) (i := n)
-  simpa using this
 
 theorem bc_injective {A B : Type} [CommRing A] [CommRing B] {n : Type} [Fintype n] [DecidableEq n] (φ : A →+* B)
     (hφ : Function.Injective φ) : Function.Injective (bc (n := n) φ) := by
@@ -151,28 +195,7 @@ variable {F : Type} [Field F] [NumberField F] {k : ℕ}
 
 theorem natCast_mem_max (v : HeightOneSpectrum (𝓞 F)) (g : ℕ) (hg : (g : 𝓞 F) ∈ v.asIdeal) :
     (g : v.adicCompletionIntegers F) ∈ IsLocalRing.maximalIdeal (v.adicCompletionIntegers F) := by
-  rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
-  intro hu
-  obtain ⟨u, hu⟩ := hu.exists_right_inv
-  have h1 : Valued.v ((g : v.adicCompletion F)) * Valued.v (u : v.adicCompletion F) = 1 := by
-    rw [← map_mul]
-    have := congrArg (fun z : v.adicCompletionIntegers F => (z : v.adicCompletion F)) hu
-    simp only [MulMemClass.coe_mul, OneMemClass.coe_one] at this
-    have e : (((g : v.adicCompletionIntegers F)) : v.adicCompletion F) = (g : v.adicCompletion F) := by simp
-    rw [e] at this
-    rw [this, map_one]
-  have h2 : Valued.v ((g : v.adicCompletion F)) < 1 := by
-    have e : (g : v.adicCompletion F) = ((algebraMap (𝓞 F) F (g : 𝓞 F) : F) : v.adicCompletion F) := by
-      rw [map_natCast]
-      exact (map_natCast (algebraMap F (v.adicCompletion F)) g).symm
-    rw [e, HeightOneSpectrum.valuedAdicCompletion_eq_valuation', HeightOneSpectrum.valuation_lt_one_iff_mem]
-    exact hg
-  have h3 : Valued.v (u : v.adicCompletion F) ≤ 1 :=
-    (HeightOneSpectrum.mem_adicCompletionIntegers _ _ _).1 u.2
-  have h4 : Valued.v ((g : v.adicCompletion F)) * Valued.v (u : v.adicCompletion F) < 1 :=
-    lt_of_le_of_lt (mul_le_of_le_one_right' h3) h2
-  rw [h1] at h4
-  exact lt_irrefl _ h4
+  apply PI.LocMassTypL.natCast_mem_max <;> assumption
 
 theorem iwU_coprime (v : HeightOneSpectrum (𝓞 F)) (g : ℕ) (hg : g.Prime) (hgv : (g : 𝓞 F) ∈ v.asIdeal)
     (δ : GL (Fin k) (v.adicCompletion F)) (hδ : δ ∈ iwU F k v) (N : ℕ) (hc : Nat.Coprime N g) (hN : δ ^ N = 1) : δ = 1 := by

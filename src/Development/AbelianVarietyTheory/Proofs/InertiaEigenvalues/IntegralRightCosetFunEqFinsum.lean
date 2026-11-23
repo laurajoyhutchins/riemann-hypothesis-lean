@@ -1,7 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+
+@[expose] public section
+
 open GlobalTheory.UnitLemma Matrix MeasureTheory
 
 namespace GlobalTheory
@@ -16,7 +65,7 @@ theorem integral_rightCoset_fun_eq_finsum (G Λ : Type) [Group G] [TopologicalSp
   have hfib : ∀ g, π ⁻¹' {π g} = (fun x => x * g⁻¹) ⁻¹' H := by
     intro g; ext x; simp [hπ g x]
   have hfibO : ∀ g, IsOpen (π ⁻¹' {π g}) := by
-    intro g; rw [hfib g]; exact hH.preimage (continuous_mul_right _)
+    intro g; rw [hfib g]; exact hH.preimage (continuous_mul_const _)
   have hfibM : ∀ l, MeasurableSet (π ⁻¹' {l}) := by
     intro l
     by_cases hl : l ∈ Set.range π
@@ -43,7 +92,7 @@ theorem integral_rightCoset_fun_eq_finsum (G Λ : Type) [Group G] [TopologicalSp
       · have : π g ∉ S := by rw [hT, Set.Finite.mem_toFinset] at *; exact h
         by_contra hne
         exact this ⟨⟨g, rfl⟩, Ne.symm hne |>.symm⟩
-    rw [hfun, integral_finset_sum]
+    rw [hfun, MeasureTheory.integral_finsetSum]
     · rw [← finsum_mem_inter_support, finsum_mem_eq_finite_toFinset_sum _ hS]
       refine Finset.sum_congr rfl ?_
       intro l hl
@@ -75,7 +124,7 @@ theorem integral_rightCoset_fun_eq_finsum (G Λ : Type) [Group G] [TopologicalSp
             obtain ⟨⟨g, rfl⟩, _⟩ := hF hl
             simp [hfib1 g]
         _ = ∫⁻ g, ∑ l ∈ F, (π ⁻¹' {l}).indicator 1 g ∂μ := by
-            rw [lintegral_finset_sum]
+            rw [MeasureTheory.lintegral_finsetSum]
             · refine Finset.sum_congr rfl ?_
               intro l _
               rw [lintegral_indicator_one (hfibM l)]

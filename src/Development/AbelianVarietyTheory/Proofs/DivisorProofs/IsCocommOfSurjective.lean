@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigExtMapRelFrobCompRigOfOmega
-import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsHopfIdealKerIdealOfBialgHomStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsHopfIdealKerIdealOfBialgHomStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -11,9 +53,9 @@ open CategoryTheory TensorProduct Coalgebra Bialgebra GlobalTheory GlobalTheory.
 
 namespace GlobalTheory.PDivGroup.KerGrp
 
+
 set_option autoImplicit false in
 open CategoryTheory TensorProduct Coalgebra Bialgebra in
-
 theorem _root_.GlobalTheory.PDivGroup.KerGrp.isCocomm_of_surjective {k A B : Type} [CommRing k] [CommRing A] [CommRing B]
     [Bialgebra k A] [Bialgebra k B] [IsCocomm k A] (f : A →ₐc[k] B)
     (hf : Function.Surjective f) : IsCocomm k B := by
@@ -27,15 +69,15 @@ theorem _root_.GlobalTheory.PDivGroup.KerGrp.isCocomm_of_surjective {k A B : Typ
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hA : TensorProduct.comm k A A (comul a) = comul a :=
     LinearMap.congr_fun (Coalgebra.comm_comp_comul (R := k) (A := A)) a
   simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply]
   rw [← CoalgHomClass.map_comp_comul_apply, hcomm, hA]
 
+
 set_option autoImplicit false in
 open CategoryTheory TensorProduct Coalgebra Bialgebra in
-
 theorem _root_.GlobalTheory.PDivGroup.KerGrp.map_res_kerIdeal {p : ℕ} {k : Type} [CommRing k] {G H : _root_.GlobalTheory.PDivGroup p k} (u : G ⟶ H)
     (n : ℕ) : Ideal.map (G.res n : G.A (n + 1) →ₐ[k] G.A n) (_root_.GlobalTheory.PDiv.kerIdeal (u.app (n + 1))) =
       _root_.GlobalTheory.PDiv.kerIdeal (u.app n) := by
@@ -116,9 +158,9 @@ theorem exists_of_family {p : ℕ} {k : Type} [Field k] (G : PDivGroup p k)
           rw [hr, ha', map_zero] }
   exact ⟨K, ⟨π, fun n => BialgHom.ext fun a => hr n a⟩, fun n => ⟨hπ n, hk n⟩⟩
 
+
 set_option autoImplicit false in
 open CategoryTheory TensorProduct Coalgebra Bialgebra in
-
 theorem _root_.GlobalTheory.PDivGroup.KerGrp.exists_kernel (p : ℕ) [Fact p.Prime] (k : Type) [Field k] (G : _root_.GlobalTheory.PDivGroup p k)
     (u : G ⟶ G) (h₀ : ℕ)
     (h : ∀ n : ℕ, Module.finrank k (G.A n ⧸ _root_.GlobalTheory.PDiv.kerIdeal (u.app n)) = p ^ (n * h₀)) :
@@ -129,7 +171,7 @@ theorem _root_.GlobalTheory.PDivGroup.KerGrp.exists_kernel (p : ℕ) [Fact p.Pri
       ∀ n, I n = _root_.GlobalTheory.PDiv.kerIdeal (u.app n) := ⟨_, fun n => rfl⟩
   haveI hH : ∀ n, (I n).IsHopfIdeal k := fun n => by
     rw [hIdef]
-    exact _root_.GlobalTheory.PDiv.isHopfIdeal_kerIdeal_of_bialgHom k _ _ (u.app n)
+    exact _root_.GlobalTheory.T.isHopfIdeal_kerIdeal_of_bialgHom' k _ _ (u.app n)
   have hq : ∀ n, Function.Surjective (Bialgebra.Quotient.mkBialgHom (R := k) (I n)) := by
     intro n x
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
@@ -176,7 +218,7 @@ theorem _root_.GlobalTheory.PDivGroup.KerGrp.exists_kernel (p : ℕ) [Fact p.Pri
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp [hφ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   let r : ∀ n, (G.A (n + 1) ⧸ I (n + 1)) →ₐc[k] (G.A n ⧸ I n) :=
     fun n => BialgHom.ofAlgHom (φ n) (hcounit n) (hcomul n)
   have hr : ∀ n a, r n (Ideal.Quotient.mk (I (n + 1)) a) =
@@ -187,7 +229,7 @@ theorem _root_.GlobalTheory.PDivGroup.KerGrp.exists_kernel (p : ℕ) [Fact p.Pri
     obtain ⟨b, rfl⟩ := G.10 n a
     exact ⟨Ideal.Quotient.mk _ b, hr n b⟩
   have hker : ∀ n, RingHom.ker (r n) =
-      _root_.GlobalTheory.PDiv.torsionIdeal k (G.A (n + 1) ⧸ I (n + 1)) (p ^ n) := by
+      _root_.GlobalTheory.PDiv.torsionIdeal (R := k) (A := G.A (n + 1) ⧸ I (n + 1)) (p ^ n) := by
     intro n
     ext x
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x

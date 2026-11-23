@@ -1,6 +1,56 @@
-import Development.WeilBound.ThetaLifts.SmallCones.KFinAn
-import Development.WeilBound.ThetaLifts.SmallCones.ExpAlg
-import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.KFinAn
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAddCharSymplecticLocalLatticeEqOne
+public import Development.WeilBound.ThetaLifts.SmallCones.ExpAlg
+public import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,22 +75,23 @@ theorem exists_at_inf (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOve
     | tmul a x =>
       have : s * sgI w a = 0 := Prod.ext (show s.1 * _ = 0 by rw [h1, zero_mul]) (show s.2 * 0 = 0 from mul_zero _)
       rw [TensorProduct.map_tmul, TensorProduct.smul_tmul', smul_eq_mul, this, TensorProduct.zero_tmul]
-    | add x y hx hy => rw [map_add, smul_add, hx, hy, add_zero]
+    | add x y hx hy => rw [map_add (f := _), smul_add, hx, hy, add_zero]
+
   · rw [piInf, RingHom.comp_apply, map_sum, Finset.sum_eq_single w (fun u _ hu => compInf_sgI_ne hu.symm _)
-      (fun h => absurd (Finset.mem_univ w) h), compInf_sgI_self, hb]
+    (fun h => absurd (Finset.mem_univ w) h), compInf_sgI_self, hb]
 
 theorem exists_mat_inf (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E w) (z : InfinitePlace F → Matrix (Fin n) (Fin d) ℂ) :
     ∃ u : Matrix (Fin n) (Fin d) (AE F E), At (evI F) u ∧ ∀ w, u.map (piInf (τ w)) = z w := by
   choose a ha using fun i j => exists_at_inf h τ (fun w => z w i j)
   exact ⟨Matrix.of a, fun x hx => Matrix.ext fun i j => (ha i j).1 x hx, fun w => Matrix.ext fun i j => (ha i j).2 w⟩
 
-variable (F) in
 
+variable (F) in
 def lamF (κ : Type) [Fintype κ] : (κ → mixedEmbedding.mixedSpace F) →ₗ[ℝ] (κ → mixedEmbedding.mixedSpace F) →L[ℝ] ℝ where
   toFun := linForm
   map_add' a b := by
     ext y
-    simp only [linForm_apply, ContinuousLinearMap.add_apply, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+    simp only [linForm_apply, ContinuousLinearMap.add_apply, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
   map_smul' c a := by
     ext y
     simp [linForm_apply, ← Finset.smul_sum]
@@ -51,8 +102,9 @@ theorem lamF_inj (κ : Type) [Fintype κ] : Function.Injective (lamF F κ) := by
   have h1 : linForm l (Pi.single i (mixedEmbedding F ((integralBasis F).traceDual j))) = 0 := DFunLike.congr_fun h _
   rw [linForm_apply, Finset.sum_eq_single i (fun b _ hb => by simp [hb]) (by simp), Pi.single_eq_same, mul_comm,
     ← (mixedEmbedding.latticeBasis F).sum_repr (l i)] at h1
+
   simp only [Finset.sum_mul, smul_mul_assoc, map_sum, map_smul, mixedEmbedding.latticeBasis_apply, ← map_mul, GlobalTheory.LatVacArith.trace_mixedEmbedding,
-    Module.Basis.trace_mul_traceDual] at h1
+  Module.Basis.trace_mul_traceDual] at h1
   simpa [apply_ite] using h1
 
 variable (M : Model σ X W) {ψ : AddChar (AF F) ℂ}
@@ -143,7 +195,7 @@ theorem exists_slice (hs : IsSplitting (adeleClass F) ψ M.co (actAB (cA σ)) om
   refine ⟨{ toFun := A, map_add' := fun a b => ?_, map_smul' := fun c a => ?_ }, hA⟩
   · ext ξ
     have : pureA F (a + b : SInf F _) g = pureA F a g + pureA F b g := funext fun _ => by simp [pureA, add_mul]
-    rw [SchwartzMap.add_apply, ← hA, ← hA, ← hA, this, map_add, Pi.add_apply]
+    rw [SchwartzMap.add_apply, ← hA, ← hA, ← hA, this, map_add (f := _), Pi.add_apply]
   · ext ξ
     have : pureA F (c • a : SInf F _) g = c • pureA F a g := funext fun _ => by simp [pureA, mul_assoc]
     rw [RingHom.id_apply, SchwartzMap.smul_apply, ← hA, ← hA, this, map_smul, Pi.smul_apply]
@@ -194,7 +246,7 @@ theorem inter' (hψ : IsStd ψ) (hs : IsSplitting (adeleClass F) ψ M.co (actAB 
       have huv : At (evI F) (u + v) := fun s hs => by rw [smul_add, hu s hs, hv s hs, add_zero]
       have h1 := inter_ne hψ hs hg hA huv (by rw [aOf_add, ha, zero_add]; exact hξ) f
       have h2 := inter_ne hψ hs hg hA hv hξ f
-      rw [aOf_add, lOf_add, dop_add, map_add, show actAB (cA σ) x (u + v) = actAB (cA σ) x u + actAB (cA σ) x v by
+      rw [aOf_add, lOf_add, dop_add, map_add (f := _), show actAB (cA σ) x (u + v) = actAB (cA σ) x u + actAB (cA σ) x v by
         rw [actAB, actAB, actAB, Matrix.mul_add, Matrix.add_mul], aOf_add, lOf_add, dop_add, h2] at h1
       exact add_right_cancel h1
   · exact inter_ne hψ hs hg hA hu ha f

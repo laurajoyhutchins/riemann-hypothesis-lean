@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.HermitianLattices.StatementMass
-import Formalism.FlagUnipotentLattices.CardSubmodulesAndLinearEquivBounds
+module
+
+public import Formalism.HermitianLattices.StatementLat
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Basic.Real.ENatENNReal
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Mathlib.Topology.Algebra.InfiniteSum.Defs
+public import Mathlib.Topology.Order.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,67 +83,11 @@ instance latAct (h : V →ₗ⋆[K] V →ₗ[K] K) : MulAction (Formalism.Hermit
       x ∈ Formalism.HermitianLatticesTheory.gmap (a : V ≃ₗ[K] V) (Formalism.HermitianLatticesTheory.gmap (b : V ≃ₗ[K] V) L)
     simp [Formalism.HermitianLatticesTheory.gmap]
 
-def gaG (h : V →ₗ⋆[K] V →ₗ[K] K) (A B : Submodule R V) : Subgroup (Formalism.HermitianLatticesTheory.isom h) where
-  carrier := {γ | (∀ x, (γ : V ≃ₗ[K] V) x ∈ A ↔ x ∈ A) ∧ (∀ x, (γ : V ≃ₗ[K] V) x ∈ B ↔ x ∈ B) ∧
-    ∀ x ∈ A, (γ : V ≃ₗ[K] V) x - x ∈ B}
-  one_mem' := ⟨fun _ => Iff.rfl, fun _ => Iff.rfl, fun x _ => by simp⟩
-  mul_mem' := by
-    rintro a b ⟨a1, a2, a3⟩ ⟨b1, b2, b3⟩
-    refine ⟨fun x => (a1 _).trans (b1 x), fun x => (a2 _).trans (b2 x), fun x hx => ?_⟩
-    have e : ((a * b : Formalism.HermitianLatticesTheory.isom h) : V ≃ₗ[K] V) x - x =
-        ((a : V ≃ₗ[K] V) ((b : V ≃ₗ[K] V) x) - (b : V ≃ₗ[K] V) x) + ((b : V ≃ₗ[K] V) x - x) := by
-      simp
-    rw [e]
-    exact B.add_mem (a3 _ ((b1 x).2 hx)) (b3 x hx)
-  inv_mem' := by
-    rintro a ⟨a1, a2, a3⟩
-    have e : ∀ x, (a : V ≃ₗ[K] V) (((a⁻¹ : Formalism.HermitianLatticesTheory.isom h) : V ≃ₗ[K] V) x) = x := fun x => by
-      simp
-    refine ⟨fun x => ?_, fun x => ?_, fun x hx => ?_⟩
-    · rw [← a1, e]
-    · rw [← a2, e]
-    · have hy : ((a⁻¹ : Formalism.HermitianLatticesTheory.isom h) : V ≃ₗ[K] V) x ∈ A := by rw [← a1, e]; exact hx
-      have := a3 _ hy
-      rw [e] at this
-      simpa using B.neg_mem this
-
-def lieL (h : V →ₗ⋆[K] V →ₗ[K] K) (A B : Submodule R V) : AddSubgroup (V →ₗ[K] V) where
-  carrier := {X | (∀ x y, h (X x) y + h x (X y) = 0) ∧ ∀ x ∈ A, X x ∈ B}
-  zero_mem' := ⟨fun x y => by simp, fun x _ => by simp⟩
-  add_mem' := by
-    rintro X Y ⟨h1, h2⟩ ⟨k1, k2⟩
-    refine ⟨fun x y => ?_, fun x hx => B.add_mem (h2 x hx) (k2 x hx)⟩
-    have a := h1 x y
-    have b := k1 x y
-    simp only [LinearMap.add_apply, map_add]
-    linear_combination a + b
-  neg_mem' := by
-    rintro X ⟨h1, h2⟩
-    refine ⟨fun x y => ?_, fun x hx => B.neg_mem (h2 x hx)⟩
-    have a := h1 x y
-    simp only [LinearMap.neg_apply, map_neg]
-    linear_combination -a
-
 def primeTo (d : R) : Submonoid R where
   carrier := {s | ∀ P : Ideal R, P.IsMaximal → d ∈ P → s ∉ P}
   one_mem' := fun P hP _ h1 => hP.ne_top ((Ideal.eq_top_iff_one P).2 h1)
   mul_mem' := fun ha hb P hP hd hab =>
     (hP.isPrime.mem_or_mem hab).elim (ha P hP hd) (hb P hP hd)
-
-def locD {W : Type*} [AddCommGroup W] [Module R W] (d : R) (L : Submodule R W) : Submodule R W :=
-  Formalism.HermitianLatticesTheory.locS (primeTo d) L
-
-def scl {W : Type*} [AddCommGroup W] [Module R W] (c : R) (L : Submodule R W) : Submodule R W :=
-  L.map (LinearMap.lsmul R W c)
-
-def gaD (h : V →ₗ⋆[K] V →ₗ[K] K) (d c : R) (M : Submodule R V) : Subgroup (Formalism.HermitianLatticesTheory.isom h) :=
-  gaG h (locD d (Formalism.HermitianLatticesTheory.dual h M)) (scl c (locD d M))
-
-def stabD (h : V →ₗ⋆[K] V →ₗ[K] K) (d : R) (M : Submodule R V) : Subgroup (Formalism.HermitianLatticesTheory.isom h) :=
-  MulAction.stabilizer (Formalism.HermitianLatticesTheory.isom h) (locD d M)
-
-def agreeD (h : V →ₗ⋆[K] V →ₗ[K] K) (d : R) (M : Submodule R V) : Set (Submodule R V) :=
-  {N | N ∈ Formalism.HermitianLatticesTheory.genus h M ∧ locD d N = locD d M}
 
 def idxN {W : Type*} [AddCommGroup W] [Module R W] (A B : Submodule R W) : ℕ :=
   B.toAddSubgroup.relIndex A.toAddSubgroup
@@ -104,7 +95,7 @@ def idxN {W : Type*} [AddCommGroup W] [Module R W] (A B : Submodule R W) : ℕ :
 def discN (h : V →ₗ⋆[K] V →ₗ[K] K) (M : Submodule R V) : ℕ := idxN (Formalism.HermitianLatticesTheory.dual h M) M
 
 def IsIntLat (h : V →ₗ⋆[K] V →ₗ[K] K) (M : Submodule R V) : Prop :=
-  Submodule.IsLattice K M ∧ Formalism.HermitianLatticesTheory.IsIntegralLat h M
+  Submodule.IsFullLattice K M ∧ Formalism.HermitianLatticesTheory.IsIntegralLat h M
 
 def IsMaxLat (h : V →ₗ⋆[K] V →ₗ[K] K) (M : Submodule R V) : Prop :=
   IsIntLat h M ∧ ∀ N : Submodule R V, IsIntLat h N → M ≤ N → N = M
@@ -135,12 +126,5 @@ def qIn {K : Type*} [Field K] [NumberField K] (P : Ideal (𝓞 K)) : ℕ := Nat.
 def lamMax {K V : Type*} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [Module K V]
     [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] (h : V →ₗ⋆[K] V →ₗ[K] K) (M : Submodule (𝓞 K) V) : ℝ :=
   ∏ᶠ P ∈ badP h M, ((qIn P : ℝ) ^ Module.finrank K V - (-1) ^ Module.finrank K V) / ((qIn P : ℝ) + 1)
-
-def ChartGen (A : Type) [CommRing A] [StarRing A] : Prop :=
-  ∀ (j : ℕ) (S : Matrix (Fin j) (Fin j) A), Sᴴ = S → ∀ Q : Matrix (Fin j) (Fin j) A → Prop,
-    (∀ (Y : Matrix (Fin j) (Fin j) A) (θ : A), θ + star θ = 1 → Formalism.HermitianLatticeCounting.LatticeSumBounds.Phi S Y = 0 →
-      IsUnit (1 + θ • (S * Y)).det → Q Y) →
-    (∀ Y Y', Q Y → Q Y' → Q (Y + Y' + Y * S * Y')) →
-    ∀ Y, Formalism.HermitianLatticeCounting.LatticeSumBounds.Phi S Y = 0 → Q Y
 
 end GlobalTheory.Mass

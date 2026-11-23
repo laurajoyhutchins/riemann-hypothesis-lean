@@ -1,10 +1,62 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersEqSumZetaPowStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPrimitiveRootPrimePowSubOnePadicComplex
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersEqSumZetaPowStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TateDecompositionCompletedCyclotomicIntegersStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TateDecompositionCompletedCyclotomicIntegersStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.Cyc
 
 noncomputable section
@@ -138,8 +190,9 @@ theorem int_decomp (K : FinExt l) {j : ℕ} (hj : 1 ≤ j) (c : ℕ) : ∀ x : O
       apply Nat.Coprime.pow_right
       have ha0 : (a : ℕ) ≠ 0 := fun h => (Finset.ne_of_mem_erase ha) (Fin.ext h)
       exact (Nat.coprime_of_lt_prime ha0 a.2 hp).symm
-    · rw [← Finset.add_sum_erase _ _ (Finset.mem_univ (0 : Fin l)), map_add, map_sum, ← add_assoc,
-        ← hod]
+
+    · rw [← Finset.add_sum_erase _ _ (Finset.mem_univ (0 : Fin l)), map_add (f := _), map_sum, ← add_assoc,
+      ← hod]
       simp
 
 variable {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)} {χ : GQ l →* ℚ_[l]ˣ}
@@ -223,7 +276,7 @@ theorem solve_alg (hact : IsActC act) (hχ : IsCyc χ) (K : FinExt l) {j : ℕ} 
       zero_mem' := ⟨0, zero_mem _, zero_mem _, by simp⟩
       add_mem' := by
         rintro a b ⟨y, hy, hy', h⟩ ⟨y', hz, hz', h'⟩
-        exact ⟨y + y', add_mem hy hz, add_mem hy' hz', by rw [map_add]; linear_combination h + h'⟩
+        exact ⟨y + y', add_mem hy hz, add_mem hy' hz', by rw [map_add (f := _)]; linear_combination h + h'⟩
       neg_mem' := by
         rintro a ⟨y, hy, hy', h⟩
         exact ⟨-y, neg_mem hy, neg_mem hy', by rw [map_neg]; linear_combination -h⟩ }
@@ -252,6 +305,7 @@ theorem solve_alg (hact : IsActC act) (hχ : IsCyc χ) (K : FinExt l) {j : ℕ} 
     sum_mem fun k _ => act_algC hact K (hgk k) (Xalg_alg K j hu), ?_⟩
   have hs : act g (∑ k ∈ Finset.range (l ^ b), act (g ^ k) u) -
       ∑ k ∈ Finset.range (l ^ b), act (g ^ k) u = act (g ^ l ^ b) u - act (g ^ 0) u := by
+
     rw [← Finset.sum_range_sub (fun k => act (g ^ k) u), map_sum, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [pow_succ', map_mul]
@@ -269,7 +323,7 @@ theorem norm_l : ‖(l : PadicComplex l)‖ = (l : ℝ)⁻¹ := by
 
 theorem norm_le_one (hact : IsActC act) (hχ : IsCyc χ) (K : FinExt l) {j : ℕ} (hj : 1 ≤ j)
     {x : PadicComplex l} (hx : x ∈ Xj K j) : ‖x‖ ≤ 1 :=
-  closure_minimal (t := {y : PadicComplex l | ‖y‖ ≤ 1}) (fun _ hy => hy.2)
+  closure_minimal (s := intC (Kinf K)) (t := {y : PadicComplex l | ‖y‖ ≤ 1}) (fun _ hy => hy.2)
     (isClosed_le continuous_norm continuous_const)
     ((GlobalTheory.T.tate_decomposition_completed_cyclotomic_integers l act χ hact hχ K j hj).2.2.1 x hx)
 
@@ -435,7 +489,7 @@ theorem exists_tate_operator_bound : ∀ (l : ℕ) [Fact l.Prime] (act : GQ l �
     rw [map_mul, act_fix hact K hg.1 hz.1]
     ring
   · refine huniq _ (add_mem hx hx') _ (add_mem (hS x hx).1 (hS x' hx').1) ?_
-    rw [map_add]
+    rw [map_add (f := _)]
     linear_combination (hS x hx).2 + (hS x' hx').2
   · refine huniq _ (T1.2.2.2.1 y hy x hx) _ (T1.2.2.2.1 y hy _ (hS x hx).1) ?_
     rw [map_mul, act_fix hact K hg.1 hy.1]

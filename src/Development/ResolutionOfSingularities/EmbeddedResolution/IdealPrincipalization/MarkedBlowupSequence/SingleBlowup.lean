@@ -1,12 +1,49 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -21,7 +58,7 @@ noncomputable def residualByPow {Y : Scheme.{u}} (A F : Y.IdealSheafData) (m : �
 
 theorem pow_mul_residualByPow {Y : Scheme.{u}} (A F : Y.IdealSheafData) (m : ℕ)
     (h : ∃ B : Y.IdealSheafData, F ^ m * B = A) : F ^ m * residualByPow A F m = A := by
-  have hx : residualByPow A F m = h.choose := dif_pos h
+  have hx : residualByPow A F m = h.choose := dite_eq_left h
   rw [hx]
   exact h.choose_spec
 
@@ -36,30 +73,30 @@ theorem exceptionalIdeal_id {X : Scheme.{u}} (Z : X.IdealSheafData) :
     Blowup.exceptionalIdeal (𝟙 X) Z = Z := by
   rw [Blowup.exceptionalIdeal_eq_comap, Scheme.IdealSheafData.comap_id]
 
-private def singleBlowupScheme {X : Scheme.{u}} (Z : X.IdealSheafData) : ℕ → Scheme.{u}
+def singleBlowupScheme {X : Scheme.{u}} (Z : X.IdealSheafData) : ℕ → Scheme.{u}
   | 0 => X
   | (_ + 1) => Blowup.blowup Z
 
-private def singleBlowupMap {X : Scheme.{u}} (Z : X.IdealSheafData) :
+def singleBlowupMap {X : Scheme.{u}} (Z : X.IdealSheafData) :
     ∀ i : ℕ, singleBlowupScheme Z (i + 1) ⟶ singleBlowupScheme Z i
   | 0 => Blowup.blowup.proj Z
   | (_ + 1) => 𝟙 (Blowup.blowup Z)
 
-private def singleBlowupCenter {X : Scheme.{u}} (Z : X.IdealSheafData) :
+def singleBlowupCenter {X : Scheme.{u}} (Z : X.IdealSheafData) :
     ∀ i : ℕ, (singleBlowupScheme Z i).IdealSheafData
   | 0 => Z
   | (_ + 1) => ⊤
 
-private def singleBlowupProj {X : Scheme.{u}} (Z : X.IdealSheafData) : ∀ i : ℕ, singleBlowupScheme Z i ⟶ X
+def singleBlowupProj {X : Scheme.{u}} (Z : X.IdealSheafData) : ∀ i : ℕ, singleBlowupScheme Z i ⟶ X
   | 0 => 𝟙 X
   | (_ + 1) => Blowup.blowup.proj Z
 
-private def singleBlowupResidualIdeal {X : Scheme.{u}} (I Z : X.IdealSheafData) (m : ℕ) :
+def singleBlowupResidualIdeal {X : Scheme.{u}} (I Z : X.IdealSheafData) (m : ℕ) :
     ∀ i : ℕ, (singleBlowupScheme Z i).IdealSheafData
   | 0 => I.comap (𝟙 X)
   | (_ + 1) => residualByPow (I.comap (Blowup.blowup.proj Z)) (Z.comap (Blowup.blowup.proj Z)) m
 
-private def singleBlowupBoundary {X : Scheme.{u}} (Z : X.IdealSheafData) (E : List X.IdealSheafData) :
+def singleBlowupBoundary {X : Scheme.{u}} (Z : X.IdealSheafData) (E : List X.IdealSheafData) :
     ∀ i : ℕ, List (singleBlowupScheme Z i).IdealSheafData
   | 0 => E.map (fun D => D.comap (𝟙 X))
   | (_ + 1) =>
@@ -71,13 +108,13 @@ private theorem isBlowupAlongIdealSheaf_singleBlowupMap {X : Scheme.{u}} (Z : X.
   show Blowup.IsBlowupAlongIdealSheaf (Blowup.blowup.proj Z) Z
   exact Blowup.blowup.isBlowupAlongIdealSheaf_proj Z
 
-private def singleBlowupSequenceData {X : Scheme.{u}} (Z : X.IdealSheafData) : BlowupSequenceData X where
+def singleBlowupSequenceData {X : Scheme.{u}} (Z : X.IdealSheafData) : BlowupSequenceData X where
   length := 1
   obj := singleBlowupScheme Z
   map := singleBlowupMap Z
   isoZero := Iso.refl X
   center := singleBlowupCenter Z
-  isBlowup := fun i hi => isBlowupAlongIdealSheaf_singleBlowupMap Z i hi
+  isBlowup := by exact isBlowupAlongIdealSheaf_singleBlowupMap Z
 
 private theorem singleBlowupProj_succ {X : Scheme.{u}} (Z : X.IdealSheafData) (i : ℕ) :
     singleBlowupProj Z (i + 1) = singleBlowupMap Z i ≫ singleBlowupProj Z i := by
@@ -162,16 +199,16 @@ def ofSingleBlowup {k : Type u} [Field k] {X : Scheme.{u}}
   toBlowupSequenceData := singleBlowupSequenceData Z
   proj := singleBlowupProj Z
   proj_zero := rfl
-  proj_succ := fun i => singleBlowupProj_succ Z i
+  proj_succ := by exact singleBlowupProj_succ Z
   ideal := singleBlowupResidualIdeal I Z m
   boundary := singleBlowupBoundary Z E
   ideal_zero := rfl
   boundary_zero := rfl
-  center_order := singleBlowupCenter_support_subset_orderAtLeastLocus I Z m hord
-  center_smooth := smooth_singleBlowupCenter_of_smooth Z hsm
-  center_snc := hasStrictNormalCrossingsWith_singleBlowupCenter Z E hsnc
-  ideal_succ := exceptionalIdeal_pow_mul_singleBlowupResidualIdeal_succ I Z m hdiv
-  boundary_succ := singleBlowupBoundary_succ Z E
+  center_order := by exact singleBlowupCenter_support_subset_orderAtLeastLocus I Z m hord
+  center_smooth := by exact smooth_singleBlowupCenter_of_smooth Z hsm
+  center_snc := by exact hasStrictNormalCrossingsWith_singleBlowupCenter Z E hsnc
+  ideal_succ := by exact exceptionalIdeal_pow_mul_singleBlowupResidualIdeal_succ I Z m hdiv
+  boundary_succ := by exact singleBlowupBoundary_succ Z E
 
 variable {k : Type u} [Field k] {X : Scheme.{u}} {p : X ⟶ Spec (CommRingCat.of k)}
   {I : X.IdealSheafData} {m : ℕ} {E : List X.IdealSheafData} {Z : X.IdealSheafData}
@@ -190,9 +227,6 @@ theorem ofSingleBlowup_schemeAt_succ (i : ℕ) :
 
 theorem ofSingleBlowup_schemeAt_zero :
     (ofSingleBlowup p I m E Z hsm hsnc hord hdiv).toBlowupSequenceData.obj 0 = X := rfl
-
-theorem ofSingleBlowup_blowupMorphism_zero :
-    (ofSingleBlowup p I m E Z hsm hsnc hord hdiv).toBlowupSequenceData.map 0 = Blowup.blowup.proj Z := rfl
 
 theorem ofSingleBlowup_projectionToBase_one :
     (ofSingleBlowup p I m E Z hsm hsnc hord hdiv).proj 1 = Blowup.blowup.proj Z := rfl

@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,20 +80,16 @@ theorem lemGB_q : ∃ w : LetA O n, W.q = letπ ^ (PD.p - 1) + ((PD.p : ℕ) : L
   funext j
   first
     | (simp only [LocWach.q, letπ, Pi.add_apply, Pi.mul_apply, Pi.pow_apply, Pi.natCast_apply]; exact hw)
-    | exact hw
 
 theorem lemGB_q_unit : IsUnit (algebraMap (LetA O n) W.EE W.q) := by
   obtain ⟨w, hw⟩ := lemGB_q W
   obtain ⟨u, hu⟩ : IsUnit (algebraMap (LetA O n) W.EE (letπ ^ (PD.p - 1))) := by
     rw [map_pow]; exact W.EE_π.pow _
-  haveI := W.EE_complete
-  have hJ : ((PD.p : ℕ) : W.EE) ∈ (⊥ : Ideal W.EE).jacobson := by
-    first
-      | exact IsAdicComplete.le_jacobson_bot _ (Ideal.mem_span_singleton_self _)
-      | exact (IsAdicComplete.le_jacobson_bot (I := Ideal.span {((PD.p : ℕ) : W.EE)}))
-          (Ideal.mem_span_singleton_self _)
-  have h1 := Ideal.mem_jacobson_bot.mp hJ ((↑u⁻¹ : W.EE) * algebraMap (LetA O n) W.EE w)
-  rw [hw, map_add, map_mul, map_natCast, ← hu]
+  have := W.EE_complete
+  have hJ : ((PD.p : ℕ) : W.EE) ∈ Ring.jacobson W.EE :=
+    IsAdicComplete.le_jacobson (Ideal.span {((PD.p : ℕ) : W.EE)}) (Ideal.mem_span_singleton_self _)
+  have h1 := Ring.mem_jacobson_iff.mp hJ ((↑u⁻¹ : W.EE) * algebraMap (LetA O n) W.EE w)
+  rw [hw, map_add (f := _), map_mul, map_natCast, ← hu]
   have he : (u : W.EE) + ((PD.p : ℕ) : W.EE) * algebraMap (LetA O n) W.EE w =
       u * (((PD.p : ℕ) : W.EE) * ((↑u⁻¹ : W.EE) * algebraMap (LetA O n) W.EE w) + 1) := by
     linear_combination (-(((PD.p : ℕ) : W.EE) * algebraMap (LetA O n) W.EE w)) * u.mul_inv
@@ -93,7 +132,7 @@ theorem lemG_units (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : 
     exact le_trans (le_min (by rw [hvp]; exact h01.le) (le_of_eq hv1.symm)) (AddValuation.map_add v _ _)
   have hle : v ((PD.p : LL) - 1) ≤ 0 := by
     by_contra hlt
-    push_neg at hlt
+    push Not at hlt
     have hm := AddValuation.map_add v ((PD.p : LL) - 1) (-(PD.p : LL))
     rw [show ((PD.p : LL) - 1) + (-(PD.p : LL)) = -1 by ring, hv1, AddValuation.map_neg, hvp] at hm
     exact absurd hm (not_le.mpr (lt_min hlt h01))
@@ -114,9 +153,6 @@ theorem lemG_units (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : 
     rw [map_mul, map_one, hy, hxmap, mul_inv_cancel₀ hxne]
   first
     | exact IsUnit.of_mul_eq_one _ hcy
-    | exact IsUnit.of_mul_eq_one _ _ hcy
-    | exact isUnit_of_mul_eq_one _ _ hcy
-    | exact ⟨⟨_, y, hcy, by rw [mul_comm]; exact hcy⟩, rfl⟩
 
 def InImg {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i : ZMod n) (z : W.DD T₂) : Prop :=
   ∃ x₁, Formalism.MainNotions.LiftingTheory.InNΔi W T₁ i x₁ ∧ W.map F x₁ = z
@@ -165,8 +201,6 @@ theorem inImg_smulA {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i
   refine (lemGB_inImg_iff W).mpr ⟨a • x, inNΔi_smulA W T₁ i ha hx, ?_⟩
   first
     | exact LinearMap.map_smul_of_tower _ _ _
-    | exact map_smul _ _ _
-    | rw [← algebraMap_smul W.EE a x, map_smul, algebraMap_smul]
 
 theorem inImg_smulO {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i : ZMod n) (c : O)
     {z : W.DD T₂} (hz : InImg W F i z) : InImg W F i (c • z) := by
@@ -174,7 +208,6 @@ theorem inImg_smulO {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i
   refine (lemGB_inImg_iff W).mpr ⟨c • x, inNΔi_smulO W T₁ i c hx, ?_⟩
   first
     | exact LinearMap.map_smul_of_tower _ _ _
-    | exact map_smul _ _ _
     | rw [← algebraMap_smul (LetA O n) c x, ← algebraMap_smul W.EE (algebraMap O (LetA O n) c) x, map_smul,
         algebraMap_smul, algebraMap_smul]
 
@@ -199,7 +232,8 @@ theorem qA_mem_AΔ (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : 
   have h1 : ∀ δ' ∈ W.DelF, W.γ₀ δ' W.π₀₁ = W.π₀₁ := by
     intro δ' hδ'
     simp only [LocWach.π₀₁]
-    rw [map_add, map_sub, map_one, map_natCast, map_sum]
+
+    rw [map_add (f := _), map_sub, map_one, map_natCast, map_sum]
     congr 1
     refine Finset.sum_equiv (Equiv.mulLeft δ') (fun δ => ⟨fun h => mul_mem_delF W hδ' h, fun h => ?_⟩)
       (fun δ _ => ?_)
@@ -238,9 +272,6 @@ theorem lemGB_Nl_γ (T : LocLat G Qp LL O) (i : ZMod n) (δ : W.Gam) {x : W.DD T
   refine ⟨W.γD T δ y, ?_, (lemGB_γD_letE W T δ i y).symm⟩
   first
     | exact W.N_Γ T δ y hy
-    | exact W.N_Γ T δ hy
-    | exact W.N_Γ T hy δ
-    | exact W.N_Γ
 
 theorem lemGB_Nl_le_N (T : LocLat G Qp LL O) (i : ZMod n) {x : W.DD T} (hx : x ∈ W.Nl T i) :
     x ∈ W.N T := by
@@ -260,6 +291,7 @@ theorem lemGB_DelF_inv {δ : W.Gam} (h : δ ∈ W.DelF) : δ⁻¹ ∈ W.DelF := 
 
 theorem lemGB_sum_inv (T : LocLat G Qp LL O) (x : W.DD T) (δ' : W.Gam) (h' : δ' ∈ W.DelF) :
     W.γD T δ' (∑ δ ∈ W.DelF, W.γD T δ x) = ∑ δ ∈ W.DelF, W.γD T δ x := by
+
   rw [map_sum]
   have hm : ∀ δ, W.γD T δ' (W.γD T δ x) = W.γD T (δ' * δ) x := by
     intro δ
@@ -285,15 +317,14 @@ theorem inImg_of_Nimg (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) {T₁ T₂ : LocL
       intro δ hδ
       first
         | (rw [W.map_γ]; exact hzΔ δ hδ)
-        | exact W.map_γ
     have hmapS : W.map F (∑ δ ∈ W.DelF, W.γD T₁ δ y) = ((W.DelF.card : ℕ) : O) • W.map F y := by
+
       rw [map_sum, Finset.sum_congr rfl hfix, Finset.sum_const]
       exact (Nat.cast_smul_eq_nsmul O _ _).symm
     have hc : W.map F ((↑u⁻¹ : O) • ∑ δ ∈ W.DelF, W.γD T₁ δ y) =
         (↑u⁻¹ : O) • W.map F (∑ δ ∈ W.DelF, W.γD T₁ δ y) := by
       first
         | exact LinearMap.map_smul_of_tower _ _ _
-        | exact map_smul _ _ _
     rw [hc, hmapS, smul_smul, ← hu, Units.inv_mul, one_smul]
 
 theorem q_pow_inImg (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : Formalism.MainNotions.DeltaInvariantLattices.P9W W) {T₁ T₂ : LocLat G Qp LL O}

@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IntegOfMem
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.IsEtIdealOfPlace
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IntegOfMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtPlace
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -50,11 +88,6 @@ def LiesAbs : Prop :=
     (∀ x ∈ (g j).K, ∃ t : Y' ⟶ C.Y, t ≫ C.p = s ≫ C.p ∧
       ∀ a b, π' ≫ t = T.X.tr (T.lev (g j).M) (T.lev N) ((g j).h * x) a b ≫ C.π) →
     ∃ (Z : Scheme.{0}) (s' t' : Z ⟶ C.Y) (d' m : ℕ), FEt s' d' ∧ t' ≫ C.p = s' ≫ C.p ∧ C.Lies j s' t' m
-
-def LiftLev : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (G : HTGroup p) (L : Link D G), D.m = 1 → ∀ (q : ℕ) (r : ℤ) (𝔴 𝔞 : Ideal (𝓞 D.F)) (N₀ : ℕ),
-    AtPrime D q r 𝔴 → (∃ e : ℕ, uId D q r ^ e ≤ 𝔞) → N₀.Coprime q → ∀ gg : LevGrp D 𝔞 1, ∃ u ∈ L.KN N₀,
-      ∀ x y : D.La, gg ((wSub D 𝔞 1).mkQ x) = (wSub D 𝔞 1).mkQ y → L.actG u (inAf D x) - inAf D y ∈ idHat D 𝔞
 
 def NormExt : Prop :=
   ∀ (U S Y B : Scheme.{0}) (i : U ⟶ S) (f : S ⟶ B) (g : Y ⟶ B) (y : U ⟶ Y), IsOpenImmersion i → IsDominant i → IsLocallyNoetherian S →

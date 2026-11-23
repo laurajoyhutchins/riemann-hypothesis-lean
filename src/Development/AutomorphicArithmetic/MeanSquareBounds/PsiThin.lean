@@ -1,6 +1,53 @@
-import Development.AutomorphicArithmetic.MeanSquareBounds.PrimeSetTwoBounds
-import Formalism.PeriodIntegrals.ExplicitFormulaCounts.ExplicitFormula
-import Formalism.LandauZeroFreeBounds.NoZeroComplex
+module
+
+public import Development.AutomorphicArithmetic.MeanSquareBounds.PrimeSetTwoBounds
+public import Formalism.PeriodIntegrals.ExplicitFormula
+public import Formalism.LandauZeroFreeBounds.NoZeroComplex
+public import Formalism.PeriodIntegrals.ExplicitFormulaCounts.ExplicitFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Harmonic.Bounds
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.JacobiCharacterSums.MeanSquareHypWIff
+
+@[expose] public section
 
 open Finset Formalism.HermitianLattices.ZeroFreeRegionGL2 Formalism.HermitianLattices.Ext.LogarithmicIntegralBounds
 
@@ -55,7 +102,7 @@ private theorem pt_rpow_le {u v r k : ℝ} (hu0 : 0 < u) (hv : v = Real.log u) (
     _ = Real.exp v * Real.exp (-k * v) := Real.exp_add _ _
     _ = u * Real.exp (-k * v) := by rw [← hu]
 
-set_option maxHeartbeats 1000000 in
+
 
 private theorem pt_core {C7 C2 c lam : ℝ} (hC7 : 0 < C7) (hC2 : 0 ≤ C2) (hc : 0 < c) (hlam : 1 ≤ lam)
     (h7 : PI.ExplicitFormulaWith C7) {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (hp : χ.IsPrimitive)
@@ -74,12 +121,10 @@ private theorem pt_core {C7 C2 c lam : ℝ} (hC7 : 0 < C7) (hC2 : 0 ≤ C2) (hc 
   have hs1 : 1 ≤ s := by rw [hs]; exact Real.one_le_sqrt.2 hv1
   have hsv : s ≤ v := by nlinarith
   set c' : ℝ := min (c / 3) 1 with hc'
-  have hc'0 : 0 < c' := lt_min (by positivity) one_pos
   have hc'1 : c' ≤ 1 := min_le_right _ _
   have hc'3 : c' ≤ c / 3 := min_le_left _ _
   have hls : 0 < lam + s := by linarith
   set E : ℝ := Real.exp (-c' * v / (lam + s)) with hE
-  have hE0 : 0 < E := Real.exp_pos _
   set T : ℝ := Real.exp s with hT
   have hT2 : 2 ≤ T := by have := Real.add_one_le_exp s; linarith
   have huv : u = Real.exp v := (Real.exp_log hu0).symm
@@ -87,7 +132,6 @@ private theorem pt_core {C7 C2 c lam : ℝ} (hC7 : 0 < C7) (hC2 : 0 ≤ C2) (hc 
   have hT0 : 0 < T := Real.exp_pos _
   have hlT : Real.log T = s := Real.log_exp s
   set W : ℝ := v + lam with hW
-  have hW2 : 2 ≤ W := by linarith
   set P : ℝ := u * E with hP
   have hP0 : 0 < P := by positivity
   have q0 : c' * v / (lam + s) ≤ v := by
@@ -111,7 +155,6 @@ private theorem pt_core {C7 C2 c lam : ℝ} (hC7 : 0 < C7) (hC2 : 0 ≤ C2) (hc 
   have l1 : Real.log (N * u * T) = Real.log N + v + s := by
     rw [Real.log_mul (by positivity) hT0.ne', Real.log_mul hN0.ne' hu0.ne', hlT]
   have l2 : Real.log (N * u) = Real.log N + v := Real.log_mul hN0.ne' hu0.ne'
-  have hW0 : 0 ≤ W ^ 2 := by positivity
   have hWW : W ≤ W ^ 2 := by nlinarith
   have hWP : W ^ 2 ≤ W ^ 2 * P := by nlinarith
   have e1 : u * Real.log (N * u * T) ^ 2 / T ≤ 4 * W ^ 2 * P := by
@@ -179,7 +222,7 @@ private theorem pt_core {C7 C2 c lam : ℝ} (hC7 : 0 < C7) (hC2 : 0 ≤ C2) (hc 
         exact mul_le_mul_of_nonneg_left (add_le_add (add_le_add e1 e2) e3) hC7.le
     _ = (C7 * (5 + C2) + C2) * u * W ^ 2 * E := by rw [hP]; ring
 
-set_option maxHeartbeats 1000000 in
+
 
 private theorem pt_zero_sum {C7 C lam ka : ℝ} (hC : 0 < C) (hlam : 1 ≤ lam) (hka : 0 < ka)
     (h7 : PI.ExplicitFormulaWith C7) (h11 : PI.ZerosWindowWith C) {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (hp : χ.IsPrimitive)
@@ -196,10 +239,8 @@ private theorem pt_zero_sum {C7 C lam ka : ℝ} (hC : 0 < C) (hlam : 1 ≤ lam) 
     exact ⟨r0, r1, lt_of_lt_of_le r2 (le_max_left _ _), r3⟩
   set M : ℕ := ⌊T⌋₊ with hM
   have hMT : (M : ℝ) ≤ T := Nat.floor_le (by linarith)
-  have hM0 : (0 : ℝ) ≤ M := Nat.cast_nonneg M
   have hlT : 0 ≤ Real.log T := Real.log_nonneg hT
   set Y : ℝ := lam + Real.log T with hY
-  have hY1 : 1 ≤ Y := by linarith
   set La : ℝ := lam + Real.log ((M : ℝ) + 2) with hLa
   have hl2 := Real.log_two_lt_d9
   have hl3 : Real.log 3 ≤ 2 := by
@@ -240,7 +281,6 @@ private theorem pt_zero_sum {C7 C lam ka : ℝ} (hC : 0 < C) (hlam : 1 ≤ lam) 
       ∑ ρ ∈ hfin.toFinset with ⌊|ρ.im|⌋₊ = i, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) / ‖ρ‖ ≤ a i * (2 * (C * La)) := by
     intro i hi
     have hiM : i ≤ M := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
-    have hi0 : (0 : ℝ) < (i : ℝ) + 1 := by positivity
     have st1 : ∑ ρ ∈ hfin.toFinset with ⌊|ρ.im|⌋₊ = i, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) / ‖ρ‖ ≤
         ∑ ρ ∈ hfin.toFinset with ⌊|ρ.im|⌋₊ = i, a i * (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := by
       apply Finset.sum_le_sum
@@ -263,7 +303,6 @@ private theorem pt_zero_sum {C7 C lam ka : ℝ} (hC : 0 < C) (hlam : 1 ≤ lam) 
           calc (1 : ℝ) = lam / ka * (ka / lam) := by field_simp
             _ ≤ a i * ‖ρ‖ := mul_le_mul h4 (hre.trans h3) (by positivity) (ha0 i)
         · have h3 := Complex.abs_im_le_norm ρ
-          have hlt : |ρ.im| < (i : ℝ) + 1 := by rw [← hρi]; exact Nat.lt_floor_add_one _
           have h4 : 2 * (1 / ((i : ℝ) + 1)) ≤ a i := by
             simp only [ha]
             split_ifs
@@ -358,7 +397,6 @@ private theorem pt_zero_free (c₀ : ℝ) (hc₀ : 0 < c₀) : ∃ c : ℝ, 0 < 
   refine ⟨min c1 c₀, lt_min hc1 hc₀, ?_⟩
   intro N _ χ lam hlam hN hex ρ r1 hz
   by_contra hlt
-  have hlt := not_le.mp hlt
   have ht := abs_nonneg ρ.im
   have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast Nat.one_le_iff_ne_zero.2 (NeZero.ne N)
   have hlN : 0 ≤ Real.log N := Real.log_nonneg hN1

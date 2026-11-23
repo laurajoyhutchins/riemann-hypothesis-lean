@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsStandardSmoothOfRelativeDimensionAwayJacobian
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.MulLeftCompOfPullbackPointEquivMul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.MulLeftCompOfPullbackPointEquivMul
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AddXYZOrChordXYZOrOriginXYZNeZero
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.OverHomEqIffForallIsAlgClosedAlgebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open HomogeneousIdeal
@@ -19,9 +69,6 @@ def specOverMap (g : A →ₐ[R] B) : specOver R B ⟶ specOver R A :=
   Over.homMk (Spec.map (CommRingCat.ofHom (g : A →+* B))) (by
     change Spec.map _ ≫ Spec.map _ = Spec.map _
     rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, g.comp_algebraMap])
-
-@[simp] theorem specOverMap_left (g : A →ₐ[R] B) :
-    (specOverMap g).left = Spec.map (CommRingCat.ofHom (g : A →+* B)) := rfl
 
 theorem exists_eq_specOverMap (x : specOver R B ⟶ specOver R A) :
     ∃ g : A →ₐ[R] B, x = specOverMap g := by
@@ -51,7 +98,6 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 variable {R : Type u} [CommRing R] (W : WeierstrassCurve R)
 
-@[reassoc]
 theorem specOverMap_ptOver {A B : Type u} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
     (g : A →ₐ[R] B) (P : Fin 3 → A) (h : IsUnimodularSol (W.baseChange A) P) :
     specOverMap g ≫ ptOver W P h = ptOver W (g ∘ P) (h.baseChange g) :=
@@ -76,7 +122,6 @@ def linearGradedMap : grading W →+*ᵍ grading W' where
 variable (hs : ∀ i, coord W' i ∈ Ideal.span (Set.range L))
 
 include hs in
-
 theorem irrelevant_le_map_linearGradedMap :
     irrelevant (grading W') ≤ (irrelevant (grading W)).map (linearGradedMap W L hL h) := by
   rw [← toIdeal_le_toIdeal_iff, irrelevant_eq_span_coord, Ideal.span_le]
@@ -94,7 +139,6 @@ variable {A : Type u} [CommRing A] (ρ : R →+* A) (P : Fin 3 → A)
   (hP : IsUnimodularSol (W'.map ρ) P)
 
 include h hs in
-
 theorem isUnimodularSol_linear :
     IsUnimodularSol (W.map ρ) (evalHom W' ρ P hP.equation ∘ L) := by
   constructor
@@ -127,7 +171,6 @@ theorem ptHom_linearHom : ptHom W' ρ P hP ≫ linearHom W L hL h hs =
   simp only [this]
   rfl
 
-@[reassoc (attr := simp)]
 theorem linearHom_toSpec : linearHom W L hL h hs ≫ toSpec W = toSpec W' := by
   apply scheme_hom_ext
   · rw [chartY, pt_toSpec, pt_eq_ptHom, ptHom_linearHom_assoc, ptHom_toSpec]
@@ -189,25 +232,24 @@ theorem ptHom_negHom {A : Type u} [CommRing A] (ρ : R →+* A) (P : Fin 3 → A
     ptHom W ρ P hP ≫ negHom W = ptHom W ρ ((W.map ρ).toProjective.neg P) hP.neg := by
   rw [negHom, ptHom_linearHom]
   refine ptHom_congr W _ _ _ rfl ?_ _
-  ext i
-  fin_cases i <;>
-    simp [WeierstrassCurve.Projective.neg, WeierstrassCurve.Projective.negY,
-      WeierstrassCurve.baseChange]
+  let f := evalHom W ρ P hP.equation
+  have hf : f.comp (algebraMap R (HomRing W)) = ρ :=
+    RingHom.ext (evalHom_algebraMap W ρ P hP.equation)
+  have hcoord : f ∘ coord W = P := funext (evalHom_coord W ρ P hP.equation)
+  change f ∘ (W.baseChange (HomRing W)).toProjective.neg (coord W) = _
+  rw [← WeierstrassCurve.Projective.map_neg, hcoord]
+  change (W.map (f.comp (algebraMap R (HomRing W)))).toProjective.neg P = _
+  rw [hf]
 
-@[reassoc (attr := simp)]
 theorem negHom_toSpec : negHom W ≫ toSpec W = toSpec W := linearHom_toSpec ..
 
 def negOver : schemeOver W ⟶ schemeOver W := Over.homMk (negHom W) (negHom_toSpec W)
 
-@[simp] theorem negOver_left : (negOver W).left = negHom W := rfl
-
-@[reassoc]
 theorem ptOver_negOver {A : Type u} [CommRing A] [Algebra R A] (P : Fin 3 → A)
     (hP : IsUnimodularSol (W.baseChange A) P) :
     ptOver W P hP ≫ negOver W = ptOver W ((W.baseChange A).toProjective.neg P) hP.neg :=
   Over.OverMorphism.ext (ptHom_negHom W _ P hP)
 
-@[reassoc]
 theorem negHom_mapHom {R' : Type u} [CommRing R'] {W' : WeierstrassCurve R'} (f : R →+* R')
     (h : W.map f = W') : negHom W' ≫ mapHom W f h = mapHom W f h ≫ negHom W := by
   subst h
@@ -219,8 +261,6 @@ theorem negHom_mapHom {R' : Type u} [CommRing R'] {W' : WeierstrassCurve R'} (f 
 
 def zeroUnit : 𝟙_ (Over (Spec (.of R))) ⟶ schemeOver W := Over.homMk (zero W) (zero_toSpec W)
 
-@[simp] theorem zeroUnit_left : (zeroUnit W).left = zero W := rfl
-
 theorem toUnit_zeroUnit (A : Type u) [CommRing A] [Algebra R A] :
     toUnit (specOver R A) ≫ zeroUnit W = zeroOver W A := rfl
 
@@ -229,6 +269,7 @@ end Neg
 section Sum
 
 open AddLaw
+open scoped WeierstrassCurve.Projective
 
 variable {A B : Type*} [CommRing A] [CommRing B]
 
@@ -266,8 +307,8 @@ theorem IsSumTriple.baseChange {R : Type*} [CommRing R] [Algebra R A] [Algebra R
   have := h.map (g : A →+* B)
   rwa [WeierstrassCurve.map_baseChange] at this
 
-open WeierstrassCurve.Projective in
 
+open WeierstrassCurve.Projective in
 theorem IsSumTriple.equiv_add {k : Type*} [Field k] {V : WeierstrassCurve k} {P Q T : Fin 3 → k}
     (h : IsSumTriple V P Q T) (hP : V.toProjective.Nonsingular P)
     (hQ : V.toProjective.Nonsingular Q) (hT : T ≠ 0) : T ≈ V.toProjective.add P Q :=
@@ -329,8 +370,8 @@ theorem comp_ptOver_eq_fieldAdd {A : Type u} [CommRing A] [Algebra R A] {P Q T :
   rw [specOverMap_ptOver, specOverMap_ptOver, specOverMap_ptOver]
   exact (fieldAdd_ptOver W _ _ _ (h.baseChange g)).symm
 
-omit [W.IsElliptic] in
 
+omit [W.IsElliptic] in
 theorem exists_nhds_eq_ptOver {T : Over (Spec (.of R))} (p q : T ⟶ schemeOver W) (t : T.left) :
     ∃ (A : Type u) (_ : CommRing A) (_ : Algebra R A) (j : specOver R A ⟶ T) (P Q : Fin 3 → A)
       (hP : IsUnimodularSol (W.baseChange A) P) (hQ : IsUnimodularSol (W.baseChange A) Q),

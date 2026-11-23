@@ -1,12 +1,59 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SplitUnitaryGroupIso
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Transport
-import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.ProGTransfer
-import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.OneAddPowOfSq
-import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.SmallOrderPrimeLogSumBound
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.GramDetIsUnit
-import Formalism.LocalToGlobal.GlobalTheory.GL5.Statement
+module
+
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SplitUnitaryGroupIso
+public import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.ProGTransfer
+public import Formalism.LocalToGlobal.GlobalTheory.GL5.Statement
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.GramDetIsUnit
+public import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.OneAddPowOfSq
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Transport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Module.Compact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,12 +130,10 @@ theorem pow_subset_nhds (I : Ideal R) (hI : (⨅ n : ℕ, I ^ n) = ⊥) (V : Set
     · exact SetLike.coe_subset_coe.mpr (Ideal.pow_le_pow_right (le_max_left a b))
     · exact SetLike.coe_subset_coe.mpr (Ideal.pow_le_pow_right (le_max_right a b))
   obtain ⟨n, hn⟩ := hK.elim_directed_family_closed (fun n : ℕ => ((I ^ n : Ideal R) : Set R))
-    (fun n => hcl _) hst hdir
+    (fun n => hcl _) (Set.disjoint_iff_inter_eq_empty.mpr hst) hdir
   refine ⟨n, fun x hx => hWV ?_⟩
   by_contra hxW
-  have hm : x ∈ Wᶜ ∩ ((I ^ n : Ideal R) : Set R) := ⟨hxW, hx⟩
-  rw [hn] at hm
-  exact hm
+  exact Set.disjoint_left.mp hn hxW hx
 
 theorem tendsto_of_mem_pow (I : Ideal R) (hI : (⨅ n : ℕ, I ^ n) = ⊥) (x : ℕ → R) (c : R)
     (hx : ∀ m, x m - c ∈ I ^ (m + 1)) : Tendsto x atTop (𝓝 c) := by
@@ -435,32 +480,6 @@ theorem proGTransfer_of_cont (F E : Type) [Field F] [NumberField F] [Field E] [N
     exact ⟨hm, hθψ p⟩
   · intro x hx; exact hψθ x (hUw hx)
 
-theorem split_cont (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (v : HeightOneSpectrum (𝓞 F)) (s : E ⊗[F] v.adicCompletion F ≃+* v.adicCompletion F × v.adicCompletion F)
-    (halg : ∀ a : v.adicCompletion F, s ((1 : E) ⊗ₜ[F] a) = (a, a)) :
-    letI := tensTopL (F := F) (E := E) (v.adicCompletion F); Continuous s ∧ Continuous s.symm := by
-  letI : TopologicalSpace (E ⊗[F] v.adicCompletion F) := tensTopL (F := F) (E := E) (v.adicCompletion F)
-  letI : Algebra (v.adicCompletion F) (E ⊗[F] v.adicCompletion F) := Algebra.TensorProduct.rightAlgebra
-  haveI : IsModuleTopology (v.adicCompletion F) (E ⊗[F] v.adicCompletion F) := ⟨rfl⟩
-  haveI : ContinuousAdd (E ⊗[F] v.adicCompletion F) :=
-    IsModuleTopology.toContinuousAdd (R := v.adicCompletion F) (A := E ⊗[F] v.adicCompletion F)
-  let sl : (E ⊗[F] v.adicCompletion F) ≃ₗ[v.adicCompletion F] (v.adicCompletion F × v.adicCompletion F) :=
-    { s.toAddEquiv with
-      map_smul' := fun r x => by
-        show s (r • x) = r • s x
-        rw [Algebra.smul_def, map_mul]
-        have h1 : s (algebraMap (v.adicCompletion F) (E ⊗[F] v.adicCompletion F) r) = (r, r) := halg r
-        rw [h1]
-        ext <;> simp }
-  exact ⟨IsModuleTopology.continuous_of_linearMap sl.toLinearMap,
-    IsModuleTopology.continuous_of_linearMap sl.symm.toLinearMap⟩
-
-theorem proGTransfer : Formalism.L2.G.Triv.ProGTransfer := by
-  unfold Formalism.L2.G.Triv.ProGTransfer
-  intro F E _ _ _ _ _ k σ J hJh hdet v s hs halg h P Uw hUw hiff g hP
-  obtain ⟨h1, h2⟩ := split_cont F E v s halg
-  exact proGTransfer_of_cont F E k σ J hJh hdet v s hs h1 h2 h P Uw hUw hiff g hP
-
 section Link
 
 def LocalEndHomeo : Prop :=
@@ -523,28 +542,11 @@ theorem colProG (hE : LocalEndHomeo) {R : Ranks} {F E : Type} [Field F] [NumberF
 theorem levels_pro_g_of_continuity (hE : LocalEndHomeo) : Link4p :=
   fun D Lv u => colProG hE (Lv u) D.host.g_prime
 
-def SplitGAlg (D : D7) (Lv : LevelData D) : Prop :=
-  ∀ (u : D.what₂.Word) (i : Fin 2) (v : HeightOneSpectrum (𝓞 D.host.F))
-    (h : ((D.host.g i : ℕ) : 𝓞 D.host.F) ∈ v.asIdeal) (a : v.adicCompletion D.host.F),
-    (Lv u).splitG i v h ((1 : D.host.E) ⊗ₜ[D.host.F] a) = (a, a)
-
-theorem levels_pro_g_of_split_algebra (D : D7) (Lv : LevelData D) (h : SplitGAlg D Lv) : Formalism.MainNotions.StandardLattice.Conclusion4p D Lv :=
-  Formalism.L2.G.Triv.proper_of_split_completion iwProG proGTransfer D Lv h
-
 end Link
 
 end Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.ProGW
 
 namespace Formalism.L2.GlobalTheoryTheory.GenusMassVolumes
-
-theorem iwahori_pro_g : Formalism.L2.G.Triv.IwProG := ProGW.iwProG
-
-theorem pro_g_transfer_unitary : Formalism.L2.G.Triv.ProGTransfer := ProGW.proGTransfer
-
-theorem Link4p_of_localEndHomeo (hE : ProGW.LocalEndHomeo) : Link4p := ProGW.levels_pro_g_of_continuity hE
-
-theorem levels_pro_g_of_split_algebra (D : Formalism.BasicNotions.D7) (Lv : Formalism.BasicNotions.LevelData D) (h : ProGW.SplitGAlg D Lv) :
-    Formalism.MainNotions.StandardLattice.Conclusion4p D Lv := ProGW.levels_pro_g_of_split_algebra D Lv h
 
 end Formalism.L2.GlobalTheoryTheory.GenusMassVolumes
 

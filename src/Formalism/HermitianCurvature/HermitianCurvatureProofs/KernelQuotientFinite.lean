@@ -1,5 +1,61 @@
-import Formalism.HermitianCurvature.BlockKernelPropertiesOfSteps
-import Formalism.DoubleCosetMeasures.LatticeCoset
+module
+
+public import Formalism.HermitianCurvature.BlockKernelPropertiesOfSteps
+public import Formalism.DoubleCosetMeasures.LatticeCoset
+public import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.ExistsContinuousLowerUpperEntry
+import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.IsIntOfLatOfLe
+import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.IsOpenIsIntSet
+public import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.LowUniMulVecELast
+import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.TwoSided
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,8 +64,8 @@ open scoped ComplexConjugate
 
 namespace Formalism.FourierDecayAlt.P.A5x4
 
-open Formalism.DoubleCosetMeasures.P Formalism.DoubleCosetMeasures.P.Supp in
 
+open Formalism.DoubleCosetMeasures.P Formalism.DoubleCosetMeasures.P.Supp in
 theorem isCompact_intPairs {K : Type} [CommRing K] [TopologicalSpace K] [IsTopologicalRing K]
     [T2Space K] (R : Subring K) (hRc : IsCompact (R : Set K)) (s : List ℕ) (t : ℕ → Kˣ) :
     IsCompact {p : lowW K s t × upUniG K s.sum |
@@ -168,8 +224,8 @@ theorem Kp_eq_sum {K : Type} [CommRing K] (R : Subring K) (ψ : AddChar K ℂ) (
       apply hcon
       simp [hI.1, hI.2]
 
-open Classical in
 
+open Classical in
 theorem BB_eq_sum {K : Type} [CommRing K] [TopologicalSpace K] [IsTopologicalRing K]
     (R : Subring K) (ψ : AddChar K ℂ) (hL : LocalDatum K R ψ) (w : Point K)
     (μ₁ : Measure (lowW K w.1 w.2)) (μ₂ : Measure (upUniG K w.1.sum))
@@ -311,9 +367,10 @@ theorem gram_kernel_identity : Formalism.FourierDecayAlt.A5.GramIdentity := by
         (Nat.card (autSet R (C a) (e a) (lam a)) : ℂ)) * phase ψ (rep R q) *
         conj (phase ψ (rep R q')) := by
     intro a
+
     rw [BB_eq_sum R ψ hL w μ₁ μ₂ h1 h2 (C a) (e a) (lam a) hf,
-      BB_eq_sum R ψ hL w' μ₁' μ₂' h1' h2' (C a) (e a) (lam a) hf', map_sum,
-      Finset.sum_mul_sum, Finset.sum_div]
+    BB_eq_sum R ψ hL w' μ₁' μ₂' h1' h2' (C a) (e a) (lam a) hf', map_sum,
+    Finset.sum_mul_sum, Finset.sum_div]
     refine Finset.sum_congr rfl fun q _ => ?_
     rw [Finset.sum_div]
     refine Finset.sum_congr rfl fun q' _ => ?_
@@ -399,6 +456,7 @@ theorem sum_of_classes {T Q : Type} [Fintype T] [Fintype Q] [DecidableEq Q] (f :
       ∑ i, ∑ j, (μ κ : ℂ) * ((if f i = κ then c i else 0) *
         conj (if f j = κ then c j else 0)) := by
     intro κ
+
     rw [Complex.ofReal_mul, ← Complex.mul_conj, map_sum, Finset.sum_mul_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Finset.mul_sum]

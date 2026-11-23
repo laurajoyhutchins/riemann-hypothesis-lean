@@ -1,4 +1,47 @@
-import Formalism.DegreeFormula.FlagDegFormula
+module
+
+public import Formalism.DegreeFormula.FlagDegFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -23,40 +66,8 @@ theorem sum_delta (N : ℕ) : ∑ i : Fin N, (N - 1 - (i : ℕ)) = N * (N - 1) /
   simp [Fin.val_rev]
   omega
 
-theorem prod_negX {ι : Type} [Fintype ι] {N : ℕ} (e : ι × Fin N → ℕ) :
-    (∏ x : ι × Fin N, (-X x : MvPolynomial (ι × Fin N) ℝ) ^ (e x)) =
-      C ((-1 : ℝ) ^ (∑ x, e x)) * monomial (Finsupp.equivFunOnFinite.symm e) 1 := by
-  rw [Finset.prod_congr rfl (fun x _ => neg_pow (X x : MvPolynomial (ι × Fin N) ℝ) (e x)),
-    Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, monomial_eq,
-    Finsupp.prod_fintype _ _ (by intro i; simp)]
-  simp only [Finsupp.equivFunOnFinite_symm_apply_apply, map_pow, map_neg, map_one, one_mul]
-
-theorem degFlPoint : DegFlPoint := by
-  intro ι _ _ N
-  rw [prod_negX]
-  unfold degFl
-  rw [Finset.sum_eq_single (fun _ => 1)]
-  · have hs : ∑ x : ι × Fin N, (N - 1 - (x.2 : ℕ)) = dimFl ι N := by
-      rw [Fintype.sum_prod_type]
-      simp [sum_delta, dimFl]
-    have he : permExp (fun _ : ι => (1 : Equiv.Perm (Fin N))) =
-        Finsupp.equivFunOnFinite.symm (fun x : ι × Fin N => N - 1 - (x.2 : ℕ)) := by
-      ext x; simp [permExp]
-    rw [he, coeff_C_mul, coeff_monomial, if_pos rfl, hs]
-    simp [← pow_add, ← two_mul, pow_mul]
-  · intro σ _ hσ
-    have he : permExp (fun _ : ι => (1 : Equiv.Perm (Fin N))) =
-        Finsupp.equivFunOnFinite.symm (fun x : ι × Fin N => N - 1 - (x.2 : ℕ)) := by
-      ext x; simp [permExp]
-    rw [coeff_C_mul, coeff_monomial, ← he, if_neg]
-    · simp
-    · intro h; exact hσ (permExp_inj _ _ h).symm
-  · simp
-
 end Formalism.DegreeFormula.PermutationPointDegree
 
 namespace Formalism.DegreeFormula
-
-theorem degreePoint : DegFlPoint := Formalism.DegreeFormula.PermutationPointDegree.degFlPoint
 
 end Formalism.DegreeFormula

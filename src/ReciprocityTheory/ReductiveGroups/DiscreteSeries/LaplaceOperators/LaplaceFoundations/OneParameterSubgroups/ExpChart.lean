@@ -1,4 +1,72 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.Analysis.Matrix.Normed
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.MeasureTheory.Group.Measure
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Slope
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+public import Mathlib.MeasureTheory.Function.Jacobian
+
+@[expose] public section
 
 open MeasureTheory Filter Topology Finset
 
@@ -25,40 +93,22 @@ theorem det_of_shear (G : ℕ → Submodule ℝ E) (L : ℕ) (hG0 : G 0 = ⊤) (
     rw [hL, Submodule.mem_bot] at h
     rw [LinearMap.zero_apply]
     exact h
-  have hpowM : ∀ k, (LinearMap.toMatrix b b N) ^ k = LinearMap.toMatrix b b (N ^ k) := by
-    intro k
-    induction k with
-    | zero => rw [pow_zero, pow_zero]; exact (LinearMap.toMatrix_one b).symm
-    | succ k ih => rw [pow_succ, pow_succ, LinearMap.toMatrix_mul, ih]
   have hM : IsNilpotent (LinearMap.toMatrix b b N) := by
     obtain ⟨k, hk⟩ := hnil
-    exact ⟨k, by rw [hpowM, hk, map_zero]⟩
-  have key : ∀ M : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ,
-      IsNilpotent M → (1 + M).det = 1 := by
-    intro M hM
-    have hch : M.charpoly = Polynomial.X ^ Fintype.card (Fin (Module.finrank ℝ E)) :=
-      sub_eq_zero.mp (Matrix.isNilpotent_charpoly_sub_pow_of_isNilpotent hM).eq_zero
-    have hmat : (Matrix.charmatrix M).map (Polynomial.eval (-1 : ℝ)) = -(1 + M) := by
-      ext i j
-      by_cases h : i = j
-      · subst h
-        simp only [Matrix.map_apply, Matrix.charmatrix_apply, Matrix.diagonal_apply_eq,
-          Matrix.neg_apply, Matrix.add_apply, Matrix.one_apply_eq, Polynomial.eval_sub,
-          Polynomial.eval_X, Polynomial.eval_C]
-        ring
-      · simp only [Matrix.map_apply, Matrix.charmatrix_apply, Matrix.diagonal_apply_ne _ h,
-          Matrix.neg_apply, Matrix.add_apply, Matrix.one_apply_ne h, Polynomial.eval_sub,
-          Polynomial.eval_zero, Polynomial.eval_C]
-        ring
-    have hev : Polynomial.eval (-1 : ℝ) M.charpoly = (-(1 + M)).det := by
-      rw [← hmat, Matrix.charpoly, ← Polynomial.coe_evalRingHom, RingHom.map_det,
-        RingHom.mapMatrix_apply]
-    rw [hch, Matrix.det_neg, Polynomial.eval_pow, Polynomial.eval_X] at hev
-    have hne : ((-1 : ℝ)) ^ Fintype.card (Fin (Module.finrank ℝ E)) ≠ 0 :=
-      pow_ne_zero _ (by norm_num)
-    exact mul_left_cancel₀ hne (hev.symm.trans (mul_one _).symm)
+    exact ⟨k, by rw [LinearMap.toMatrix_pow, hk, map_zero]⟩
+  have key (M : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ)
+      (hM : IsNilpotent M) : (1 + M).det = 1 := by
+    have hch := sub_eq_zero.mp
+      (Matrix.isNilpotent_charpoly_sub_pow_of_isNilpotent hM).eq_zero
+    have heval := M.eval_charpoly (-1)
+    have hneg : Matrix.scalar _ (-1 : ℝ) - M = -(1 + M) := by
+      rw [map_neg, map_one]
+      abel
+    rw [hch, Polynomial.eval_pow, Polynomial.eval_X, hneg, Matrix.det_neg] at heval
+    exact mul_left_cancel₀ (pow_ne_zero _ (by norm_num))
+      (heval.symm.trans (mul_one _).symm)
   have hD' : LinearMap.toMatrix b b (D : E →ₗ[ℝ] E) = 1 + LinearMap.toMatrix b b N := by
-    rw [← LinearMap.toMatrix_id b, ← map_add]
+    rw [← LinearMap.toMatrix_id b, ← map_add (f := _)]
     congr 1
     ext x
     simp [N]
@@ -439,7 +489,8 @@ theorem st_exp (hF : IsFil F L) (hst : IsAdj F st) {Y : A} (hY : Y ∈ F 0) :
     induction n with
     | zero => simp [hst.one]
     | succ n ih => rw [pow_succ, hst.mul, ih, pow_succ']
-  rw [hF.exp_eq hY, hF.exp_eq (hst.mem Y hY), map_add, map_add, map_sum, hst.one]
+
+  rw [hF.exp_eq hY, hF.exp_eq (hst.mem Y hY), map_add (f := _), map_add (f := _), map_sum, hst.one]
   simp only [map_smul, hpow]
 
 theorem exp_mem_grpN (hF : IsFil F L) (hst : IsAdj F st) {Y : A} (hY : Y ∈ lieN F st) :
@@ -628,7 +679,7 @@ theorem exp_chart_embedding (hF : IsFil F L) :
       funext Y
       exact hF.exp_eq (hY0 Y)
     rw [e]
-    exact continuous_const.add (continuous_subtype_val.add (continuous_finset_sum _ fun k _ =>
+    exact continuous_const.add (continuous_subtype_val.add (continuous_finsetSum _ fun k _ =>
       (continuous_subtype_val.pow _).const_smul _))
   haveI : ProperSpace (lieN F st) := FiniteDimensional.proper_real _
   exact hcont.measurableEmbedding fun Y Y' h => Subtype.ext (exp_injOn hF (hY0 Y) (hY0 Y') h)
@@ -657,7 +708,7 @@ theorem exp_chart_haar (hF : IsFil F L) (hst : IsAdj F st) (μ : Measure (lieN F
     obtain ⟨Φ, hΦm, hΦ⟩ := exp_chart_invariant hF hst μ hs
     show Measure.map (s * ·) (Measure.map (fun Y : lieN F st => NormedSpace.exp (Y : A)) μ) =
       Measure.map (fun Y : lieN F st => NormedSpace.exp (Y : A)) μ
-    rw [Measure.map_map (continuous_mul_left s).measurable hemb.measurable]
+    rw [Measure.map_map (continuous_const_mul s).measurable hemb.measurable]
     have hcomp : (s * ·) ∘ (fun Y : lieN F st => NormedSpace.exp (Y : A)) =
         (fun Y : lieN F st => NormedSpace.exp (Y : A)) ∘ Φ := by
       funext Y

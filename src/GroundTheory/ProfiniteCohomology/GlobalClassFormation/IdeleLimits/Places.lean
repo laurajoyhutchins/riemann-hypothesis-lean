@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.Components
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.Assembly
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.Components
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -54,7 +98,7 @@ def transition : ∀ (v : Place K.1) {p q : GLevel K}, p ≤ q → P.localGroup 
     haveI := P.fin_liesOver v h
     (localTransition K p.1 q.1 (P.fin v p) (P.fin v q) n).hom.toAddMonoidHom
 
-set_option maxHeartbeats 4000000 in
+
 theorem shapiro_placeProj_inr (v : HeightOneSpectrum (𝓞 K.1)) (p : GLevel K)
     (y : cohomology (ideleRep K.1 p.1.1) n) :
     P.shapiro n (.inr v) p ((cohomologyMap (placeProj (.inr v)) n).hom y) =
@@ -64,7 +108,7 @@ theorem shapiro_placeProj_inr (v : HeightOneSpectrum (𝓞 K.1)) (p : GLevel K)
   rw [← placeProj_comp_finiteShapiroIso (P.fin v p) n]
   rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem shapiro_placeProj_inl (v : InfinitePlace K.1) (p : GLevel K)
     (y : cohomology (ideleRep K.1 p.1.1) n) :
     P.shapiro n (.inl v) p ((cohomologyMap (placeProj (.inl v)) n).hom y) =
@@ -74,7 +118,7 @@ theorem shapiro_placeProj_inl (v : InfinitePlace K.1) (p : GLevel K)
   rw [← placeProj_comp_infiniteShapiroIso (P.inf v p) n]
   rfl
 
-set_option maxHeartbeats 8000000 in
+
 
 def levelDecomposition : LevelDecomposition K n where
   L := P.localGroup n

@@ -1,6 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 
@@ -33,7 +78,7 @@ theorem res_constFn {U V : Y.Opens} (h : V ≤ U) (a : R) :
 
 instance : Add (SecMod p M) where
   add s t := ⟨fun i => LB.Sec.f s i + LB.Sec.f t i, fun i j => by
-    rw [map_add, map_add, LB.Sec.compat s, LB.Sec.compat t, mul_add]⟩
+    rw [map_add (f := _), map_add (f := _), LB.Sec.compat s, LB.Sec.compat t, mul_add]⟩
 
 instance : Zero (SecMod p M) where
   zero := ⟨fun _ => 0, fun _ _ => by rw [map_zero, map_zero, MulZeroClass.mul_zero]⟩
@@ -50,8 +95,6 @@ instance : AddCommGroup (SecMod p M) where
   neg_add_cancel a := SecMod.ext fun i => neg_add_cancel _
   add_comm a b := SecMod.ext fun i => add_comm _ _
 
-theorem add_f (s t : SecMod p M) (i : M.ι) : LB.Sec.f (s + t : SecMod p M) i = LB.Sec.f s i + LB.Sec.f t i := rfl
-
 theorem zero_f (i : M.ι) : LB.Sec.f (0 : SecMod p M) i = 0 := rfl
 
 instance : Module R (SecMod p M) where
@@ -67,7 +110,7 @@ instance : Module R (SecMod p M) where
   smul_add a s t := SecMod.ext fun i => mul_add _ _ _
   add_smul a b s := SecMod.ext fun i => by
     show constFn p _ (a + b) * _ = constFn p _ a * _ + constFn p _ b * _
-    rw [← constHom_apply, ← constHom_apply, ← constHom_apply, map_add, add_mul]
+    rw [← constHom_apply, ← constHom_apply, ← constHom_apply, map_add (f := _), add_mul]
   zero_smul s := SecMod.ext fun i => by
     show constFn p _ 0 * _ = 0
     rw [← constHom_apply, map_zero, MulZeroClass.zero_mul]
@@ -77,7 +120,11 @@ theorem smul_f (a : R) (s : SecMod p M) (i : M.ι) :
 
 theorem eq_zero_of_smul_eq_zero [IsDomain R] [Flat p] {a : R} (ha : a ≠ 0) {s : SecMod p M}
     (h : a • s = 0) : s = 0 := by
-  refine SecMod.ext fun i => fn_ext fun y hy => cst_regular p y ha ?_
+  apply SecMod.ext
+  intro i
+  apply fn_ext
+  intro y hy
+  apply cst_regular p y ha
   have e := congrArg (gs (𝟙 Y) y (M.U i)) (congrArg (fun s : SecMod p M => LB.Sec.f s i) h)
   simp only [smul_f, zero_f] at e
   rw [gs_mul _ y _ hy, gs_constFn p _ _ y hy, Category.id_comp] at e

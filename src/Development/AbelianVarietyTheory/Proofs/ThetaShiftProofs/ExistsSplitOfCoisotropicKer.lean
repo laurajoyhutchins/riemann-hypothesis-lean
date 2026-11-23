@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SmulPeriodMapMkZeroFstEqNegForm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SmulPeriodMapMkZeroFstEqNegForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +63,7 @@ theorem exists_isotropic_section [Module.Projective O Y] {w : O} (hw : w + star 
   have skew : ∀ a b, EF a b = -EF b a := by
     intro a b
     have h := halt (a + b)
-    simp only [map_add, LinearMap.add_apply, halt a, halt b, zero_add, add_zero] at h
+    simp only [map_add (f := _), LinearMap.add_apply, halt a, halt b, zero_add, add_zero] at h
     linarith
   have hle' : kerPerp hadj y ≤ LinearMap.ker y := fun t ht => hle t (mem_kerPerp.1 ht)
   obtain ⟨be, hbe_apply⟩ : ∃ be : LinearMap.BilinForm ℤ Y,
@@ -36,7 +80,7 @@ theorem exists_isotropic_section [Module.Projective O Y] {w : O} (hw : w + star 
   · have h0 : y ((nilTo hadj hb hy hbe (s0 x) : L)) = 0 :=
       LinearMap.mem_ker.1 (hle' (nilTo hadj hb hy hbe (s0 x)).2)
     simp [hs0', h0]
-  · simp only [LinearMap.add_apply, LinearMap.comp_apply, Submodule.subtype_apply, map_add]
+  · simp only [LinearMap.add_apply, LinearMap.comp_apply, Submodule.subtype_apply, map_add (f := _)]
     have h1 := hn (s0 x) (s0 x')
     have h2 := hn (s0 x') (s0 x)
     rw [hs0', hs0', hbe_apply] at h1 h2
@@ -64,7 +108,7 @@ theorem exists_split_of_coisotropic_ker (O L Y : Type) [CommRing O] [StarRing O]
   have skew : ∀ a b, EF a b = -EF b a := by
     intro a b
     have h := halt (a + b)
-    simp only [map_add, LinearMap.add_apply, halt a, halt b, zero_add, add_zero] at h
+    simp only [map_add (f := _), LinearMap.add_apply, halt a, halt b, zero_add, add_zero] at h
     linarith
   have hle' : KerPerp.kerPerp hadj y ≤ LinearMap.ker y := fun t ht =>
     hle t (KerPerp.mem_kerPerp.1 ht)
@@ -93,8 +137,8 @@ theorem exists_split_of_coisotropic_ker (O L Y : Type) [CommRing O] [StarRing O]
     ring
   obtain ⟨N, hN⟩ : ∃ N : Submodule O L, ∀ v, v ∈ N ↔ y v = 0 ∧ ∀ x, EF v (s x) = 0 :=
     ⟨{ carrier := {v | y v = 0 ∧ ∀ x, EF v (s x) = 0}
-       add_mem' := fun {a b} ha hb => ⟨by rw [map_add, ha.1, hb.1, add_zero],
-         fun x => by rw [map_add, LinearMap.add_apply, ha.2, hb.2, add_zero]⟩
+       add_mem' := fun {a b} ha hb => ⟨by rw [map_add (f := _), ha.1, hb.1, add_zero],
+         fun x => by rw [map_add (f := _), LinearMap.add_apply, ha.2, hb.2, add_zero]⟩
        zero_mem' := ⟨map_zero y, fun x => by rw [map_zero, LinearMap.zero_apply]⟩
        smul_mem' := fun c v hv => ⟨by rw [map_smul, hv.1, smul_zero],
          fun x => by rw [hadj, ← map_smul s, hv.2]⟩ }, fun _ => Iff.rfl⟩
@@ -123,11 +167,11 @@ theorem exists_split_of_coisotropic_ker (O L Y : Type) [CommRing O] [StarRing O]
           LinearMap.mem_ker.1 (hle' (E.symm _).2)
         have hym : y (m : L) = 0 := ((hN m).1 m.2).1
         have hyv : y (s a + ((E.symm φ.toIntLinearMap : KerPerp.kerPerp hadj y) : L) + m) = a := by
-          rw [map_add, map_add, hsy, hyt, hym, add_zero, add_zero]
+          rw [map_add (f := _), map_add (f := _), hsy, hyt, hym, add_zero, add_zero]
         have hΦv : Φ (s a + ((E.symm φ.toIntLinearMap : KerPerp.kerPerp hadj y) : L) + m) =
             φ.toIntLinearMap := by
           refine LinearMap.ext fun x => ?_
-          rw [hΦ, map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, hsiso, hEF, hsy,
+          rw [hΦ, map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, hsiso, hEF, hsy,
             LinearEquiv.apply_symm_apply, ((hN m).1 m.2).2]
           simp
         refine Prod.ext hyv (Prod.ext (AddMonoidHom.ext fun x => ?_) (Subtype.ext ?_))
@@ -140,7 +184,7 @@ theorem exists_split_of_coisotropic_ker (O L Y : Type) [CommRing O] [StarRing O]
       map_add' := fun a b => by
         refine Prod.ext (map_add y a b) (Prod.ext (AddMonoidHom.ext fun x => ?_) (Subtype.ext ?_))
         · show Φ (a + b) x = Φ a x + Φ b x
-          rw [map_add, LinearMap.add_apply]
+          rw [map_add (f := _), LinearMap.add_apply]
         · show P (a + b) = P a + P b
           exact map_add P a b }
   refine ⟨N, inferInstance, inferInstance,
@@ -154,7 +198,7 @@ theorem exists_split_of_coisotropic_ker (O L Y : Type) [CommRing O] [StarRing O]
     have hm' : EF (m : L) (P w) = 0 := by
       simpa using LinearMap.congr_fun hm ⟨P w, hPN w⟩
     have hmN := (hN m).1 m.2
-    rw [Submodule.coe_zero, map_zero, LinearMap.zero_apply, hdec w, map_add, map_add, hmN.2, hm',
+    rw [Submodule.coe_zero, map_zero, LinearMap.zero_apply, hdec w, map_add (f := _), map_add (f := _), hmN.2, hm',
       skew, hT, hmN.1, map_zero, map_zero]
     simp
   · intro g

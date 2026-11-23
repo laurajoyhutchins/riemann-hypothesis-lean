@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartFPlaceIdem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartFPlaceIdem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +74,7 @@ theorem continuous_cAF (σ : E →ₐ[F] E) : Continuous (cAF (F := F) σ) := by
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => rfl
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   rw [e]
   exact IsModuleTopology.continuous_of_linearMap l
 
@@ -62,11 +102,11 @@ variable {σ : E →ₐ[F] E} {nS nT : ℕ} {JS : Matrix (Fin nS) (Fin nS) E} {J
 
 theorem symplOHF_add_left (x x' y : WOF F E nS nT) :
     symplOHF σ JS JT xi0 (x + x') y = symplOHF σ JS JT xi0 x y + symplOHF σ JS JT xi0 x' y := by
-  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add]
+  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem symplOHF_add_right (x y y' : WOF F E nS nT) :
     symplOHF σ JS JT xi0 x (y + y') = symplOHF σ JS JT xi0 x y + symplOHF σ JS JT xi0 x y' := by
-  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, map_add, mul_add, add_mul, Finset.sum_add_distrib]
+  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, map_add (f := _), mul_add, add_mul, Finset.sum_add_distrib]
 
 variable {ψ : AddChar (AF F) ℂ}
 
@@ -144,8 +184,8 @@ end Quasi
 
 section Coord
 
-variable (F E) in
 
+variable (F E) in
 abbrev IxF (nS nT : ℕ) : Type := (Fin nT × Fin nS) × InfinitePlace F
 
 structure IsChartF (θ : InfinitePlace F → (Ainf F ⊗[F] E →+* ℂ)) (ι : (InfinitePlace F → ℂ) →+ AEF F E) : Prop where
@@ -164,7 +204,7 @@ theorem iotaVF_add {nS nT : ℕ} (ι : (InfinitePlace F → ℂ) →+ AEF F E) (
     iotaVF ι (v + v') = iotaVF ι v + iotaVF ι v' := by
   ext i j
   simp only [iotaVF, Matrix.of_apply, Matrix.add_apply, Pi.add_apply]
-  rw [← map_add]
+  rw [← map_add (f := _)]
   rfl
 
 theorem iotaVF_zero {nS nT : ℕ} (ι : (InfinitePlace F → ℂ) →+ AEF F E) : iotaVF ι (0 : IxF F nS nT → ℂ) = 0 := by
@@ -179,8 +219,8 @@ def rhoVF (hψ : IsCharAF F ψ) (ι : (InfinitePlace F → ℂ) →+ AEF F E) (v
     BBF σ JS JT xi0 ψ →L[ℂ] BBF σ JS JT xi0 ψ :=
   rhoBF σ JS JT xi0 ψ hψ (iotaVF ι v)
 
-open Classical in
 
+open Classical in
 def HMF (tau : InfinitePlace F → (E →+* ℂ)) : Matrix (IxF F nS nT) (IxF F nS nT) ℂ :=
   GlobalTheory.RealWeil.blk (fun w => ((2 * (tau w xi0).im : ℝ) : ℂ) • JT.map (tau w)) fun w => (JS.map (tau w))⁻¹
 
@@ -188,8 +228,8 @@ def compAtF (θ : InfinitePlace F → (Ainf F ⊗[F] E →+* ℂ)) (w : Infinite
     (x : Matrix (Fin m) (Fin n) (AEF F E)) : Matrix (Fin m) (Fin n) ℂ :=
   x.map ((θ w).comp (infPartF F E))
 
-open Classical in
 
+open Classical in
 def mMF (θ : InfinitePlace F → (Ainf F ⊗[F] E →+* ℂ)) :
     GAF σ JS × GAF σ JT →* Matrix (IxF F nS nT) (IxF F nS nT) ℂ where
   toFun p := GlobalTheory.RealWeil.blk (fun w => compAtF θ w (mtF σ JT p.2)) fun w => compAtF θ w (mtF σ JS p.1⁻¹)

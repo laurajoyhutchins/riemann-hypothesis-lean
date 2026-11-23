@@ -1,9 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalSecondPointDerivativeSecondCoordinate
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PowerSeriesExpIntegralCanonGaugeAdditiveSecond
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalSecondPointDerivativeSecondCoordinate
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PowerSeriesExpIntegralCanonGaugeAdditiveSecond
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -210,7 +252,7 @@ theorem small_add_left (hh : B.IsCanonGauge k h) {P P' Q : Pt k m d} (hP : IsBas
   have w1 : constantCoeff B.ph1 = 1 := by
     rw [← gt_const_ev_eq _ (triple_points_zero_constant (gp_zero₂ (n := 2)) (gp_pt 0) (gp_pt 1)), B.cocycleLeft_zero_fst, map_one]
   have key := Small.subst (isBase3 hP hP' hQ) ⟨by
-    rw [map_sub, map_add, gt_const_ev_eq _ c0, gt_const_ev_eq _ c1, gt_const_ev_eq _ c2, const_gauge hh,
+    rw [map_sub, map_add (f := _), gt_const_ev_eq _ c0, gt_const_ev_eq _ c1, gt_const_ev_eq _ c2, const_gauge hh,
       add_zero, sub_self], _, w1, hh.ph1⟩
   have hV := triple_points_zero_constant hP.gp hP'.gp hQ.gp
   rw [gt_ev_sub _ hV, gt_ev_add _ hV, gt_ev_ev' _ _ hV c0, gt_ev_ev' _ _ hV c1, gt_ev_ev' _ _ hV c2,
@@ -230,7 +272,7 @@ theorem small_add_right (hh : B.IsCanonGauge k h) {P Q Q' : Pt k m d} (hP : IsBa
   have w1 : constantCoeff B.ph2 = 1 := by
     rw [← gt_const_ev_eq _ (triple_points_zero_constant (gp_zero₂ (n := 2)) (gp_pt 0) (gp_pt 1)), B.cocycleRight_zero_fst, map_one]
   have key := Small.subst (isBase3 hP hQ hQ') ⟨by
-    rw [map_sub, map_add, gt_const_ev_eq _ c0, gt_const_ev_eq _ c1, gt_const_ev_eq _ c2, const_gauge hh,
+    rw [map_sub, map_add (f := _), gt_const_ev_eq _ c0, gt_const_ev_eq _ c1, gt_const_ev_eq _ c2, const_gauge hh,
       add_zero, sub_self], _, w1, hh.ph2⟩
   have hV := triple_points_zero_constant hP.gp hQ.gp hQ'.gp
   rw [gt_ev_sub _ hV, gt_ev_add _ hV, gt_ev_ev' _ _ hV c0, gt_ev_ev' _ _ hV c1, gt_ev_ev' _ _ hV c2,

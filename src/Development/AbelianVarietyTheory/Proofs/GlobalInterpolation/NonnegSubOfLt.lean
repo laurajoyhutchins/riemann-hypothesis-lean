@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.InterlacingEquivariance
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.InterlacingEquivariance
+public import Formalism.LocalToGlobal.Columns.BaseLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SplitLastBlockActX
+
+@[expose] public section
 
 open MvPolynomial NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.DIV Formalism.L2.Col GlobalTheory.IndefiniteRowSideFullHecke.InterlacingEquivariance GlobalTheory.BranchFormula
 
@@ -13,7 +54,7 @@ theorem lamTrue_lo (u : Word) (τ : X.Tau) (i : Fin (R.N R.m)) (j : Fin R.k) (h 
       (W.hc u τ).u j - ((R.k : ℚ) - 1) / 2 + (j.1 : ℚ) - (R.m : ℚ) * (((R.t : ℚ) + 1) / 2) := by
   have hi : i.1 < R.k := h ▸ j.2
   have e : (⟨i.1, hi⟩ : Fin R.k) = j := Fin.ext h
-  rw [Wts.lamTrue_eq, Wts.lamN_eq W u le_rfl, dif_pos hi, e]
+  rw [Wts.lamTrue_eq, Wts.lamN_eq W u le_rfl, dite_eq_left hi, e]
   unfold hcToWeightQ rhoVec
   ring
 
@@ -28,7 +69,7 @@ theorem lamTrue_hi (u : Word) (τ : X.Tau) (i : Fin (R.N R.m)) (B ρ : ℕ) (hρ
     rw [this]
     exact (divmod (R.t + 1) B ρ hρ).1
   have hB : B < R.m := e1 ▸ R.blk_lt le_rfl i hi
-  rw [Wts.lamTrue_eq, Wts.lamN_eq W u le_rfl, dif_neg hi, RowPar.eAt_of _ hB]
+  rw [Wts.lamTrue_eq, Wts.lamN_eq W u le_rfl, dite_eq_right hi, RowPar.eAt_of _ hB]
   simp only [e1]
   unfold wG
   push_cast

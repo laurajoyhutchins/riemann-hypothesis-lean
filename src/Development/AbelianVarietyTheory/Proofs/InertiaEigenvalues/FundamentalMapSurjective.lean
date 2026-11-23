@@ -1,15 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRPlusFiltrationEqFontaineXiPow
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRPlusIsDomainBdRIsField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AcrisFrobeniusFontaineTEqMul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FontaineTIsUnitBcrisAndUniformizerBdRPlus
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrisMaps
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrisMapsLoc
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
+public import Development.AbelianVarietyTheory.CrystallinePeriods.CrisMapsLoc
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLimitOfPowDvdSub
+import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLimitOfPowDvdSub
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Acris0TorsionFree
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AcrisFrobeniusFontaineTEqMul
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRPlusFiltrationEqFontaineXiPow
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRPlusIsDomainBdRIsField
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCompatibleRootsOfUnityAndTiltPadic
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FontaineTIsUnitBcrisAndUniformizerBdRPlus
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPrimitiveTiltedRootOfUnityLocalPeriodRingsData
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodRingsGaloisActionLawsFrobeniusComm
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ThetaBdRPlusSurjectiveKerUnitsEquivariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.MemLoc
 open scoped Formalism.Per
@@ -79,7 +127,7 @@ theorem exists_log [IsAdicComplete (Ideal.span {(p : R)}) R] (tf : ∀ x : R, (p
     intro n
     apply pow_cancel p tf (n + 2)
     have h := congrArg φ (hW n)
-    rw [map_pow, hu, ← pow_mul, ← pow_succ', hW, map_add, map_one, map_mul, map_pow, map_natCast] at h
+    rw [map_pow, hu, ← pow_mul, ← pow_succ', hW, map_add (f := _), map_one, map_mul, map_pow, map_natCast] at h
     linear_combination -h
   obtain ⟨y, hy⟩ := exists_lim p W h1
   refine ⟨y, ?_, ?_⟩
@@ -93,7 +141,7 @@ theorem exists_log [IsAdicComplete (Ideal.span {(p : R)}) R] (tf : ∀ x : R, (p
     ring
   · obtain ⟨V, hV, e, he⟩ := iter p c 5
     have h := congrArg Θ (hW 3)
-    rw [map_pow, hc, ← pow_mul, ← pow_add, hV, map_add, map_one, map_mul, map_pow, map_natCast] at h
+    rw [map_pow, hc, ← pow_mul, ← pow_add, hV, map_add (f := _), map_one, map_mul, map_pow, map_natCast] at h
     have h3 : Θ (W 3) = (p : O) ^ 2 * V := pow_cancel p tfO 5 _ _ (by linear_combination -h)
     have a := map_dvd Θ (hy 3)
     rw [map_pow, map_natCast, map_sub, h3] at a
@@ -114,13 +162,13 @@ theorem exists_exact [IsAdicComplete (Ideal.span {(p : R)}) R] [IsAdicComplete (
     intro n
     induction n with
     | zero => simp [S]
-    | succ n ih => rw [hS, map_add, ih, map_mul, map_pow, map_natCast, hY]; ring
+    | succ n ih => rw [hS, map_add (f := _), ih, map_mul, map_pow, map_natCast, hY]; ring
   have h2 : ∀ n, Θ (S n) = (p : O) ^ 2 * c - (p : O) ^ (n + 2) * cs n := by
     intro n
     induction n with
     | zero => simp [S, cs]
     | succ n ih =>
-      rw [hS, map_add, ih, map_mul, map_pow, map_natCast, hcs]
+      rw [hS, map_add (f := _), ih, map_mul, map_pow, map_natCast, hcs]
       linear_combination (p : O) ^ n * hd (cs n)
   obtain ⟨y, hy⟩ := exists_lim p S fun n => ⟨Y (cs n), by rw [hS]; ring⟩
   refine ⟨y, ?_, ?_⟩
@@ -322,14 +370,14 @@ theorem fundOnto : ∀ (l : ℕ) [Fact l.Prime] (C : Core l), C.FundOnto := by
         linear_combination hz - aDp l (xi C.ε) * z * hv'
       obtain ⟨b, hb1, hb2⟩ := ih (v' * z)
       refine ⟨b + a * o ^ n * s ^ (n + 1), ?_, ?_⟩
-      · rw [map_add, hb1, map_mul, map_mul, map_pow, map_pow, ha1, ho1]
+      · rw [map_add (f := _), hb1, map_mul, map_mul, map_pow, map_pow, ha1, ho1]
         congr 1
         calc _ = a * o ^ n * ((l : Per.Bcris l) * Per.φB l s) ^ (n + 1) := by ring
           _ = _ := by rw [hφ]
       · convert hb2 using 1
-        rw [map_add, map_mul, map_mul, map_pow, map_pow, ha2, ho2]
+        rw [map_add (f := _), map_mul, map_mul, map_pow, map_pow, ha2, ho2]
         conv_lhs => rw [hz']
-        rw [map_add, map_mul, map_pow, map_mul (algebraMap (Per.BdRp l) (Per.BdR l)) (C.j C.t)]
+        rw [map_add (f := _), map_mul, map_pow, map_mul (algebraMap (Per.BdRp l) (Per.BdR l)) (C.j C.t)]
         linear_combination (-(algebraMap (Per.BdRp l) (Per.BdR l) (v' * z) * C.ι s ^ n)) * hT
   intro w
   obtain ⟨n, y, hy⟩ := (BdRField.bdR_isField l).2.2.2 C.ε he w

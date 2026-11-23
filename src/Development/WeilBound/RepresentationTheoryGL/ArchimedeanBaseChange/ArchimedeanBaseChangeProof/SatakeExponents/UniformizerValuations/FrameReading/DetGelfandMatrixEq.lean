@@ -1,4 +1,48 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.GammaZetaNablaCancel
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.GammaZetaNablaCancel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +56,7 @@ namespace GelfH
 def qm (S : Multiset ℂ) : ℂ[X] := (S.map fun c => 1 - C c * X).prod
 
 theorem qm_add (S T : Multiset ℂ) : qm (S + T) = qm S * qm T := by
-  simp [qm, Multiset.map_add, Multiset.prod_add]
+  simp [qm, Multiset.map_add (f := _), Multiset.prod_add]
 
 theorem one_sub_eq (c : ℂ) (hc : c ≠ 0) : (1 - C c * X : ℂ[X]) = C (-c) * (X - C c⁻¹) := by
   rw [mul_sub, ← C_mul, neg_mul, mul_inv_cancel₀ hc]
@@ -117,6 +161,7 @@ def M (A : Matrix (Fin n) (Fin n) ℂ) : Matrix (Fin n) (Fin n) ℂ⟦X⟧ := 1 
 theorem mapC_mul_S (A : Matrix (Fin n) (Fin n) ℂ) :
     A.map (fun a => (PowerSeries.C a : ℂ⟦X⟧)) * S A = Matrix.of fun i j => mk fun k => (A ^ (k + 1)) i j := by
   ext i j m
+
   simp only [Matrix.mul_apply, S, Matrix.map_apply, Matrix.of_apply, map_sum, PowerSeries.coeff_C_mul, PowerSeries.coeff_mk]
   rw [pow_succ', Matrix.mul_apply]
 
@@ -156,6 +201,7 @@ theorem det_rank_one (A : Matrix (Fin n) (Fin n) ℂ) :
   rw [hdet]
   have hsum : ∑ i, ∑ j, S A i j = mk (tot A) := by
     refine PowerSeries.ext (R := ℂ) fun m => ?_
+
     simp [S, tot, map_sum, coeff_mk]
   congr 1
   simp only [Matrix.add_apply, Matrix.one_apply_eq, Matrix.mul_apply, Matrix.replicateRow_apply,

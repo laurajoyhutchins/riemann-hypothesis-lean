@@ -1,7 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTypeGroupBlockLift
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCharLab
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsUnitarisableOfCharIff
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+public import Mathlib.Algebra.Field.ZMod
+import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContractNeZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -312,6 +366,7 @@ theorem TypeVec.up {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
   let x' : S.toSubmodule := ∑ u ∈ O, u
   have hx'fix : ∀ k ∈ KOne F n, ρS k x' = x' := by
     intro k hk
+
     simp only [x', map_sum]
     refine Finset.sum_nbij' (fun u => ρS k u) (fun u => ρS k⁻¹ u) ?_ ?_ ?_ ?_ (fun _ _ => rfl)
     · intro u hu
@@ -327,6 +382,7 @@ theorem TypeVec.up {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
       change (ρS k * ρS k⁻¹) u = u
       rw [← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
   have hfx' : f x' = (O.card : ℂ) • y := by
+
     simp only [x', map_sum]
     have : ∀ u ∈ O, f u = y := by
       intro u hu
@@ -347,6 +403,7 @@ theorem TypeVec.up {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
       rw [Submodule.coe_sum]
       rfl
     have hfT : f T = (O.card : ℂ) • z.coeff.sum fun g c => c • τ (ℓ g) y := by
+
       simp only [T, Finsupp.sum, map_sum, map_smul, f.isIntertwining, hfx', Finset.smul_sum]
       refine Finset.sum_congr rfl fun g _ => ?_
       rw [f.isIntertwining, hfx', map_smul]
@@ -370,7 +427,7 @@ theorem TypeVec.factor {α : Type} [Fintype α] [DecidableEq α] {m : α → Typ
     apply (Basis.piTensorProduct B).repr.injective
     ext r
     simp [hq0 r]
-  let Φm : MultilinearMap ℂ X (X a) :=
+  let Φm : MultilinearMap (RingHom.id ℂ) X (X a) :=
     { toFun := fun x => (∏ b ∈ Finset.univ.erase a, (B b).coord (q b) (x b)) • x a
       map_update_add' := by
         intro _ x i u v
@@ -396,7 +453,7 @@ theorem TypeVec.factor {α : Type} [Fintype α] [DecidableEq α] {m : α → Typ
             rw [Function.update_of_ne (Finset.ne_of_mem_erase hb)]
           have hxa : ∀ u' : X i, Function.update x i u' a = x a := fun u' => Function.update_of_ne (Ne.symm hi) _ _
           have key : (∏ b ∈ Finset.univ.erase a, (B b).coord (q b) (Function.update x i (u + v) b)) • Function.update x i (u + v) a = (∏ b ∈ Finset.univ.erase a, (B b).coord (q b) (Function.update x i (u) b)) • Function.update x i (u) a + (∏ b ∈ Finset.univ.erase a, (B b).coord (q b) (Function.update x i (v) b)) • Function.update x i (v) a := by
-            rw [hR, hR, hR, hxa, hxa, hxa, map_add, add_mul, add_smul]
+            rw [hR, hR, hR, hxa, hxa, hxa, map_add (f := _), add_mul, add_smul]
           convert key
       map_update_smul' := by
         intro _ x i c u
@@ -442,7 +499,7 @@ theorem TypeVec.factor {α : Type} [Fintype α] [DecidableEq α] {m : α → Typ
       apply Finset.prod_congr rfl
       intro b hb
       rw [Pi.mulSingle_eq_of_ne (Finset.ne_of_mem_erase hb), map_one, Module.End.one_apply]
-    | add t₁ t₂ h₁ h₂ => simp only [map_add, h₁, h₂]
+    | add t₁ t₂ h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
   have hcoord : ∀ t : PiTensorProduct ℂ X, (B a).coord (q a) (Φ t) = (Basis.piTensorProduct B).repr t q := by
     intro t
     induction t using PiTensorProduct.induction_on with
@@ -450,13 +507,14 @@ theorem TypeVec.factor {α : Type} [Fintype α] [DecidableEq α] {m : α → Typ
       rw [map_smul, map_smul, hΦt, map_smul, map_smul, Finsupp.smul_apply, Basis.piTensorProduct_repr_tprod_apply]
       simp only [Finsupp.smul_apply, smul_eq_mul, Module.Basis.coord_apply]
       rw [← Finset.prod_erase_mul _ _ (Finset.mem_univ a)]
-    | add t₁ t₂ h₁ h₂ => rw [map_add, map_add, h₁, h₂, map_add, Finsupp.add_apply]
+    | add t₁ t₂ h₁ h₂ => rw [map_add (f := _), map_add (f := _), h₁, h₂, map_add (f := _), Finsupp.add_apply]
   refine ⟨Φ y, fun k hk => ?_, ℓ, hℓ, ?_⟩
   · rw [← hequiv, hfix k hk]
   · intro h0
     apply hq
     rw [← hcoord]
     have : Φ w = z.coeff.sum fun g c => c • ρ a (ℓ g) (Φ y) := by
+
       simp only [hw, Finsupp.sum, map_sum, map_smul, hequiv]
     rw [this, h0, map_zero]
 
@@ -477,6 +535,7 @@ theorem exists_eigen_of_map {G V Y : Type} [Group G] [Finite G] [AddCommGroup V]
   · intro hP
     apply hw
     have hΛ : Λ (∑ x : H, ((ψ x : ℂ))⁻¹ • ρ x w) = (Fintype.card H : ℂ) • Λ w := by
+
       rw [map_sum]
       have : ∀ x : H, Λ (((ψ x : ℂ))⁻¹ • ρ x w) = Λ w := by
         intro x
@@ -486,6 +545,7 @@ theorem exists_eigen_of_map {G V Y : Type} [Group G] [Finite G] [AddCommGroup V]
     rw [hP, map_zero] at hΛ
     exact (smul_eq_zero.1 hΛ.symm).resolve_left (Nat.cast_ne_zero.2 Fintype.card_ne_zero)
   · intro y hy
+
     rw [map_sum, Finset.smul_sum]
     refine Fintype.sum_equiv (Equiv.mulLeft (⟨y, hy⟩ : H)) _ _ ?_
     intro x
@@ -509,8 +569,8 @@ def StdVec {r : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] (ρ : Representa
     (θ : (ZMod p)ˣ →* ℂˣ) (v : V) : Prop :=
   ∀ x : GL (Fin r) (ZMod p), StdBlock a x → ρ x v = (θ (GeneralLinearGroup.det x) : ℂ) • v
 
-open Classical in
 
+open Classical in
 def stdTrace [Fact p.Prime] {r : ℕ} (a : ℕ) (θ : (ZMod p)ˣ →* ℂˣ) (ψ : GL (Fin r) (ZMod p) → ℂ) : ℂ :=
   ∑ x : GL (Fin r) (ZMod p), if StdBlock a x then (((θ (GeneralLinearGroup.det x))⁻¹ : ℂˣ) : ℂ) * ψ x else 0
 

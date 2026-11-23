@@ -1,5 +1,60 @@
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PshMollB
+module
+
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.JensenFormula
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PshMollA
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PshMollB
+public import Mathlib.Analysis.Calculus.DiffContOnCl
+public import Mathlib.Analysis.Complex.CauchyIntegral
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -70,7 +125,7 @@ lemma polyMax_exp_usc (hU : IsOpen U) (hφ : UpperSemicontinuousOn φ U) {R : �
   have hsR : closedBall z (Real.exp s) ⊆ U := (closedBall_subset_closedBall hexp).trans hR
   obtain ⟨δ, hδ, -, hδ'⟩ := polyMax_usc hU hφ (Real.exp_pos s).le hsR (sub_pos.2 hy)
   have hev : ∀ᶠ s' in 𝓝 s, Real.exp s' < Real.exp s + δ :=
-    (Real.continuous_exp.tendsto s) (Iio_mem_nhds (by linarith))
+    (Real.continuous_exp.tendsto s) (Iio_mem_nhds (lt_add_of_pos_right _ hδ))
   apply Filter.Eventually.filter_mono nhdsWithin_le_nhds
   filter_upwards [hev] with s' hs'
   have := hδ' _ (Real.exp_pos s').le hs'.le

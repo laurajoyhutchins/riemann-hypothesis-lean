@@ -1,9 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.WeightLOf
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SatakeParameterSphericalProductSpehQuotients
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MinusculeSetEqDoubleCoset
-import GroundTheory.AutomorphicForms.Satake
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.FGLeaf
+public import GroundTheory.AutomorphicForms.SmoothRep
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SatakeParameterSphericalProductSpehQuotients
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MinusculeSetEqDoubleCoset
+public import GroundTheory.AutomorphicForms.Satake
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.EntZero
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.JoinType
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +54,7 @@ open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions 
 open PositivityTheory.Rg.BcB.E PositivityTheory.Rg.BcB.CG PositivityTheory.Rg.BcB.G8 PositivityTheory.Rg.BcB.SpectralAccumulation PositivityTheory.Rg.BcB.F.Tail PositivityTheory.Rg.BcB.F.RS PositivityTheory.Rg.BcB.F.Eig
 open scoped Classical
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace PositivityTheory.Rg.BcB.F.FG
 
@@ -32,7 +74,7 @@ theorem uSatOf_holds : USatOf := by
   obtain ⟨P, T, hT, hP, hlev⟩ := hSD E n w hw σ
   have hUL : UL n w = ⊤ := if_pos hw
   have hmemUL : ∀ g : GLw n w, g ∈ UL n w := fun g => hUL ▸ Subgroup.mem_top g
-  have hKmap : (KL n w).map (UL n w).subtype = KGL w n := by
+  have hKmap : (KL n w).map (UL n w).subtype = KGL w (n := n) := by
     ext g
     constructor
     · rintro ⟨x, hx, rfl⟩
@@ -41,7 +83,7 @@ theorem uSatOf_holds : USatOf := by
       exact ⟨⟨g, hmemUL g⟩, Subgroup.mem_subgroupOf.2 hg, rfl⟩
   have hoc := GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w n
   have hKLopen : IsOpen (KL n w : Set (UL n w)) := by
-    have : (KL n w : Set (UL n w)) = Subtype.val ⁻¹' (KGL w n : Set (GLw n w)) := by
+    have : (KL n w : Set (UL n w)) = Subtype.val ⁻¹' (KGL w (n := n) : Set (GLw n w)) := by
       ext x
       exact Subgroup.mem_subgroupOf
     rw [this]
@@ -55,11 +97,11 @@ theorem uSatOf_holds : USatOf := by
     exact ⟨hoc.1, hoc.2, hcs_of_finDoset hoc.2 hT'.2, fun k₁ hk₁ k₂ hk₂ g => hT'.1 ⟨k₁, hk₁⟩ ⟨k₂, hk₂⟩ g⟩
   obtain ⟨ϖ₀, hϖ₀⟩ := GlobalTheory.LFun.exists_isUnifV w
 
-  have hTfix : ∀ y ∈ fixed σ.ρ (KL n w), T y ∈ fixed P.ρ (KGL w n) := fun y hy => by
+  have hTfix : ∀ y ∈ fixed σ.ρ (KL n w), T y ∈ fixed P.ρ (KGL w (n := n)) := fun y hy => by
     have := ((hlev (KL n w) hLev _ (hHk ϖ₀ hϖ₀ 0)).2 y hy).1
     rwa [hKmap] at this
   obtain ⟨y₀, hy₀, hy₀0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hfix
-  have hsph : GlobalTheory.LGrp.IsSpherical P.ρ (KGL w n) := by
+  have hsph : GlobalTheory.LGrp.IsSpherical P.ρ (KGL w (n := n)) := by
     intro h
     have h1 := hTfix y₀ hy₀
     rw [h, Submodule.mem_bot] at h1
@@ -73,16 +115,16 @@ theorem uSatOf_holds : USatOf := by
     ext v
     simp [fixed, eig, GroundTheory.Automorphic.fixedVectors]
   have e1 := GlobalTheory.CompanionTheory.SatakeTyping.integralGL_eq_KGL w n
-  have hP1 : Module.finrank ℂ (fixed P.ρ (KGL w n)) = 1 := by
+  have hP1 : Module.finrank ℂ (fixed P.ρ (KGL w (n := n))) = 1 := by
     have := P.irred
     have hne : GroundTheory.Automorphic.fixedVectors P.ρ (GroundTheory.Automorphic.GLnLocal.integralGL (w.adicCompletion E) n) ≠ ⊥ := by
       rw [e1, ← hff]
       exact hsph
     have h := GroundTheory.Automorphic.Spherical.finrank_fixedVectors_eq_one (fun v => P.smooth v) hne
     rwa [e1, ← hff] at h
-  have : FiniteDimensional ℂ (fixed P.ρ (KGL w n)) := Module.finite_of_finrank_pos (by omega)
+  have : FiniteDimensional ℂ (fixed P.ρ (KGL w (n := n))) := Module.finite_of_finrank_pos (by omega)
 
-  let Tf : fixed σ.ρ (KL n w) →ₗ[ℂ] fixed P.ρ (KGL w n) :=
+  let Tf : fixed σ.ρ (KL n w) →ₗ[ℂ] fixed P.ρ (KGL w (n := n)) :=
     { toFun := fun y => ⟨T y, hTfix y.1 y.2⟩
       map_add' := fun a b => Subtype.ext (T.map_add a b)
       map_smul' := fun c a => Subtype.ext (T.map_smul c a) }
@@ -114,7 +156,7 @@ theorem uSatOf_holds : USatOf := by
   have hcond : ∀ v ∈ fixed σ.ρ (KL n w),
       levOp σ.ρ (KL n w) (KL n w) (fun u => Tj ℂ n (Ov E w) ϖ k u.1) LinearMap.id v ∈ fixed σ.ρ (KL n w) :=
     fun v hv => by rw [heig v hv]; exact Submodule.smul_mem _ _ hv
-  rw [twTr, dif_pos hcond]
+  rw [twTr, dite_eq_left hcond]
   have hres : (levOp σ.ρ (KL n w) (KL n w) (fun u => Tj ℂ n (Ov E w) ϖ k u.1) LinearMap.id).restrict hcond =
       c • (1 : Module.End ℂ (fixed σ.ρ (KL n w))) := by
     ext v

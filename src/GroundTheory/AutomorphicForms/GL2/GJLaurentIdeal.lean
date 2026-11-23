@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Complex.Norm
+public import Mathlib.FieldTheory.RatFunc.AsPolynomial
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -27,7 +79,7 @@ theorem algebraMap_mem_laurentSubalgebra (P : ℂ[X]) :
   refine Polynomial.induction_on P (fun a => ?_) (fun p q hp hq => ?_) (fun k a h => ?_)
   · rw [RatFunc.algebraMap_C]
     exact C_mem_laurentSubalgebra a
-  · rw [map_add]
+  · rw [map_add (f := _)]
     exact add_mem hp hq
   · rw [pow_succ, ← mul_assoc, map_mul, RatFunc.algebraMap_X]
     exact mul_mem h X_mem_laurentSubalgebra
@@ -50,7 +102,7 @@ theorem mem_laurentSubalgebra_iff {R : RatFunc ℂ} :
       obtain ⟨P, k, rfl⟩ := hx
       obtain ⟨Q, l, rfl⟩ := hy
       refine ⟨P * Polynomial.X ^ l + Q * Polynomial.X ^ k, k + l, ?_⟩
-      rw [map_add, map_mul, map_mul, map_pow, map_pow, RatFunc.algebraMap_X]
+      rw [map_add (f := _), map_mul, map_mul, map_pow, map_pow, RatFunc.algebraMap_X]
       field_simp
       ring
     | mul x y _ _ hx hy =>
@@ -153,7 +205,7 @@ theorem algebraMap_mul_mem (hX : ∀ R ∈ I, RatFunc.X * R ∈ I) (P : ℂ[X]) 
     rw [RatFunc.algebraMap_C, ← RatFunc.smul_eq_C_mul]
     exact I.smul_mem a hR
   · intro R hR
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
     exact I.add_mem (hp R hR) (hq R hR)
   · intro R hR
     have : algebraMap ℂ[X] (RatFunc ℂ) (Polynomial.C a * Polynomial.X ^ (k + 1)) * R =
@@ -240,7 +292,7 @@ theorem existsUnique_eq_laurent_div (I : Submodule ℂ (RatFunc ℂ))
   let J : Ideal ℂ[X] :=
     { carrier := {Q | algebraMap ℂ[X] (RatFunc ℂ) Q / algebraMap ℂ[X] (RatFunc ℂ) D ∈ I}
       add_mem' := fun {a b} ha hb => by
-        simp only [Set.mem_ofPred_eq, map_add, add_div] at ha hb ⊢
+        simp only [Set.mem_ofPred_eq, map_add (f := _), add_div] at ha hb ⊢
         exact I.add_mem ha hb
       zero_mem' := by
         simp only [Set.mem_ofPred_eq, map_zero, zero_div]

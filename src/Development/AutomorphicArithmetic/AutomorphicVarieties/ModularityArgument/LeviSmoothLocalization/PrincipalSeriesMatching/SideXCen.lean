@@ -1,37 +1,67 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.WinUpDown
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.PolFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.GamLocX
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.LocalEmbeddingNorms.LocIso
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ExpAlg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ExpIndep
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.LocUnr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.SatDict
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.CoefSm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.SideCenOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.SideOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ExistsPullback
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.Regroup
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.UnionOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.CharSep
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnramifiedAtValueHeckeCharCompIdeleNorm
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsGoodConjSelfDualTwistSplitUnramifiedStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeLAdicCharacterAndPrincipalIdealSt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeilDeligneParamOfLadicRepTwistDetAwayFromL
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.QuadraticTwists.AttTwist
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.EventuallyUnr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ContDiffFderivApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.HasDerivAtProdLog
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ShiftOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.HasFDerivAtExpF
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.TestEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.IsOpenEmbeddingVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.BridgeOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ArchOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.GenericFunctionalEquation.GenFE
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHasInfCharGL
-import GroundTheory.AutomorphicForms.GL2.GJLocalFEGamma
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.WinUpDown
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHasInfCharGL
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ArchOf
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.BridgeOf
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.CoefSm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ContDiffFderivApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.HasDerivAtProdLog
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.HasFDerivAtExpF
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.IntegralHWMul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.IsOpenEmbeddingVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.LocUnr
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.SatDict
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.ShiftOf
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ArchimedeanDerivatives.TestEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.GenericFunctionalEquation.GenFE
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.LocalEmbeddingNorms.LocIso
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.GamLocX
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.PolFacts
+import Formalism.DoubleCosetMeasures.Statement
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import GroundTheory.AutomorphicForms.GL2.GJStandardLBump
+import GroundTheory.AutomorphicForms.GL2.GJStandardLCuspidalGen
 import GroundTheory.GlobalFields.TateThesis.RootNumberLocalPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -140,7 +170,7 @@ theorem UpperTheory.V.Z.ImaginaryQuadraticEtaCharacter.sideXCen :
   choose m hm using fun τ : K →+* ℂ => (GlobalTheory.ResW.IrrInfChar.main K n τ).1 σ
   have hn1 : 1 ≤ n := by omega
   obtain ⟨D⟩ := (Cm.toRep σ h).nonempty_adelicDecomposition
-  let μ : Measure (Reduction.normOneGL K n) := Measure.haar
+  let μ : Measure (Reduction.normOneGL (K := K) (n := n)) := Measure.haar
   obtain ⟨a, x, hx, ha, hx0, hxK⟩ := exists_pureTensor_spherical _ D
   obtain ⟨ℓ, fi, hℓs, hℓ1, hℓK, hf, hF1⟩ := matrixCoeff_factorization_of_pureTensor _ D μ a x hx ha hx0
   have hfix : ∀ v ∉ S, x v ∈ fixedVectors (D.finite.π v) (integralGL (v.adicCompletion K) n) := fun v hv =>
@@ -171,8 +201,10 @@ theorem UpperTheory.V.Z.ImaginaryQuadraticEtaCharacter.sideXCen :
     rw [hf', e1]
     simp [e2, hone]
   have hfi0 : ∃ y, fi y ≠ 0 := ⟨_, left_ne_zero_of_mul (hf' 1 ▸ hF1')⟩
-  obtain ⟨φ, φ', k, k', hk, hk', hAd, hA0, hsh, hsh'⟩ := hAS K n hn1 (T p) m (fun τ u => by
-    rw [← hTc τ u p (((m τ).map (u + ·)).prod • p) (show _ = _ by first | exact (hm τ u _ hmem).symm | exact ((hm τ).2 u _ hmem).symm | exact (hm τ _ hmem u).symm | exact ((hm τ).2 _ hmem u).symm), map_smul]) fi hfi hfi0 Measure.haar
+  obtain ⟨φ, φ', k, k', hk, hk', hAd, hA0, hsh, hsh'⟩ := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact hAS K n hn1 (T p) m (fun τ u => by
+        rw [← hTc τ u p (((m τ).map (u + ·)).prod • p) (show _ = _ by first | exact (hm τ u _ hmem).symm | exact ((hm τ).2 u _ hmem).symm | exact (hm τ _ hmem u).symm | exact ((hm τ).2 _ hmem u).symm), map_smul]) fi hfi hfi0 Measure.haar
 
   have hz : ∀ v, ∃ z : Fin n → ℂˣ, v ∉ S →
       Spherical.IsSatakeParameter (F := v.adicCompletion K) (D.finite.π v) (localHaar n v) z ∧ B v = Finset.univ.val.map z :=
@@ -187,10 +219,12 @@ theorem UpperTheory.V.Z.ImaginaryQuadraticEtaCharacter.sideXCen :
   let Φ : ∀ v : HeightOneSpectrum (𝓞 K), Matrix (Fin n) (Fin n) (v.adicCompletion K) → ℂ :=
     fun v => if v ∈ S then Φb v else integralIndicator (v.adicCompletion K) n
   have hΦS : ∀ v ∈ S, Φ v = Φb v := fun v hv => if_pos hv
-  obtain ⟨c, c', hc, hc', hSB1, hG⟩ := genFE hn μ φ₀.2 φ₀.2 (h hmem) S hRS
-    D.finite.π x ℓ hsm hℓs (fun v hv => ⟨hfix v hv, hℓ1 v⟩) (fun v hv => hℓK v (hfix v hv)) D.finite.isIrreducible
-    D.finite.isAdmissible z (fun v hv => (hz v hv).1) fi hf' ⟨1, hF1'⟩ Φ (fun v hv => hΦS v hv ▸ hΦb v)
-    (fun v hv => if_neg hv)
+  obtain ⟨c, c', hc, hc', hSB1, hG⟩ := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact genFE hn μ φ₀.2 φ₀.2 (h hmem) S hRS
+        D.finite.π x ℓ hsm hℓs (fun v hv => ⟨hfix v hv, hℓ1 v⟩) (fun v hv => hℓK v (hfix v hv)) D.finite.isIrreducible
+        D.finite.isAdmissible z (fun v hv => (hz v hv).1) fi hf' ⟨1, hF1'⟩ Φ (fun v hv => hΦS v hv ▸ hΦb v)
+        (fun v hv => if_neg hv)
   obtain ⟨σ₁, Λ, hΛ, h1⟩ := hG φ
   obtain ⟨σ₂, Λ', hΛ', h2⟩ := hG φ'
   have hloc : ∀ s, ∏ v ∈ S, zetaIntegral (localHaar n v) (Φ v)
@@ -248,11 +282,12 @@ theorem UpperTheory.V.Z.ImaginaryQuadraticEtaCharacter.sideXCen :
     refine Finset.prod_congr rfl fun v hv => (hd v hv).2.2.2 s ?_
     have := Finset.single_le_sum (f := fun v => |cv v|) (fun _ _ => abs_nonneg _) hv
     linarith [le_abs_self (cv v)]
-  refine ⟨linPoly (∑ τ, m τ), (monic_multiset_prod_of_monic _ _ fun z _ => monic_X_add_C z).ne_zero,
-    Λ, fun s => Λ' (s + 1), fun s => c * archZeta Measure.haar φ fi s * ∏ v ∈ S, b v,
-    fun s => c' * archZeta Measure.haar (archMatrixFourier φ) (fun y => fi y⁻¹) (1 - s),
-    k, k', c₀, t, r, hΛ, hΛ'.comp (differentiable_id.add_const 1), ?_, hk, hk', fun s hs => ⟨?_, ?_⟩,
-    fun s hs => ⟨?_, ?_⟩⟩
+  set_option synthInstance.maxHeartbeats 200000 in
+    refine ⟨linPoly (∑ τ, m τ), (monic_multiset_prod_of_monic _ _ fun z _ => monic_X_add_C z).ne_zero,
+      Λ, fun s => Λ' (s + 1), fun s => c * archZeta Measure.haar φ fi s * ∏ v ∈ S, b v,
+      fun s => c' * archZeta Measure.haar (archMatrixFourier φ) (fun y => fi y⁻¹) (1 - s),
+      k, k', c₀, t, r, hΛ, hΛ'.comp (differentiable_id.add_const 1), ?_, hk, hk', fun s hs => ⟨?_, ?_⟩,
+      fun s hs => ⟨?_, ?_⟩⟩
   · obtain ⟨s, hs, hA⟩ := far_ne hAd hA0 σ₁
     intro e
     have := (h1 s hs).2.1

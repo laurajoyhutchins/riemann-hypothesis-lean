@@ -1,16 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PrinInf
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SkewGramHalfModule
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.PairwiseDisjointCell
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HeckeLPartialContinuationHolds
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.UnitaryLatticeOrthogonal
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalVolumeLift
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RegularisedSiegelWeilFirstTerm
+public import Formalism.SatakeDualWeyl.StatementG
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsUnitaryIsometryIsotropicFrameLocalRingStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsTameFinitePlaceHermitianAll
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IwasawaDoubledHermitianSpaceNonsplitPlace
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsUnitaryIsometryIsotropicFrameLocalRingStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsOfFixedInt
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StabTransitiveOfLemmas
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsTameFinitePlaceHermitianAll
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DisjointSpanPerpLat
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsDualFamilyOfIsLattice
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsLatticeFrameIsMajorantFrame
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DisjointSpanPerpLat
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsOfFixedInt
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSubConjNotMem
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StabTransitiveOfLemmas
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TendstoOneOfSummable
+import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PrinInf
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +80,8 @@ theorem exists_minor_ne_zero [Nontrivial A] {X : Matrix (Fin n) (Fin r) A} {P : 
     change detRowAlternating (P * X) = detRowAlternating _
     congr 1
     ext i j
-    simp [mul_apply]
+    simp [Matrix.mul_apply]
+
   rw [h, det_one, MultilinearMap.map_sum] at e
   refine one_ne_zero (e.trans (Finset.sum_eq_zero fun f _ => ?_))
   rw [MultilinearMap.map_smul_univ]
@@ -58,7 +109,7 @@ theorem exists_frame (O : Subring A) {K : Type} [Field K] (V : ValuationSubring 
       by_cases ha : a = j
       · subst ha
         have := congrFun (congrFun hX i) b
-        simpa [mul_apply] using this
+        simpa [Matrix.mul_apply] using this
       · simp [ha]
     have := hf (Function.update f j i)
     rw [e, det_updateRow_sum, smul_eq_mul, map_mul, map_mul] at this
@@ -69,7 +120,7 @@ theorem exists_frame (O : Subring A) {K : Type} [Field K] (V : ValuationSubring 
     rw [← hu.mul_val_inv, hY]; rfl
   ext i j
   have := congrFun (congrFun e i) j
-  simpa [mul_apply, one_apply, apply_ite ((↑) : O → A)] using this
+  simpa [Matrix.mul_apply, Matrix.one_apply, id_eq, apply_ite ((↑) : O → A)] using this
 
 theorem isLocalRing_of_equiv (O : Subring A) {K : Type} [Field K] (V : ValuationSubring K) (φ : A ≃+* K)
     (hφ : ∀ y, y ∈ O ↔ φ y ∈ V) : IsLocalRing O :=
@@ -154,7 +205,7 @@ theorem tensNU_mul_inclR (j : R →ₗ[F] R') (hj : ∀ a b, j (a * b) = j a * j
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => simp [inclR]
-  | add y z hy hz => rw [add_mul, map_add, map_add, hy, hz, add_mul]
+  | add y z hy hz => rw [add_mul, map_add (f := _), map_add (f := _), hy, hz, add_mul]
 
 theorem glue_mul_rect {A B : Type} [CommRing A] [CommRing B] (j : B →ₙ+* A) {M : Matrix (Fin n) (Fin n) B}
     {β : Matrix (Fin r) (Fin r) B} {X : Matrix (Fin n) (Fin r) B} {X' : Matrix (Fin n) (Fin r) A}
@@ -163,6 +214,7 @@ theorem glue_mul_rect {A B : Type} [CommRing A] [CommRing B] (j : B →ₙ+* A) 
   congr 1
   ext a b
   have := congrArg j (congrFun (congrFun h a) b)
+
   simp only [Matrix.mul_apply, map_sum, mul_comm (X _ _), hj] at this
   simp only [Matrix.mul_apply, Matrix.map_apply, mul_comm (X' _ _), this]
 
@@ -185,7 +237,7 @@ open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.Genus
 
 theorem exists_of_inert {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     {σ : E →ₐ[F] E} (hσ : IsCMExt F E σ) {c : 𝓞 E} (hc : (c : E) + σ c = 1) {n r : ℕ}
-    {J : Matrix (Fin n) (Fin n) E} (hJ : IsHermND σ J) {L : Submodule (𝓞 E) (Fin n → E)} [Submodule.IsLattice E L]
+    {J : Matrix (Fin n) (Fin n) E} (hJ : IsHermND σ J) {L : Submodule (𝓞 E) (Fin n → E)} [Submodule.IsFullLattice E L]
     {v : HeightOneSpectrum (𝓞 F)} {w : HeightOneSpectrum (𝓞 E)} (hw : Formalism.UG.IsInertAt F E v w)
     (hv : GlobalTheory.IndefiniteRowSideFullHecke.UnitaryLatticeOrthogonal.UnramAt F E v) (hL : IsSelfDualAt σ J L v) {e : Matrix (Fin n) (Fin r) E}
     {p : Matrix (Fin r) (Fin n) E} (hp : p * e = 1) (he : Formalism.UG.cT (σ : E →+* E) e * J * e = 0) (y : GLoc σ J v) :
@@ -203,7 +255,7 @@ theorem exists_of_inert {F E : Type} [Field F] [NumberField F] [Field E] [Number
     (σ := Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sigR (Fv F v) σ) (fun _ => sigR_mem_intLoc σ) (sigR_invol (InertChart.conj_conj hσ))
     (τ := ι c) (tmul_mem_intLoc (one_mem _) c)
     (by change ι c + ι (σ c) = 1
-        rw [← map_add, hc, map_one]) hN
+        rw [← map_add (f := _), hc, map_one]) hN
     (J := JR (Fv F v) J) (by ext i j; exact congrArg ι (hJ.1 i j))
     ((Matrix.isUnit_iff_isUnit_det _).2 (isUnit_det_JR hJ.2)) (Λ := latLoc F L v)
     (fun y => Submodule.ext_iff.1 hL y) (ha v) (X := e.map ι) (P := p.map ι)

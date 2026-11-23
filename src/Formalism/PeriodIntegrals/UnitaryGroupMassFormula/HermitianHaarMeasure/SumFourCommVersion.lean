@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HermitianHaarMeasure.LowerRightNeZeroOfUpperRightZero
+module
+
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HermitianHaarMeasure.NestedMinorExpansionOneZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -136,75 +184,5 @@ theorem starConj {A : Type*} [Ring A] [StarRing A] [Algebra ℂ A] [StarModule �
   rw [h1, hQH, hHP]
   push_cast
   ring
-
-theorem relCov {A : Type*} [Ring A] [StarRing A] [Algebra ℂ A] [StarModule ℂ A] {m : ℕ}
-    (Y Yb : Fin m → A) (Hm P Q : Matrix (Fin m) (Fin m) ℂ) (ε : Fin m → ℤˣ)
-    (hYb : ∀ c, Yb c = ∑ l, Hm l c • star (Y l)) (hQ : ∀ i j, star (Q i j) = P j i)
-    (hHP : ∀ k b, ∑ j, Hm k j * P j b = P k b * ((ε b : ℤ) : ℂ)) (c : Fin m) :
-    covC P Yb c = ((ε c : ℤ) : ℂ) • star (vecC Q Y c) := by
-  simp only [covC, vecC, hYb, star_sum, star_smul, hQ, Finset.smul_sum, smul_smul]
-  rw [Finset.sum_comm]
-  simp only [← Finset.sum_smul]
-  refine Finset.sum_congr rfl (fun k _ => ?_)
-  congr 1
-  rw [Finset.sum_congr rfl (fun j _ => mul_comm (P j c) (Hm k j)), hHP k c]
-  ring
-
-theorem relX {m : ℕ} (x xb : Fin m → ℂ) (Hm P Q : Matrix (Fin m) (Fin m) ℂ) (ε : Fin m → ℤˣ)
-    (hxb : ∀ c, xb c = ∑ l, Hm l c * star (x l)) (hQ : ∀ i j, star (Q i j) = P j i)
-    (hHP : ∀ k b, ∑ j, Hm k j * P j b = P k b * ((ε b : ℤ) : ℂ)) (c : Fin m) :
-    (xb ᵥ* P) c = ((ε c : ℤ) : ℂ) * star ((Q *ᵥ x) c) := by
-  simp only [Matrix.vecMul, Matrix.mulVec, dotProduct, hxb, star_sum, star_mul', hQ, Finset.sum_mul,
-    Finset.mul_sum]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl (fun k _ => ?_)
-  have h := hHP k c
-  have h2 : ∑ j, Hm k j * star (x k) * P j c = (∑ j, Hm k j * P j c) * star (x k) := by
-    rw [Finset.sum_mul]
-    refine Finset.sum_congr rfl (fun j _ => ?_)
-    ring
-  rw [h2, h]
-  ring
-
-theorem diagInvol {m : ℕ} (Hm : Matrix (Fin m) (Fin m) ℂ) (hH : Hmᴴ = Hm) (h2 : Hm * Hm = 1) :
-    ∃ (U : Matrix (Fin m) (Fin m) ℂ) (ε : Fin m → ℤˣ), star U * U = 1 ∧ U * star U = 1 ∧
-      Hm * U = U * diagonal (fun j => ((ε j : ℤ) : ℂ)) := by
-  have hA : Hm.IsHermitian := hH
-  have hu1 : star (hA.eigenvectorUnitary : Matrix (Fin m) (Fin m) ℂ) * (hA.eigenvectorUnitary : Matrix (Fin m) (Fin m) ℂ) = 1 :=
-    Matrix.mem_unitaryGroup_iff'.mp hA.eigenvectorUnitary.2
-  have hu2 : (hA.eigenvectorUnitary : Matrix (Fin m) (Fin m) ℂ) * star (hA.eigenvectorUnitary : Matrix (Fin m) (Fin m) ℂ) = 1 :=
-    Matrix.mem_unitaryGroup_iff.mp hA.eigenvectorUnitary.2
-  set U : Matrix (Fin m) (Fin m) ℂ := (hA.eigenvectorUnitary : Matrix (Fin m) (Fin m) ℂ) with hU
-  set lam : Fin m → ℂ := fun j => ((hA.eigenvalues j : ℝ) : ℂ) with hlam
-  have hHU : Hm * U = U * diagonal lam := by
-    ext i j
-    rw [Matrix.mul_diagonal, Matrix.mul_apply]
-    have h := congrFun (hA.mulVec_eigenvectorBasis j) i
-    simp only [Matrix.mulVec, dotProduct, Pi.smul_apply, Complex.real_smul] at h
-    simp only [hU, Matrix.IsHermitian.eigenvectorUnitary_apply, hlam]
-    rw [h, mul_comm]
-  have hD1 : star U * Hm * U = diagonal lam := by
-    rw [Matrix.mul_assoc, hHU, ← Matrix.mul_assoc, hu1, Matrix.one_mul]
-  have hD : diagonal lam * diagonal lam = 1 := by
-    rw [← hD1]
-    simp only [Matrix.mul_assoc]
-    rw [← Matrix.mul_assoc U (star U), hu2, Matrix.one_mul, ← Matrix.mul_assoc Hm Hm, h2, Matrix.one_mul, hu1]
-  have hr : ∀ j, hA.eigenvalues j = 1 ∨ hA.eigenvalues j = -1 := by
-    intro j
-    have h := congrFun (congrFun hD j) j
-    rw [Matrix.diagonal_mul_diagonal, Matrix.diagonal_apply_eq, Matrix.one_apply_eq] at h
-    simp only [hlam] at h
-    have h' : hA.eigenvalues j * hA.eigenvalues j = 1 := by exact_mod_cast h
-    exact mul_self_eq_one_iff.mp h'
-  refine ⟨U, fun j => if hA.eigenvalues j = 1 then 1 else -1, hu1, hu2, ?_⟩
-  rw [hHU]
-  congr 2
-  funext j
-  rcases hr j with h | h
-  · simp [hlam, h]
-  · have hn : ¬ hA.eigenvalues j = 1 := by rw [h]; norm_num
-    show ((hA.eigenvalues j : ℝ) : ℂ) = (((if hA.eigenvalues j = 1 then (1 : ℤˣ) else -1 : ℤˣ) : ℤ) : ℂ)
-    rw [if_neg hn, h]
-    simp
 
 end PI.QnHermHaar

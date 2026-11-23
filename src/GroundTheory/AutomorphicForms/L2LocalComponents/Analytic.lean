@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.HarishChandraRegularity
-import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.Density
+module
+
+public import GroundTheory.AutomorphicForms.GKModules.Casimir
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+public import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.Density
+public import GroundTheory.AutomorphicForms.HarishChandraRegularity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Analytic.Order
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -75,7 +121,7 @@ theorem rightUAction_coeffFun (ℓ : E →L[ℂ] ℂ) (u : UniversalEnvelopingAl
   | mul a b iha ihb =>
     rw [map_mul, map_mul, map_mul, Module.End.mul_apply, Module.End.mul_apply, ihb, iha]
   | add a b iha ihb =>
-    rw [map_add, map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, iha, ihb]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, iha, ihb]
     exact ((h.coeffLin π ℓ).map_add _ _).symm
 
 noncomputable def laplacianElt {ι : Type*} [Fintype ι] (bL : Module.Basis ι ℝ h.lieSubalgebra) :
@@ -84,6 +130,7 @@ noncomputable def laplacianElt {ι : Type*} [Fintype ι] (bL : Module.Basis ι �
 
 theorem rightUAction_laplacianElt {ι : Type*} [Fintype ι] (bL : Module.Basis ι ℝ h.lieSubalgebra) :
     h.rightUAction (F := ℂ) (h.laplacianElt bL) = h.laplacian bL := by
+
   simp only [laplacianElt, laplacian, map_sum, map_mul, rightUAction_ι]
 
 theorem comp_aeval_eq {V W : Type*} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
@@ -97,7 +144,7 @@ theorem comp_aeval_eq {V W : Type*} [AddCommGroup V] [Module ℂ V] [AddCommGrou
       rw [pow_succ, pow_succ, Module.End.mul_eq_comp, Module.End.mul_eq_comp, ← LinearMap.comp_assoc,
         ih, LinearMap.comp_assoc, hAB, LinearMap.comp_assoc]
   induction P using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add, map_add, LinearMap.comp_add, LinearMap.add_comp, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), LinearMap.comp_add, LinearMap.add_comp, hp, hq]
   | monomial k c =>
     rw [aeval_monomial, aeval_monomial]
     ext v

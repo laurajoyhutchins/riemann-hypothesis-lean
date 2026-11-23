@@ -1,11 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ZAEqAlgebraMapPt
-import Development.AutomorphicArithmetic.CyclotomicBounds.DeRhamLattices.FilZeroEqRangeCDAndCDInjective
-import Development.AutomorphicArithmetic.CyclotomicBounds.DeRhamLattices.ExistsPrimePowSmulMemLattice
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ZAEqAlgebraMapPt
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
+public import Development.AutomorphicArithmetic.CyclotomicBounds.DeRhamLattices.ExistsPrimePowSmulMemLattice
+public import Development.AutomorphicArithmetic.CyclotomicBounds.DeRhamLattices.FilZeroEqRangeCDAndCDInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Matrix
 open scoped Formalism.Per
-set_option maxHeartbeats 2000000
-set_option synthInstance.maxHeartbeats 400000
+
+
 
 private theorem span_abs {Q Z O D B V κ : Type} [CommRing Q] [CommRing Z] [CommRing O] [CommRing D]
     [CommRing B] [Algebra Z O] [Algebra Z D] [Algebra Q B] [AddCommGroup V] [Module Q V] [Module O V]
@@ -24,15 +65,16 @@ private theorem span_abs {Q Z O D B V κ : Type} [CommRing Q] [CommRing Z] [Comm
     obtain ⟨d, hd⟩ := ha
     obtain ⟨d', hd'⟩ := ha'
     refine ⟨d + d', ?_⟩
-    rw [map_add, hd, hd', ← Finset.sum_add_distrib]
+    rw [map_add (f := _), hd, hd', ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun k _ => ?_
-    rw [Pi.add_apply, map_add, AddMonoidHom.add_apply]
+    rw [Pi.add_apply, map_add (f := _), AddMonoidHom.add_apply]
   | tmul v x =>
     obtain ⟨y0, hy0⟩ := hF x x.2
     obtain ⟨q, t, y1, ht, hy⟩ := hT v y0
     refine ⟨fun k => b.repr t k ⊗ₜ[Z] y1, ?_⟩
     have h1 : (t : V) = ∑ k, b.repr t k • ((b k : T) : V) := by
       have h2 := congrArg T.subtype (b.sum_repr t).symm
+
       rw [map_sum] at h2
       simpa only [map_smul, Submodule.subtype_apply] using h2
     rw [hf, hy0, hy, ← TensorProduct.smul_tmul, ← ht, h1, TensorProduct.sum_tmul]

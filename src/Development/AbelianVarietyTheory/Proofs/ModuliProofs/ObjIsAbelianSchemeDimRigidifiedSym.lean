@@ -1,13 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RankPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
-import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.IsLocallyConstantRankAtStalkEigenSub
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RankPf
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.IsLocallyConstantRankAtStalkEigenSub
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.AlgChart
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,7 +84,7 @@ theorem algChart_of_relativeDimension {R : Type} [CommRing R] (B : Type) [CommRi
   have hπ : ∀ m : ℕ, ∃ π : B →ₐ[R] JetR R (Fin n) m, (jetAug R (Fin n) m).comp π = ε' ∧
       ∀ j, π (sX R j) = algebraMap R _ (ε' (sX R j)) + zR m j := fun m =>
     etale_exists (n := n) ε' (jetAug R (Fin n) m) (ker_jetAug_nil (Fin n) m) _ (fun j => by
-      rw [map_add, AlgHom.commutes, Algebra.algebraMap_self, RingHom.id_apply, jetAug_zR, add_zero])
+      rw [map_add (f := _), AlgHom.commutes, Algebra.algebraMap_self, RingHom.id_apply, jetAug_zR, add_zero])
   choose π hπaug hπX using hπ
   refine ⟨π, ?_, ?_, ?_⟩
   · intro m
@@ -46,7 +93,7 @@ theorem algChart_of_relativeDimension {R : Type} [CommRing R] (B : Type) [CommRi
       exact hπaug (m + 1)
     · exact hπaug m
     · intro j
-      rw [AlgHom.comp_apply, hπX, hπX, map_add, AlgHom.commutes]
+      rw [AlgHom.comp_apply, hπX, hπX, map_add (f := _), AlgHom.commutes]
       rfl
   · intro m
     refine etale_ext (n := n) ε' (jetAug R (Fin n) 0) (ker_jetAug_nil (Fin n) 0) _ _ ?_ ?_ ?_
@@ -55,7 +102,7 @@ theorem algChart_of_relativeDimension {R : Type} [CommRing R] (B : Type) [CommRi
     · ext s
       simp
     · intro j
-      rw [AlgHom.comp_apply, hπX, map_add, AlgHom.commutes, AlgHom.comp_apply, jetZero_zR, add_zero]
+      rw [AlgHom.comp_apply, hπX, map_add (f := _), AlgHom.commutes, AlgHom.comp_apply, jetZero_zR, add_zero]
       rfl
   · intro A _ _ aug m hJ φ' hφ'aug
     have hJn := nil_of_pow _ hJ
@@ -74,14 +121,14 @@ theorem algChart_of_relativeDimension {R : Type} [CommRing R] (B : Type) [CommRi
         exact hπaug m
       · exact hφ'aug
       · intro j
-        rw [AlgHom.comp_apply, hπX, map_add, AlgHom.commutes, jetLift_zR, add_sub_cancel]
+        rw [AlgHom.comp_apply, hπX, map_add (f := _), AlgHom.commutes, jetLift_zR, add_sub_cancel]
     refine ⟨ψ, ⟨hψaug, hψπ⟩, ?_⟩
     rintro ψ₂ ⟨_, h4⟩
     apply jet_ext
     intro j
     rw [jetLift_zR]
     have := AlgHom.congr_fun h4 (sX R j)
-    rw [AlgHom.comp_apply, hπX, map_add, AlgHom.commutes] at this
+    rw [AlgHom.comp_apply, hπX, map_add (f := _), AlgHom.commutes] at this
     rw [← this, add_sub_cancel_left]
 
 theorem univChart_of_relativeDimension {k : Type} [Field k] (G : Over (Spec (CommRingCat.of k))) [GrpObj G] {n : ℕ}
@@ -144,8 +191,8 @@ section Count
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] (H : Host E) {k : Type} [Field k] [IsAlgClosed k]
   [CharZero k]
 
-open Classical in
 
+open Classical in
 theorem two_mul_sum_embeddings {r : k} (hr : r ^ 2 = -(H.d : k)) (p q : ℕ) :
     2 * ∑ φ : E →+* k, (if φ (H.rt : E) = r then p else q) = Module.finrank ℚ E * (p + q) := by
   let c : E ≃+* E := (IsCMField.complexConj E).toRingEquiv

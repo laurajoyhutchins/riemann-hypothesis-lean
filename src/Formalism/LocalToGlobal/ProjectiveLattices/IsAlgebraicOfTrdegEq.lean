@@ -1,6 +1,49 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveOpen
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveInstSt
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveOpen
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveInstSt
+public import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +55,8 @@ section Alg
 
 variable {K L : Type*} [Field K] [Field L] [Algebra K L] {N : ℕ}
 
-variable (K) in
 
+variable (K) in
 def HomQ (x : Fin N → L) (f : L) : Prop :=
   ∃ (e : ℕ) (A B : MvPolynomial (Fin N) K), A.IsHomogeneous e ∧ B.IsHomogeneous e ∧
     MvPolynomial.aeval x B ≠ 0 ∧ f = MvPolynomial.aeval x A / MvPolynomial.aeval x B
@@ -29,7 +72,7 @@ theorem homQ_add {x : Fin N → L} {f g : L} (hf : HomQ K x f) (hg : HomQ K x g)
   obtain ⟨e', A', B', hA', hB', hBx', rfl⟩ := hg
   exact ⟨e + e', A * B' + B * A', B * B', (hA.mul hB').add (hB.mul hA'), hB.mul hB',
     by rw [map_mul]; exact mul_ne_zero hBx hBx',
-    by rw [map_add, map_mul, map_mul, map_mul, div_add_div _ _ hBx hBx']⟩
+    by rw [map_add (f := _), map_mul, map_mul, map_mul, div_add_div _ _ hBx hBx']⟩
 
 theorem homQ_inv {x : Fin N → L} {f : L} (hf : HomQ K x f) : HomQ K x f⁻¹ := by
   obtain ⟨e, A, B, hA, hB, hBx, rfl⟩ := hf
@@ -45,8 +88,8 @@ theorem homQ_ratio (x : Fin N → L) (m k₀ : Fin N) (hx : x k₀ ≠ 0) : HomQ
   ⟨1, MvPolynomial.X m, MvPolynomial.X k₀, MvPolynomial.isHomogeneous_X _ _, MvPolynomial.isHomogeneous_X _ _,
     by simpa using hx, by simp⟩
 
-variable (K) in
 
+variable (K) in
 def homQField (x : Fin N → L) : IntermediateField K L where
   carrier := {f | HomQ K x f}
   mul_mem' := fun ha hb => homQ_mul ha hb

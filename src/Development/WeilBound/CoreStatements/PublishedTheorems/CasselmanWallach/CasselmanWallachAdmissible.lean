@@ -1,7 +1,47 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.CasselmanWallach.SmoothSeminormAndSobolevBounds
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.CasselmanWallachAdm
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.CasselmanWallachLift
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsClosedImageOfSobolevLower
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.CasselmanWallach.SmoothSeminormAndSobolevBounds
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.CasselmanWallachLift
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsClosedImageOfSobolevLower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,21 +146,6 @@ theorem cw_of_steps (hM : MaxPr) (hmod : AllIrr fun _ ε _ _ _ σ => ∃ E, KDer
         exact ⟨0, (smooth (Jm ε) σ).zero_mem, map_zero T⟩
     rw [this]
     exact isClosed_singleton
-
-theorem casselman_wallach_admissible (c5 : C5) (h : GlobalTheory.Published.CasselmanWallach) : GlobalTheory.Published.CasselmanWallachAdm := by
-  intro n ε H _ _ _ σ hU hI E _ _ _ _ _ _ p π dπ hπ T₀ hT₀ _
-  obtain ⟨T, h1, h2, -, h4, h5⟩ := h n ε H σ hU hI E p π dπ hπ T₀ hT₀
-  refine ⟨T, h1, h2, h4, fun hinj S hS => ?_⟩
-  by_cases h0 : ∃ v, IsKFin ε σ v ∧ T₀ v ≠ 0
-  · exact h5 h0 S hS
-  · refine ⟨0, continuous_const, fun w hw => ?_⟩
-    refine le_of_forall_pos_le_add fun δ hδ => ?_
-    obtain ⟨v, hv, h⟩ := (c5 n ε H σ hU hI).2.2 w hw S hS δ hδ
-    have : v = 0 := hinj v hv (by
-      by_contra h
-      exact h0 ⟨v, hv, h⟩)
-    rw [this, sub_zero] at h
-    simpa using h.le
 
 end PositivityTheory.CW
 

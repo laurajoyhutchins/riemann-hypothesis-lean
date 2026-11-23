@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GGMirabolic
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GGMirabolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,45 +48,6 @@ open scoped Classical ComplexConjugate
 namespace Formalism.L2.SG.NormCut
 
 section Abs
-
-theorem colSum {G : Type*} [Group G] [Fintype G] (U : Set G) (p : G → ℂ) (h0 : ∀ x, x ∉ U → p x = 0)
-    (hr : ∀ x, ∀ w ∈ U, p (x * w) = p x * p w) (hn : ∀ w ∈ U, conj (p w) * p w = 1) (i j : G) :
-    ∑ s : G, ∑ s' : G, conj (p (s⁻¹ * i * s')) * p (s⁻¹ * j * s') =
-      (Nat.card U : ℂ) * ∑ s : G, conj (p (s⁻¹ * (i * j⁻¹) * s)) := by
-  rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl fun s _ => ?_
-  rw [← Equiv.sum_comp (Equiv.mulLeft (j⁻¹ * s))]
-  simp only [Equiv.coe_mulLeft]
-  have h1 : ∀ w : G, conj (p (s⁻¹ * i * (j⁻¹ * s * w))) * p (s⁻¹ * j * (j⁻¹ * s * w)) =
-      if w ∈ U then conj (p (s⁻¹ * (i * j⁻¹) * s)) else 0 := by
-    intro w
-    have hw : s⁻¹ * j * (j⁻¹ * s * w) = w := by group
-    have hw2 : s⁻¹ * i * (j⁻¹ * s * w) = s⁻¹ * (i * j⁻¹) * s * w := by group
-    rw [hw, hw2]
-    split_ifs with h
-    · rw [hr _ w h, map_mul, mul_assoc, hn w h, mul_one]
-    · rw [h0 w h, mul_zero]
-  simp only [h1]
-  rw [Finset.sum_ite, Finset.sum_const_zero, add_zero, Finset.sum_const, nsmul_eq_mul]
-  have hc : ((Finset.univ.filter fun w => w ∈ U).card : ℂ) = (Nat.card U : ℂ) := by
-    rw [Nat.card_eq_fintype_card, ← Set.toFinset_card]
-    congr 2
-    ext w
-    simp
-  rw [hc]
-
-theorem orbitSum {G C : Type*} [Group G] [Fintype G] [Fintype C] (A U : Set G) (s : C → G)
-    (hb : Function.Bijective (fun x : A × C × U => (x.1 : G) * s x.2.1 * (x.2.2 : G))) (f : G → ℂ)
-    (hf : ∀ x, ∀ a ∈ A, ∀ w ∈ U, f (a * x * w) = f x) :
-    ∑ x : G, f x = (Nat.card A : ℂ) * (Nat.card U : ℂ) * ∑ c : C, f (s c) := by
-  rw [← Function.Bijective.sum_comp hb f]
-  simp only [Fintype.sum_prod_type]
-  have h1 : ∀ (a : A) (c : C) (w : U), f ((a : G) * s c * (w : G)) = f (s c) :=
-    fun a c w => hf (s c) a a.2 w w.2
-  simp only [h1, Finset.sum_const, Finset.card_univ, nsmul_eq_mul, Nat.card_eq_fintype_card]
-  rw [Finset.mul_sum, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun c _ => ?_
-  ring
 
 def GamProdSum : Prop :=
   ∀ (ι : Type) [Fintype ι] (Fq : ι → Type) [∀ v, Field (Fq v)] [∀ v, Fintype (Fq v)] (k : ℕ)

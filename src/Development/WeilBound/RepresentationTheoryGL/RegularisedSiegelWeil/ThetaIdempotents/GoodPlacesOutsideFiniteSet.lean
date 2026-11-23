@@ -1,5 +1,47 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SectionEigenfunctionMaximalCompact
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.ConjUnitIdeleAt
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SectionEigenfunctionMaximalCompact
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.ConjUnitIdeleAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LowerLeftBlock
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,15 +75,15 @@ theorem PositivityTheory.Rg.Rsw.exists_tau {F E : Type} [Field F] [NumberField F
     | tmul a x =>
       simp only [splitProj, Algebra.TensorProduct.lift_tmul, AlgHom.id_apply]
       rw [e a x, map_smul, Prod.smul_fst, smul_eq_mul, hτ]
-    | add y z hy hz => simp only [map_add, Prod.fst_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), Prod.fst_add, hy, hz]
   · induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a x =>
       simp only [splitProj, Algebra.TensorProduct.lift_tmul, AlgHom.id_apply, AlgHom.comp_apply]
       rw [e a x, map_smul, Prod.smul_snd, smul_eq_mul, hτ, hx]
-    | add y z hy hz => simp only [map_add, Prod.snd_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), Prod.snd_add, hy, hz]
 
-set_option maxHeartbeats 1000000 in
+
 theorem PositivityTheory.Rg.Rsw.jacquet_piatetski_first_bound : GoodPlacesOutsideFiniteSet := by
   intro D r ψ hψ χ hχ hr S
   obtain ⟨v, hvS, P, hP1, hP2, hP3⟩ := PositivityTheory.Rg.Rsw.L.LJPos.placeEx D ψ hψ χ hχ r hr S

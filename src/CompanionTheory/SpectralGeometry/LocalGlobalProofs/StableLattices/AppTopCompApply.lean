@@ -1,8 +1,52 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.ObstructionLifting.ObstructionLift
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PoincareDeRhamDuality
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CubeTheorem
+module
+
+public import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.ObstructionLifting.H1StructureDimLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -84,14 +128,12 @@ lemma exists_invariant [Module.Flat A B] (u w : B ⊗[A] B) (huw : u * w = 1)
   have h23 : ∀ z : B ⊗[A] B, pr e₂ e₃ z = (1 : B) ⊗ₜ[A] z := by
     intro z
     induction z with
-    | zero => simp
     | add a b ha hb => simp [ha, hb, TensorProduct.tmul_add]
     | tmul a b => simp [e₂, e₃, Algebra.TensorProduct.tmul_mul_tmul]
   have hl : ∀ z : B ⊗[A] B, d.lTensor B z = pr e₁ e₂ z - pr e₂ e₃ u * pr e₁ e₃ z := by
     intro z
     induction z with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb, mul_add]; ring
+    | add a b ha hb => simp only [map_add (f := _), ha, hb, mul_add]; ring
     | tmul a b =>
       simp only [LinearMap.lTensor_tmul, hd, TensorProduct.tmul_sub, h23]
       congr 1
@@ -119,7 +161,6 @@ lemma exists_invariant [Module.Flat A B] (u w : B ⊗[A] B) (huw : u * w = 1)
       m ((LinearMap.ker d).subtype.lTensor B z) ∈ Ideal.span ((LinearMap.ker d : Submodule A B) : Set B) := by
     intro z
     induction z with
-    | zero => simp
     | add a b ha hb => simpa using Ideal.add_mem _ ha hb
     | tmul a b =>
       simp only [LinearMap.lTensor_tmul, Submodule.subtype_apply, m]

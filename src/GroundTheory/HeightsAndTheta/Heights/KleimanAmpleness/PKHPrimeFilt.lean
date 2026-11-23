@@ -1,5 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgFiltSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgFiltSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -56,8 +103,8 @@ theorem mem_colon {A : Submodule (MRingOver S ι) M} {g : M} {p : MRingOver S ι
     p ∈ colon A g ↔ p • g ∈ A := by
   simp [colon]
 
-variable (𝓜) in
 
+variable (𝓜) in
 def IsGradedSub (A : Submodule (MRingOver S ι) M) : Prop :=
   ∀ m ∈ A, ∀ c, (DirectSum.decompose 𝓜 m c : M) ∈ A
 
@@ -70,7 +117,7 @@ theorem decompose_smul (hgr : IsMGraded S ι 𝓜) {g : M} {e : K → ℤ} (hg :
   rw [Finset.sum_smul, DirectSum.decompose_sum, DFinsupp.finsetSum_apply, Submodule.coe_sum,
     weightedHomogeneousComponent_apply, Finset.sum_smul, Finset.sum_filter]
   refine Finset.sum_congr rfl fun d _ => ?_
-  have hm : monomial d (coeff d r) • g ∈ 𝓜 (shift e (Finsupp.weight (blockWeight ι) d)) :=
+  have hm : monomial d (AddMonoidAlgebra.coeff r d) • g ∈ 𝓜 (shift e (Finsupp.weight (blockWeight ι) d)) :=
     hgr.2 _ e _ g (isMultiHomog_of_isWeightedHomogeneous
       (isWeightedHomogeneous_monomial _ _ _ rfl)) hg
   split_ifs with h
@@ -85,7 +132,7 @@ theorem decompose_smul_mem_span (hgr : IsMGraded S ι 𝓜) {g : M} {e : K → �
   rw [← r.support_sum_monomial_coeff]
   rw [Finset.sum_smul, DirectSum.decompose_sum, DFinsupp.finsetSum_apply, Submodule.coe_sum]
   refine Submodule.sum_mem _ fun d _ => ?_
-  have hm : monomial d (coeff d r) • g ∈ 𝓜 (shift e (Finsupp.weight (blockWeight ι) d)) :=
+  have hm : monomial d (AddMonoidAlgebra.coeff r d) • g ∈ 𝓜 (shift e (Finsupp.weight (blockWeight ι) d)) :=
     hgr.2 _ e _ g (isMultiHomog_of_isWeightedHomogeneous
       (isWeightedHomogeneous_monomial _ _ _ rfl)) hg
   by_cases h : shift e (Finsupp.weight (blockWeight ι) d) = c
@@ -178,8 +225,8 @@ theorem exists_prime_colon [IsNoetherianRing S] (hgr : IsMGraded S ι 𝓜)
 
 variable (ι 𝓜)
 
-open Classical in
 
+open Classical in
 def next [IsNoetherianRing S] (A : Submodule (MRingOver S ι) M) : M × (K → ℤ) :=
   if h : IsMGraded S ι 𝓜 ∧ IsGradedSub 𝓜 A ∧ A ≠ ⊤ then
     Classical.choose (exists_prime_colon h.1 h.2.1 h.2.2) else (0, 0)
@@ -197,7 +244,7 @@ theorem next_spec [IsNoetherianRing S] (hgr : IsMGraded S ι 𝓜) {A : Submodul
     (colon A (next ι 𝓜 A).1).IsPrime ∧
       (colon A (next ι 𝓜 A).1).IsHomogeneous (weightedHomogeneousSubmodule S (blockWeight ι)) := by
   unfold next
-  rw [dif_pos ⟨hgr, hA, hne⟩]
+  rw [dite_eq_left ⟨hgr, hA, hne⟩]
   exact (Classical.choose_spec (exists_prime_colon hgr hA hne)).2
 
 def seq [IsNoetherianRing S] : ℕ → Submodule (MRingOver S ι) M
@@ -262,8 +309,8 @@ theorem range_fin {M : Type} {r : ℕ} (f : ℕ → M) :
 
 end KHPrimeFilt
 
-open KHPrimeFilt in
 
+open KHPrimeFilt in
 theorem KHPrimeFilt.full : PrimeFiltStatement := by
   intro S _ K _ ι _ M _ _ _ _ 𝓜 hS hfin hgr
   let _ : LinearOrder K := LinearOrder.lift' (Fintype.equivFin K) (Fintype.equivFin K).injective

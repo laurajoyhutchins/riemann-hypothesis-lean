@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LatDictZAbs
-import Lemmata.Denominators.Denom
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LatDictZSt
+public import Formalism.PeriodIntegrals.HermitianGenusExtension.SemilocalHermitianLattices.AlgebraMapNeZeroOfMemHcompl
+public import Lemmata.Denominators.Denom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,24 +52,6 @@ namespace Formalism.L2.SG.Pf.LatDictZ.Z0.LF
 open ReciprocityTheory.ChartRestriction.L3 ReciprocityTheory.ChartRestriction.L3.WA
 
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ}
-
-theorem nat_denom (e : E) : ∃ m : ℕ, 0 < m ∧ ∃ r : 𝓞 E, (m : E) * e = algebraMap (𝓞 E) E r := by
-  have hQi : IsIntegral ℚ e := Algebra.IsIntegral.isIntegral (R := ℚ) e
-  obtain ⟨y, hy0, hint⟩ : ∃ y : ℤ, y ≠ 0 ∧ IsIntegral ℤ ((y : E) * e) := by
-    have hZ : IsAlgebraic ℤ e := (IsFractionRing.isAlgebraic_iff ℤ ℚ E).mpr hQi.isAlgebraic
-    obtain ⟨y, hy0, hi⟩ := hZ.exists_integral_multiple
-    exact ⟨y, hy0, by simpa [zsmul_eq_mul] using hi⟩
-  have hint' : IsIntegral ℤ ((y.natAbs : E) * e) := by
-    rcases Int.natAbs_eq y with h | h
-    · rw [h] at hint
-      rwa [Int.cast_natCast] at hint
-    · rw [h] at hint
-      have h2 := hint.neg
-      push_cast at h2
-      simpa using h2
-  refine ⟨y.natAbs, Int.natAbs_pos.mpr hy0, ?_⟩
-  exact ⟨IsIntegralClosure.mk' (𝓞 E) ((y.natAbs : E) * e) hint',
-    (IsIntegralClosure.algebraMap_mk' (𝓞 E) _ hint').symm⟩
 
 theorem vec_denom (M : Submodule (𝓞 E) (Fin n → E)) (hsp : Submodule.span E (M : Set (Fin n → E)) = ⊤)
     (v : Fin n → E) : ∃ m : ℕ, 0 < m ∧ (m : 𝓞 E) • v ∈ M := by
@@ -75,7 +98,7 @@ theorem lattice_locally_finite : LocFinite := by
   by_contra hNp
   apply hne
   have hp' := hp.isPrime
-  simp only [Set.mem_setOf_eq, Nat.cast_mul] at hNp
+  simp only [Set.mem_ofPred_eq, Nat.cast_mul] at hNp
   have n1 : (N₁ : 𝓞 E) ∉ p := fun h => hNp (p.mul_mem_right _ h)
   have n2 : (N₂ : 𝓞 E) ∉ p := fun h => hNp (p.mul_mem_left _ h)
   exact le_antisymm (loc_le_of_denom h2 hp' n2) (loc_le_of_denom h1 hp' n1)

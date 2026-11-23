@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
-import GroundTheory.GlobalFields.IdeleGroups.StandardOpenEquiv
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Places
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -13,8 +58,8 @@ variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Alge
 
 namespace AdeleBaseChange
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem finiteCompletionMap_eq_galHom (σ : L ≃ₐ[K] L) (w' : HeightOneSpectrum (𝓞 L))
     (h : w' = σ • comapPrime (σ : L ≃+* L) w') :
     finiteCompletionMap (σ : L ≃+* L) w' = galHom σ (comapPrime (σ : L ≃+* L) w') w' h := by
@@ -25,8 +70,8 @@ theorem finiteCompletionMap_eq_galHom (σ : L ≃ₐ[K] L) (w' : HeightOneSpectr
       rfl)
   exact RingHom.ext (congrFun this)
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem smul_snd_eq_galHom (σ : L ≃ₐ[K] L) (a : 𝔸[L]) (w w' : HeightOneSpectrum (𝓞 L))
     (h : w' = σ • w) : (σ • a).2 w' = galHom σ w w' h (a.2 w) := by
   obtain rfl : w = comapPrime (σ : L ≃+* L) w' := by
@@ -46,8 +91,8 @@ theorem finite_setOf_liesOver :
   (Set.finite_range (Subtype.val : PlacesOver L v → HeightOneSpectrum (𝓞 L))).subset
     fun w hw ↦ ⟨⟨w, hw⟩, rfl⟩
 
-open Classical in
 
+open Classical in
 def finiteAdeleAboveFun (a : (w : PlacesOver L v) → w.1.adicCompletion L)
     (w : HeightOneSpectrum (𝓞 L)) : w.adicCompletion L :=
   if h : w.asIdeal.LiesOver v.asIdeal then a ⟨w, h⟩ else 1
@@ -55,13 +100,13 @@ def finiteAdeleAboveFun (a : (w : PlacesOver L v) → w.1.adicCompletion L)
 omit [NumberField K] in
 theorem finiteAdeleAboveFun_apply (a : (w : PlacesOver L v) → w.1.adicCompletion L)
     (w : PlacesOver L v) : finiteAdeleAboveFun v a w.1 = a w := by
-  rw [finiteAdeleAboveFun, dif_pos w.2]
+  rw [finiteAdeleAboveFun, dite_eq_left w.2]
 
 omit [NumberField K] in
 theorem finiteAdeleAboveFun_apply_of_not (a : (w : PlacesOver L v) → w.1.adicCompletion L)
     {w : HeightOneSpectrum (𝓞 L)} (h : ¬ w.asIdeal.LiesOver v.asIdeal) :
     finiteAdeleAboveFun v a w = 1 := by
-  rw [finiteAdeleAboveFun, dif_neg h]
+  rw [finiteAdeleAboveFun, dite_eq_right h]
 
 theorem finiteAdeleAboveFun_eventually (a : (w : PlacesOver L v) → w.1.adicCompletion L) :
     ∀ᶠ w in Filter.cofinite, finiteAdeleAboveFun v a w ∈ w.adicCompletionIntegers L := by
@@ -149,8 +194,8 @@ theorem comapPrime_liesOver (σ : L ≃ₐ[K] L) (w : PlacesOver L v) :
   rw [comapPrime_eq_inv_smul]
   exact (σ⁻¹ • w).2
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem finiteProjAbove_smul_congr (σ : L ≃ₐ[K] L) {x y : IdeleGroup L}
     (h : finiteProjAbove v x = finiteProjAbove v y) :
     finiteProjAbove v (σ • x) = finiteProjAbove v (σ • y) := by

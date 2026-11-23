@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FromNAdd
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.PolarisedFlagStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLatFlagPair
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+public import Mathlib.Algebra.Algebra.ZMod
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -37,6 +83,7 @@ theorem eq_of_root {R : Type} [CommRing R] [IsDomain R] [IsLocalRing R] (q : ℕ
   have h2 : (∑ i ∈ Finset.range q, x ^ i * y ^ (q - 1 - i)) = 1 :=
     mul_right_cancel₀ (sub_ne_zero.2 hne) (by rw [h1, _root_.one_mul])
   have h3 := congrArg (IsLocalRing.residue R) h2
+
   rw [map_sum, map_one] at h3
   simp only [map_mul, map_pow, h] at h3
   rw [geom_sum₂_self] at h3
@@ -94,7 +141,7 @@ theorem core (p : ℕ) [Fact p.Prime] {R : Type} [CommRing R] [IsDomain R] [IsLo
   refine ⟨σ', ee, fun a b => ?_, key, fun τ => ?_⟩
   · rw [hσ, hσ, hσ]
     refine fund hpp n.ne_zero (hn ▸ hroot _ _) (hn ▸ hroot _ _) (hn ▸ hroot _ _) ?_
-    rw [← IsLocalRing.residue_eq_zero_iff, map_sub, map_sub, hχ, hχ, hχ, map_add]
+    rw [← IsLocalRing.residue_eq_zero_iff, map_sub, map_sub, hχ, hχ, hχ, map_add (f := _)]
     ring
   · ext a
     rw [← key, pow_succ, pow_mul, MulChar.pow_apply' _ hpp.ne_zero, ← key, ← map_pow]
@@ -157,7 +204,7 @@ theorem overC (p : ℕ) [Fact p.Prime] {O : Type} [CommRing O] [IsLocalRing O] {
 theorem inj_loc {A Ω O : Type} [CommRing A] [Field Ω] [Algebra A Ω] [IsIntegralClosure A ℤ Ω] (m : Ideal A) [m.IsPrime]
     [CommRing O] [Algebra A O] [IsLocalization.AtPrime O m] [Algebra O Ω] [IsScalarTower A O Ω] :
     Function.Injective (algebraMap O Ω) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro o ho
   obtain ⟨⟨a, s⟩, h⟩ := IsLocalization.surj m.primeCompl o
   have h1 := congrArg (algebraMap O Ω) h

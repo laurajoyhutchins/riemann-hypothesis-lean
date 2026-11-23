@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.InFrameStabilizer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.InFrameStabilizer
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,10 +73,6 @@ def pairLat {n r : ℕ} (g : ℕ) (P P' : Matrix (Fin n) (Fin (r + 1)) E) :
 def latMap {n : ℕ} (γ : Matrix (Fin n) (Fin n) E) (Λ : Submodule (𝓞 E) (Fin n → E)) :
     Submodule (𝓞 E) (Fin n → E) := Λ.map (γ.mulVecLin.restrictScalars (𝓞 E))
 
-def massOf {G X : Type} (C : Set X) (iso : G → X → X → Prop) : ENNReal :=
-  ∑' c : Quot (fun x y : C => ∃ γ, iso γ x.1 y.1),
-    (ENat.toENNReal (ENat.card {γ : G // iso γ (Quot.out c).1 (Quot.out c).1}))⁻¹
-
 abbrev Tri (E : Type) [Field E] [NumberField E] (n r : ℕ) : Type :=
   Submodule (𝓞 E) (Fin n → E) × Matrix (Fin n) (Fin (r + 1)) E × Matrix (Fin n) (Fin (r + 1)) E
 
@@ -41,31 +80,8 @@ def GenConf (σ : E →+* E) {n r : ℕ} (J : Matrix (Fin n) (Fin n) E) (T T' : 
     (Z : Matrix (Fin (r + 1)) (Fin (r + 1)) E) : Set (Tri E n r) :=
   {x | SelfDual σ J x.1 ∧ (x.2.1, x.2.2) ∈ XZ σ J T T' Z ∧ PrimIn (pairLat g x.2.1 x.2.2) x.1}
 
-def IsoTri (σ : E →+* E) {n r : ℕ} (J : Matrix (Fin n) (Fin n) E)
-    (γ : Matrix (Fin n) (Fin n) E) (x y : Tri E n r) : Prop :=
-  IsUn σ J γ ∧ latMap γ x.1 = y.1 ∧ γ * x.2.1 = y.2.1 ∧ γ * x.2.2 = y.2.2
-
-def Mass (σ : E →+* E) {n r : ℕ} (J : Matrix (Fin n) (Fin n) E) (T T' : E) (g : ℕ)
-    (Z : Matrix (Fin (r + 1)) (Fin (r + 1)) E) : ENNReal :=
-  massOf (GenConf σ J T T' g Z) (IsoTri σ J)
-
-def LzSet (σ : E →+* E) {m : ℕ} (Jb : Matrix (Fin m) (Fin m) E) (T : E) :
-    Set (Submodule (𝓞 E) (Fin m → E) × (Fin m → E)) :=
-  {x | SelfDual σ Jb x.1 ∧ form σ Jb x.2 x.2 = -T ∧ PrimIn (Submodule.span (𝓞 E) {x.2}) x.1}
-
-def IsoLz (σ : E →+* E) {m : ℕ} (Jb : Matrix (Fin m) (Fin m) E) (γ : Matrix (Fin m) (Fin m) E)
-    (x y : Submodule (𝓞 E) (Fin m → E) × (Fin m → E)) : Prop :=
-  IsUn σ Jb γ ∧ latMap γ x.1 = y.1 ∧ γ.mulVec x.2 = y.2
-
-def massLz (σ : E →+* E) {m : ℕ} (Jb : Matrix (Fin m) (Fin m) E) (T : E) : ENNReal :=
-  massOf (LzSet σ Jb T) (IsoLz σ Jb)
-
 def FrameLats (σ : E →+* E) {n r : ℕ} (J : Matrix (Fin n) (Fin n) E)
     (P : Matrix (Fin n) (Fin (r + 1)) E) : Set (Submodule (𝓞 E) (Fin n → E)) :=
   {Λ | SelfDual σ J Λ ∧ PrimIn (frameLat P) Λ}
-
-def TotPos (x : E) : Prop := ∀ τ : E →+* ℂ, 0 < (τ x).re
-
-def normInf (x : E) : ℝ := ∏ v : InfinitePlace E, (v.embedding x).re
 
 end GlobalTheory.SgGlob

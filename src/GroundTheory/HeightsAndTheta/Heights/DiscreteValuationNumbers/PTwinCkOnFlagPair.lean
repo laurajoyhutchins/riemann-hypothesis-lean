@@ -1,15 +1,65 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Inhabit
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsTerTer
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsTerFurther
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitBis
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitAlt
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitMore
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitFurther
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsBisTer
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ClassListMapDomainPerm
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyBridgeFull
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Inhabit
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsTerTer
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsTerFurther
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitBis
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitAlt
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitMore
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitFurther
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsBisTer
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyBridgeFull
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ClassListMapDomainPerm
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -58,19 +108,20 @@ theorem isFlagPair_self {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuatio
     {y : (Σ k, ι k) → Ω} [(pointIdeal O y).IsPrime] {N : ℕ} {E : Type} [AddCommGroup E] [Module Ω E]
     {B : ChartBundle O (segreVec y) N E} {w : Module.Basis (Fin N) Ω E} {x : Fin N → K → ℤ}
     (h : IsFlagFrame y B w x) :
-    IsFlagPair ϖ y B B w w x x (fun _ => 1) (fun _ => 1) where
-  flag := h
-  flag' := h
-  sameFlag i j hij := by rw [Module.Basis.repr_self, Finsupp.single_apply, if_neg hij.ne]
-  vertical i := by
+    IsFlagPair ϖ y B B w w x x (fun _ => 1) (fun _ => 1) := by
+  refine ⟨h, h, ?_, ?_, ?_⟩
+  · intro i j hij
+    rw [Module.Basis.repr_self, Finsupp.single_apply, ite_eq_right hij.ne]
+  · intro i
     rw [sub_self]
     exact isVerticalDivisor_one ϖ _
-  generic i := by simp [Module.Basis.repr_self]
+  · intro i
+    simp [Module.Basis.repr_self]
 
 end ChernClassOnFlagPair
 
-open ChernClassOnFlagPair in
 
+open ChernClassOnFlagPair in
 theorem ChernClassOnFlagPair.proof (h1 : JoinPointFlagModel.Statement)
     (h2 : JoinPointNumbers.Statement) (h3 : FlagModelValueIndependence.Statement)
     (h4 : FlagModelRootIndependence.Statement) (h5 : plainPolynomialPairNumber.Statement)
@@ -130,7 +181,7 @@ theorem ChernClassOnFlagPair.proof (h1 : JoinPointFlagModel.Statement)
         simp only [Fin.append_right, IndefiniteRowSideFullHecke.NumbersDVR.Bundles.ratCyc, sub_self,
           IndefiniteRowSideFullHecke.NumbersDVR.Bundles.vEval, Finsupp.sum_zero_index]
     unfold IndefiniteRowSideFullHecke.NumbersDVR.Bundles.ck
-    rw [dif_pos hne]
+    rw [dite_eq_left hne]
     let _ := (Classical.choice hne).finK
     let _ := (Classical.choice hne).finι
     refine (h3 O Ω K ι y d N E B B' hW2 ((BundleExamples.sameGeneric_iff hϖ y B B').mpr hBB')
@@ -172,7 +223,7 @@ theorem ChernClassOnFlagPair.proof (h1 : JoinPointFlagModel.Statement)
           (Fin.append φ.deg _) _) _ = _
       rw [hd, append_pullDeg]
     unfold IndefiniteRowSideFullHecke.NumbersDVR.Bundles.rootNum
-    rw [dif_pos hne]
+    rw [dite_eq_left hne]
     let _ := (Classical.choice hne).finK
     let _ := (Classical.choice hne).finι
     refine (h4 O Ω K ι y d N E B B hW2 ((BundleExamples.sameGeneric_iff hϖ y B B).mpr hsame)

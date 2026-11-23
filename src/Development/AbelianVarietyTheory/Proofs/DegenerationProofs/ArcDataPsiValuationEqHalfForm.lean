@@ -1,7 +1,57 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.WchartLePreimage
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.BeTransSymmOfWitData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
+import Development.AbelianVarietyTheory.Definitions.Degenerations.HomExtSt
+import Development.AbelianVarietyTheory.Definitions.Degenerations.SepticCharacterInjective
+import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsFrameIff
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ArcDatumMatchLengthSymmPreimages
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalB
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj BigOperators
@@ -33,6 +83,24 @@ theorem value_of_qVal {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationR
       (gm (Out.jFK (R := R) F) z
         (LB.wchart P.P.L (K := PUnit) (fun _ => Out.ptK (P.c χ)) (fun _ => j))
         ((P.psi χ).s (fun _ => j))).val = toStk z (algebraMap (FractionRing R) F c) := by
+  have exists_unit_gm_spMap {A F : Type} [CommRing A] [Field F] {X : Scheme.{0}}
+      (f : A →+* F) (x : Sp A ⟶ X) (U : X.Opens) (h : ⊤ ≤ x ⁻¹ᵁ U)
+      (a : Γ(X, U)ˣ) (z : Sp F) :
+      ∃ u : Aˣ, (gm (spMap f ≫ x) z U a).val = toStk z (f u) := by
+    let g : Γ(X, U) →+* A := (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom.comp (x.appLE U ⊤ h).hom
+    refine ⟨Units.map g.toMonoidHom a, ?_⟩
+    have hz : (spMap f ≫ x) z ∈ U := h (show spMap f z ∈ (⊤ : (Sp A).Opens) from trivial)
+    rw [← toStk_valF _ U z hz]
+    congr 1
+    have ht := (top_le_iff_mem (spMap f ≫ x) U z).2 hz
+    rw [valF, dite_eq_left ht]
+    have e1 : (spMap f ≫ x).appLE U ⊤ ht = x.appLE U ⊤ h ≫ (spMap f).appTop := by
+      rw [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
+      exact (Scheme.Hom.appLE_comp_appLE _ _ _ _ _ _ _).symm
+    have e2 := Scheme.ΓSpecIso_naturality (CommRingCat.ofHom f)
+    have e3 := congrArg (fun q => q.hom ((x.appLE U ⊤ h).hom a.val)) e2
+    rw [e1]
+    exact e3
   obtain ⟨e, -, c, hc, hC⟩ := genHasVal_units _ _ _ _ _ _ h
   obtain ⟨C, hCv, hCt⟩ := hC (fun _ => j)
   let g : R →+* F := (algebraMap (FractionRing R) F).comp (algebraMap R _)
@@ -76,6 +144,24 @@ theorem psi_value (a : ArcIn D l β O' b) {R : Type} [CommRing R] [IsDomain R] [
         ((P.psi χ).s (fun _ => j))).val =
       toStk z ((algebraMap (FractionRing R) F (algebraMap R _ u)) ^ (a.be y y / 2) *
         algebraMap (FractionRing R) F (algebraMap R _ v.val)) := by
+  have exists_unit_gm_spMap {A F : Type} [CommRing A] [Field F] {X : Scheme.{0}}
+      (f : A →+* F) (x : Sp A ⟶ X) (U : X.Opens) (h : ⊤ ≤ x ⁻¹ᵁ U)
+      (a : Γ(X, U)ˣ) (z : Sp F) :
+      ∃ u : Aˣ, (gm (spMap f ≫ x) z U a).val = toStk z (f u) := by
+    let g : Γ(X, U) →+* A := (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom.comp (x.appLE U ⊤ h).hom
+    refine ⟨Units.map g.toMonoidHom a, ?_⟩
+    have hz : (spMap f ≫ x) z ∈ U := h (show spMap f z ∈ (⊤ : (Sp A).Opens) from trivial)
+    rw [← toStk_valF _ U z hz]
+    congr 1
+    have ht := (top_le_iff_mem (spMap f ≫ x) U z).2 hz
+    rw [valF, dite_eq_left ht]
+    have e1 : (spMap f ≫ x).appLE U ⊤ ht = x.appLE U ⊤ h ≫ (spMap f).appTop := by
+      rw [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
+      exact (Scheme.Hom.appLE_comp_appLE _ _ _ _ _ _ _).symm
+    have e2 := Scheme.ΓSpecIso_naturality (CommRingCat.ofHom f)
+    have e3 := congrArg (fun q => q.hom ((x.appLE U ⊤ h).hom a.val)) e2
+    rw [e1]
+    exact e3
   obtain ⟨hp, hv⟩ := (genRel_iff w _ _ _ z).1 hG
   let g : R →+* F := (algebraMap (FractionRing R) F).comp (algebraMap R _)
   let x : Sp R ⟶ P.P.A.left := (P.c χ).left

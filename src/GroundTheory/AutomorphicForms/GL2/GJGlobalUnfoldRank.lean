@@ -1,5 +1,62 @@
-import Mathlib
-import GroundTheory.PowerSubgroups.CountableNeighbourhoods.SingleMemInitialCoordSubspace
+module
+
+public import GroundTheory.PowerSubgroups.CountableNeighbourhoods.SingleMemInitialCoordSubspace
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Function Module
 
@@ -16,8 +73,6 @@ def U0 : Submodule K (Fin n → K) := by
   | (intros; apply GroundTheory.Variant₂.N1.initialCoordSubspace <;> assumption)
 
 variable {k}
-
-theorem mem_U0 {v : Fin n → K} : v ∈ U0 k ↔ ∀ i : Fin n, k ≤ (i : ℕ) → v i = 0 := Iff.rfl
 
 theorem single_mem_U0 {j : Fin n} (hj : (j : ℕ) < k) (c : K) : (Pi.single j c : Fin n → K) ∈ U0 k := by
   intro i hi
@@ -63,9 +118,9 @@ theorem isBlockUpper_iff {M : Matrix (Fin n) (Fin n) K} :
     have := h _ (single_mem_U0 hj 1) i hi
     simpa [Matrix.mulVec_single_one] using this
 
-variable (k) in
 
-def parabolic : Subgroup (GL (Fin n) K) where
+variable (k) in
+def parabolic (k : ℕ) : Subgroup (GL (Fin n) K) where
   carrier := {γ | IsBlockUpper k (γ : Matrix (Fin n) (Fin n) K) ∧
     IsBlockUpper k ((γ⁻¹ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K)}
   mul_mem' := by
@@ -104,7 +159,7 @@ theorem kerM_mul (Z : Matrix (Fin n) (Fin n) K) (γ : GL (Fin n) K) (v : Fin n �
   rw [mem_kerM, mem_kerM, ← Matrix.mulVec_mulVec]
 
 theorem rank_add_finrank_kerM (Z : Matrix (Fin n) (Fin n) K) : Z.rank + finrank K (kerM Z) = n := by
-  rw [Matrix.rank, kerM, LinearMap.finrank_range_add_finrank_ker, finrank_fin_fun]
+  rw [← Matrix.finrank_range_mulVecLin, kerM, LinearMap.finrank_range_add_finrank_ker, finrank_fin_fun]
 
 theorem U0_le_kerM_iff {Z : Matrix (Fin n) (Fin n) K} :
     U0 k ≤ kerM Z ↔ ∀ i j : Fin n, (j : ℕ) < k → Z i j = 0 := by
@@ -123,9 +178,9 @@ theorem U0_le_kerM_iff {Z : Matrix (Fin n) (Fin n) K} :
     · rw [h i j hj, zero_mul]
     · rw [hv j (not_lt.1 hj), mul_zero]
 
-variable (k) in
 
-def R : Set (Matrix (Fin n) (Fin n) K) :=
+variable (k) in
+def R (k : ℕ) : Set (Matrix (Fin n) (Fin n) K) :=
   {Z | (∀ i j : Fin n, (j : ℕ) < k → Z i j = 0) ∧ Z.rank = n - k}
 
 theorem mem_R_iff (hk : k ≤ n) {Z : Matrix (Fin n) (Fin n) K} : Z ∈ R k ↔ kerM Z = U0 k := by
@@ -168,7 +223,8 @@ theorem exists_GL_map_eq (hk : k ≤ n) {W : Submodule K (Fin n → K)} (hW : fi
         exact this
       have hc0 : c = 0 := Subtype.ext hc
       subst hc0
-      simp
+      rw [(LinearEquiv.ofFinrankEq C C' h2).map_zero, Submodule.coe_zero, add_zero]
+      exact (LinearEquiv.ofFinrankEq W (U0 k) h1 w).2
     · intro hv
       have hc : ((LinearEquiv.ofFinrankEq C C' h2 c : C') : Fin n → K) = 0 := by
         have hcU : ((LinearEquiv.ofFinrankEq C C' h2 c : C') : Fin n → K) ∈ U0 k := by
@@ -202,9 +258,9 @@ theorem rank_mul_GL (Z : Matrix (Fin n) (Fin n) K) (γ : GL (Fin n) K) :
     (Z * (γ : Matrix (Fin n) (Fin n) K)).rank = Z.rank :=
   Matrix.rank_mul_eq_left_of_isUnit_det _ _ (Matrix.isUnits_det_units γ)
 
-variable (k) in
 
-def mulMap (S : Set (GL (Fin n) K)) (x : S × R (K := K) (n := n) k) :
+variable (k) in
+def mulMap (k : ℕ) (S : Set (GL (Fin n) K)) (x : S × R (K := K) (n := n) k) :
     {ξ : Matrix (Fin n) (Fin n) K // ξ.rank = n - k} :=
   ⟨x.2.1 * ((x.1 : GL (Fin n) K) : Matrix (Fin n) (Fin n) K), by rw [rank_mul_GL]; exact x.2.2.2⟩
 

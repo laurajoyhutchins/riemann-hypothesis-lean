@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SubIdBijOfContracting
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NabBijectiveWindow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SubIdBijOfContracting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.PhiGam
@@ -34,7 +81,7 @@ private theorem mem_of_gmult_eq_zero_of_sub_mem {k U : Type} [Field k] [AddCommG
     refine ⟨a, ha, ?_⟩
     show Q.mkQ a = Q.mkQ (z : U)
     have hc0 : Q.mkQ c = 0 := (Submodule.Quotient.mk_eq_zero Q).mpr hc
-    rw [← hac, map_add, hc0, add_zero]
+    rw [← hac, map_add (f := _), hc0, add_zero]
   have hker : LinearMap.ker f = Q.submoduleOf E := by
     ext z
     simp only [LinearMap.mem_ker, f, LinearMap.comp_apply, Submodule.mkQ_apply, Submodule.subtype_apply,
@@ -100,7 +147,7 @@ private theorem vv_pow_smul_mem_of_sen_eq_zero {k : Type} [Field k] {l : ℕ} (R
   have he' : (1 - (κ : k⸨X⸩) * vv k) ^ (s + 1) - 1 + ((s + 1 : ℕ) : k⸨X⸩) * vv k
       = vv k ^ 2 * (e : k⸨X⸩) := by
     have h := congrArg (HahnSeries.ofPowerSeries ℤ k) he
-    simp only [map_add, map_sub, map_mul, map_pow, map_one, map_natCast] at h
+    simp only [map_add (f := _), map_sub, map_mul, map_pow, map_one, map_natCast] at h
     rw [← vv_eq_coe_X] at h
     exact h
   have hw' : (vv k)⁻¹ • (g b - b) ∈ N := by
@@ -175,7 +222,7 @@ theorem cocycle_split_of_contracting : ∀ {k : Type} [Field k] {l : ℕ} [Fact 
     intro i
     have e1 : D.φ i (m (i - 1)) = b i + m i := by rw [← hm i]; abel
     have e2 : D.φ i (g (i - 1)) = D.γ i (b i) - b i + g i := by rw [hcoc i]; abel
-    rw [map_sub, map_sub, D.comm, e1, e2, map_add]
+    rw [map_sub, map_sub, D.comm, e1, e2, map_add (f := _)]
     abel
   have h0 := (one_sub_frob_bij R D N hlat hφ').2 (fun i => D.γ i (m i) - m i - g i) hhN hhφ
   refine ⟨m, hmN, fun i => ⟨(hm i).symm, ?_⟩⟩

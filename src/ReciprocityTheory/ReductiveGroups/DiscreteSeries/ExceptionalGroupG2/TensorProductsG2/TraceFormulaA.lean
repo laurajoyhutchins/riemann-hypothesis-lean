@@ -1,13 +1,63 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefEmbed
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.ClosGenStable
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.RigidityG2.ClosGenStable
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.TraceFormulaA
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefOfEmb
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.MultOne
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.NormSubOneLeOfHsdA
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SigLamMemLpOfNe
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.RigidityG2.ClosGenStable
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.MultOneA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.RorthFunctionalEqZero
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.MeasurePreservingMulRight
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefEmbed
+
+@[expose] public section
 
 noncomputable section
 
@@ -176,61 +226,17 @@ theorem tf_inv_mul_Jm_mul {ε : Fin n → Bool} {g : Matrix (Fin n) (Fin n) ℂ}
 theorem tfCoef_orth (dual : Bool) {ε : Fin n → Bool} {g : Matrix (Fin n) (Fin n) ℂ} (hg : g ∈ UJset ε)
     (d d' : Fin n) :
     ∑ c, tfSgn ε c * star (tfCoef dual g c d) * tfCoef dual g c d' = if d = d' then tfSgn ε d else 0 := by
-  cases dual
-  · have h : (gᴴ * Jm ε * g) d d' = Jm ε d d' := by rw [show gᴴ * Jm ε * g = Jm ε from hg]
-    rw [tf_Jm_apply, Matrix.mul_apply] at h
-    rw [← h]
-    refine sum_congr rfl fun c _ => ?_
-    rw [Matrix.mul_apply, sum_eq_single c]
-    · simp only [tfCoef, cond_false, Matrix.conjTranspose_apply, tf_Jm_apply, if_true]; ring
-    · intro b _ hb; rw [tf_Jm_apply, if_neg hb, mul_zero]
-    · simp
-  · have h : (g⁻¹ * Jm ε * (g⁻¹)ᴴ) d' d = Jm ε d' d := by rw [tf_inv_mul_Jm_mul hg]
-    rw [tf_Jm_apply, Matrix.mul_apply] at h
-    have e : (if d = d' then tfSgn ε d else 0) = if d' = d then tfSgn ε d' else 0 := by
-      by_cases hdd : d = d'
-      · subst hdd; rfl
-      · rw [if_neg hdd, if_neg (Ne.symm hdd)]
-    rw [e, ← h]
-    refine sum_congr rfl fun c _ => ?_
-    rw [Matrix.mul_apply, sum_eq_single c]
-    · simp only [tfCoef, cond_true, Matrix.conjTranspose_apply, tf_Jm_apply, if_true]; ring
-    · intro b _ hb; rw [tf_Jm_apply, if_neg hb, mul_zero]
-    · simp
+  apply ReciprocityTheory.ChartRestriction.DS.tfCoef_orth <;> assumption
 
 theorem tf_jquad (t : Fin n → Fin n → ℂ) (s : Fin n → ℂ)
     (ht : ∀ d d', ∑ c, s c * star (t c d) * t c d' = if d = d' then s d else 0) (u u' : Fin n → ℂ) :
     ∑ c, s c * star (∑ d, t c d * u d) * (∑ d, t c d * u' d) = ∑ d, s d * star (u d) * u' d := by
-  have h1 : ∀ c, s c * star (∑ d, t c d * u d) * (∑ d, t c d * u' d) =
-      ∑ d, ∑ d', (s c * star (t c d) * t c d') * (star (u d) * u' d') := by
-    intro c
-    rw [star_sum, mul_assoc, Finset.sum_mul_sum, Finset.mul_sum]
-    refine sum_congr rfl fun d _ => ?_
-    rw [Finset.mul_sum]
-    refine sum_congr rfl fun d' _ => ?_
-    rw [star_mul']; ring
-  rw [sum_congr rfl (fun c _ => h1 c), sum_comm]
-  refine sum_congr rfl fun d _ => ?_
-  rw [sum_comm]
-  simp_rw [← Finset.sum_mul, ht]
-  rw [sum_eq_single d]
-  · simp; ring
-  · intro b _ hb; simp [Ne.symm hb]
-  · simp
+  apply ReciprocityTheory.ChartRestriction.DS.tf_jquad <;> assumption
 
 theorem tf_tensGrp_mul (dual : Bool) {ε : Fin n → Bool} {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)}
     (hσ : IsURepOn (UJset ε) σ) {g h : Matrix (Fin n) (Fin n) ℂ} (hg : g ∈ UJset ε) (hh : h ∈ UJset ε)
     (f : Fin n → H) : tensGrp dual σ (g * h) f = tensGrp dual σ g (tensGrp dual σ h f) := by
-  funext c
-  simp only [tf_tensGrp_apply, map_sum, map_smul, Finset.smul_sum, smul_smul]
-  rw [sum_comm]
-  refine sum_congr rfl fun d _ => ?_
-  rw [← Finset.sum_smul, hσ.1.2 g hg h hh, ContinuousLinearMap.comp_apply]
-  congr 1
-  cases dual
-  · simp [tfCoef, Matrix.mul_apply]
-  · simp only [tfCoef, cond_true, Matrix.mul_inv_rev, Matrix.mul_apply]
-    exact sum_congr rfl fun e _ => mul_comm _ _
+  apply ReciprocityTheory.ChartRestriction.DS.tf_tensGrp_mul <;> assumption
 
 end Form
 

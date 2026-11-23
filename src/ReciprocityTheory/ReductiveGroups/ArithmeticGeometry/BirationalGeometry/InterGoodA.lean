@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Jacobson.Ring
+public import Mathlib.RingTheory.KrullDimension.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Basic
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.Geo
 
@@ -17,7 +69,7 @@ theorem exists_ltSeries_lift {R S : Type*} [CommRing R] [CommRing S] [Algebra R 
       rw [(RingHom.injective_iff_ker_eq_bot _).mp hinj]
       exact bot_le
     obtain ⟨Q, -, hQ, hQc⟩ := Ideal.exists_ideal_over_prime_of_isIntegral p.last.asIdeal (⊥ : Ideal S)
-      (by rw [← RingHom.ker_eq_comap_bot]; exact hker)
+      (by rw [Ideal.under_def, ← RingHom.ker_eq_comap_bot]; exact hker)
     exact ⟨RelSeries.singleton _ ⟨Q, hQ⟩, rfl, hQc⟩
   | succ n ih =>
     intro p hp
@@ -27,17 +79,22 @@ theorem exists_ltSeries_lift {R S : Type*} [CommRing R] [CommRing S] [Algebra R 
       | simp [hp])
     have hlt : p.eraseLast.last < p.last := p.eraseLast_last_rel_last (by omega)
     obtain ⟨Q, hQle, hQ, hQc⟩ := Ideal.exists_ideal_over_prime_of_isIntegral_of_isPrime
-      p.last.asIdeal q'.last.asIdeal (by rw [hq'c]; exact hlt.le)
+      p.last.asIdeal q'.last.asIdeal (by
+        calc
+          under R q'.last.asIdeal = p.eraseLast.last.asIdeal := hq'c
+          _ ≤ p.last.asIdeal := hlt.le)
     have hlt' : q'.last.asIdeal < Q := by
       refine lt_of_le_of_ne hQle fun h => hlt.ne ?_
       ext1
-      rw [← hq'c, h, hQc]
+      calc
+        p.eraseLast.last.asIdeal = under R q'.last.asIdeal := hq'c.symm
+        _ = under R Q := congrArg (under R) h
+        _ = p.last.asIdeal := hQc
     refine ⟨q'.snoc ⟨Q, hQ⟩ hlt', ?_, ?_⟩
     · show q'.length + 1 = n + 1
       rw [hq'len]
-    · first
-      | (rw [RelSeries.last_snoc]; exact hQc)
-      | simpa using hQc
+    · rw [RelSeries.last_snoc]
+      exact hQc
 
 theorem le_ringKrullDim_of_isIntegral {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
     (hf : f.IsIntegral) (hinj : Function.Injective f) (n : ℕ)
@@ -106,7 +163,7 @@ theorem succ_le_ringKrullDim_of_isLocalization {A B : Type*} [CommRing A] [CommR
     refine lt_of_le_of_ne (Ideal.comap_mono hab.le) fun e => hab.ne ?_
     have e' : (φ a).asIdeal = (φ b).asIdeal := congrArg PrimeSpectrum.asIdeal e
     ext1
-    rw [← IsLocalization.map_comap M B a.asIdeal, ← IsLocalization.map_comap M B b.asIdeal]
+    rw [← IsLocalization.map_under M B a.asIdeal, ← IsLocalization.map_under M B b.asIdeal]
     exact congrArg (Ideal.map (algebraMap A B)) e'
   obtain ⟨p, hp⟩ := Order.le_krullDim_iff.mp h
   let p' := p.map φ hsm

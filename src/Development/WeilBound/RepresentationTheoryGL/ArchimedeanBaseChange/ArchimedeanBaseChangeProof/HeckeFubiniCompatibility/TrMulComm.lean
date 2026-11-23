@@ -1,4 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Zero
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -135,26 +181,25 @@ theorem map_aff [MeasurableSpace (nilrad W₁ W₂)] [BorelSpace (nilrad W₁ W�
 
 theorem haar_map [MeasurableSpace (G n)] [BorelSpace (G n)] [MeasurableSpace (nilrad W₁ W₂)]
     [BorelSpace (nilrad W₁ W₂)] (ν : Measure (nilrad W₁ W₂)) [ν.IsAddHaarMeasure] :
-    (Measure.map (eH W₁ W₂) ν).IsHaarMeasure where
-  toIsFiniteMeasureOnCompacts := ⟨fun K hK => by
-    have h := (eH W₁ W₂).toMeasurableEquiv.map_apply (μ := ν) K
-    rw [Homeomorph.toMeasurableEquiv_coe] at h
-    rw [h]
-    exact ((eH W₁ W₂).isCompact_preimage.2 hK).measure_lt_top⟩
-  toIsOpenPosMeasure := (eH W₁ W₂).continuous.isOpenPosMeasure_map (eH W₁ W₂).surjective
-  toIsMulLeftInvariant := by
-    refine ⟨fun g => ?_⟩
-    set Y := (eH W₁ W₂).symm g
-    have hg : g = eH W₁ W₂ Y := by simp [Y]
-    have hcomp : (fun x => g * x) ∘ (eH W₁ W₂) = (eH W₁ W₂) ∘ (fun X : nilrad W₁ W₂ =>
-        (⟨Y.1 + (X.1 + Y.1 * X.1), add_mem Y.2 (add_mem X.2 (nil_mul_mem Y.2 X.2))⟩ : nilrad W₁ W₂)) := by
-      funext X
-      refine Subtype.ext (Units.ext ?_)
-      show (g : G n).val * (1 + X.1) = 1 + (Y.1 + (X.1 + Y.1 * X.1))
-      rw [hg, eH_val]
-      noncomm_ring
-    rw [Measure.map_map (continuous_const_mul g).measurable (eH W₁ W₂).continuous.measurable, hcomp,
-      ← Measure.map_map (eH W₁ W₂).continuous.measurable (by fun_prop), map_aff]
+    (Measure.map (eH W₁ W₂) ν).IsHaarMeasure :=
+  { lt_top_of_isCompact K hK := by
+      have h := (eH W₁ W₂).toMeasurableEquiv.map_apply (μ := ν) K
+      rw [Homeomorph.toMeasurableEquiv_coe] at h
+      rw [h]
+      exact ((eH W₁ W₂).isCompact_preimage.2 hK).measure_lt_top
+    open_pos := ((eH W₁ W₂).continuous.isOpenPosMeasure_map (eH W₁ W₂).surjective).open_pos
+    map_mul_left_eq_self g := by
+      set Y := (eH W₁ W₂).symm g
+      have hg : g = eH W₁ W₂ Y := by simp [Y]
+      have hcomp : (fun x => g * x) ∘ (eH W₁ W₂) = (eH W₁ W₂) ∘ (fun X : nilrad W₁ W₂ =>
+          (⟨Y.1 + (X.1 + Y.1 * X.1), add_mem Y.2 (add_mem X.2 (nil_mul_mem Y.2 X.2))⟩ : nilrad W₁ W₂)) := by
+        funext X
+        refine Subtype.ext (Units.ext ?_)
+        show (g : G n).val * (1 + X.1) = 1 + (Y.1 + (X.1 + Y.1 * X.1))
+        rw [hg, eH_val]
+        noncomm_ring
+      rw [Measure.map_map (continuous_const_mul g).measurable (eH W₁ W₂).continuous.measurable, hcomp,
+        ← Measure.map_map (eH W₁ W₂).continuous.measurable (by fun_prop), map_aff] }
 
 end Haar
 

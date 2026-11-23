@@ -1,4 +1,46 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,20 +116,6 @@ def TheoremSStatement : Prop :=
     (∃ c₀ : ℤ, ∀ (c : K → ℤ) (n : ℕ), 1 ≤ n → (∀ k, c₀ ≤ c k) → Subsingleton (cechHc ι 𝓜 c n)) ∧
     (∃ c₀ : ℤ, ∀ c : K → ℤ, (∀ k, c₀ ≤ c k) → ∀ z ∈ cechZc ι 𝓜 c 0,
       ∃ m ∈ 𝓜 c, ∀ I, z I = LocalizedModule.mk m 1) ∧
-    (∀ d : K → ℤ, (Submodule.span (MRingOver S ι)
-      (⋃ c : ℕ, (cechZc ι 𝓜 (d + fun _ => (c : ℤ)) 0 : Set (CechC S ι M 0)))).FG)
-
-def TheoremSDirStatement : Prop :=
-  ∀ (S : Type) [CommRing S] (K : Type) [Fintype K] [LinearOrder K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] [∀ k, LinearOrder (ι k)]
-    (M : Type) [AddCommGroup M] [Module (MRingOver S ι) M] [Module S M]
-    [IsScalarTower S (MRingOver S ι) M] (𝓜 : (K → ℤ) → Submodule S M),
-    IsNoetherianRing S → Module.Finite (MRingOver S ι) M → IsMGraded S ι 𝓜 →
-    (∀ (c : K → ℤ) (n : ℕ), Module.Finite S (cechHc ι 𝓜 c n)) ∧
-    (∀ (ν : K → ℕ) (d : K → ℤ), (∀ k, 1 ≤ ν k) → ∃ τ₀ : ℕ, ∀ τ : ℕ, τ₀ ≤ τ →
-      (∀ n : ℕ, 1 ≤ n → Subsingleton (cechHc ι 𝓜 (d + fun k => ((τ * ν k : ℕ) : ℤ)) n)) ∧
-      (∀ z ∈ cechZc ι 𝓜 (d + fun k => ((τ * ν k : ℕ) : ℤ)) 0,
-        ∃ m ∈ 𝓜 (d + fun k => ((τ * ν k : ℕ) : ℤ)), ∀ I, z I = LocalizedModule.mk m 1)) ∧
     (∀ d : K → ℤ, (Submodule.span (MRingOver S ι)
       (⋃ c : ℕ, (cechZc ι 𝓜 (d + fun _ => (c : ℤ)) 0 : Set (CechC S ι M 0)))).FG)
 

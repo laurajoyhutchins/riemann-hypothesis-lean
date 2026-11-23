@@ -1,19 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PointShiftSt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGoodPointDimOne
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.PrincipalTriplePullback
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CubeLBPairingIsoIffWeilPairingCompatibleOverRing
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsCubeLBPairingIsoBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PointShiftSt
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueHomExtensionSemiAbelian
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertUnifTangentWeilPairing
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CubeLBPairingIsoIffWeilPairingCompatibleOverRing
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsInverseIsogenySumOfCmHoms
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsLinearOfIsMonHom
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.LieAlgebraEigenDecompositionCMSignature
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.NonemptyPolAVGenericFibreWithLieBasisStatement
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.PrincipalTriplePullback
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.WeilEqIffHermFormEqComplex
 import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.WeilPairingEqOfIsomorphicCubePairings
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.WeilEqIffHermFormEqComplex
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsHomFamilyOfPureTypeComplexTriple
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.NonemptyPolAVGenericFibreWithLieBasisStatement
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.LieAlgebraEigenDecompositionCMSignature
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsInverseIsogenySumOfCmHoms
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsMulEquivOfIsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueHomExtensionSemiAbelian
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniformisationOfPoint
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsMulEquivOfIsGrpPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.LamLetters
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,6 +94,7 @@ theorem ex_smul (T : PAT H (Sp ℂ)) {s : 𝓞 E} {r : ℂ}
     exact ⟨F, hF⟩
   refine Eq.trans (congrArg u.ex ?_) (hρ s z)
   have hs := PointUnif.isSplitting_embeddings (E := E)
+
   rw [← sum_proj hs ρ z, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun φ _ => ?_
   have hm := proj_mem hs ρ φ z
@@ -148,7 +199,19 @@ theorem lamEq_one {ρ : 𝓞 K} (hρ : ρ ^ 2 = -(H.d : 𝓞 K)) (A A' B : PAT H
   haveI := hf.isMonHom
   haveI := hf'.isMonHom
   haveI := A.ab.comm
-  haveI : IsMonHom (1 : A'.t.G ⟶ A.t.G) := LamF.IsogSum.isMonHom_of_points _ fun T a b => by
+  have mon_of_points : ∀ {S : Scheme.{0}} {G H : Over S} [GrpObj G] [GrpObj H] (f : G ⟶ H),
+      (∀ (T : Over S) (a b : T ⟶ G), (a * b) ≫ f = a ≫ f * b ≫ f) → IsMonHom f := by
+    intro S G H _ _ f h
+    refine ⟨?_, ?_⟩
+    · have h1 := h (𝟙_ _) 1 1
+      rw [_root_.mul_one] at h1
+      have h2 : (1 : 𝟙_ _ ⟶ G) ≫ f = 1 := by simpa using h1
+      simpa [Hom.one_def] using h2
+    · have h1 := h (G ⊗ G) (fst G G) (snd G G)
+      have e : lift (fst G G ≫ f) (snd G G ≫ f) = f ⊗ₘ f := by ext1 <;> simp
+      rw [Hom.mul_def, Hom.mul_def, lift_fst_snd, Category.id_comp, e] at h1
+      exact h1
+  haveI : IsMonHom (1 : A'.t.G ⟶ A.t.G) := mon_of_points _ fun T a b => by
     simp only [MonObj.comp_one, _root_.mul_one]
   obtain ⟨f₁, hm₁, e₁⟩ := GlobalTheory.PairingFibre.exists_hom m₁.cart mB.cart f
   obtain ⟨f₂, hm₂, e₂⟩ := GlobalTheory.PairingFibre.exists_hom m₂.cart mB.cart f'
@@ -197,7 +260,7 @@ theorem dims : (∀ b, (X.A b).g = Module.finrank ℚ E / 2) ∧ X.B.g = Module.
   · cases b
     · simpa using key _ _ _ X.typeM
     · simpa using key _ _ _ X.typeP
-  · have e := Module.finrank_mul_finrank ℚ (maximalRealSubfield E) E
+  · have e := (letI : Module.Free (maximalRealSubfield E) E := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℚ (maximalRealSubfield E) E)
     rw [Algebra.IsQuadraticExtension.finrank_eq_two (maximalRealSubfield E) E] at e
     have : 0 < Module.finrank ℚ (maximalRealSubfield E) := Module.finrank_pos
     omega
@@ -240,7 +303,28 @@ theorem exists_inverse : ∃ (N : ℕ) (ψ : Fin p → (X.B.pol.A ⟶ (X.A true)
       · congr 1
         funext i
         exact congrArg (fun j => x j ≫ X.φ j) (finSumFinEquiv_symm_apply_natAdd i)
-  have S := LamF.points_sums_eq_products.1 (Sp (𝓞 K))
+  have S : ∀ (G T : Over (Sp (𝓞 K))) [GrpObj G],
+      (toUnit T ≫ η[G] = (1 : T ⟶ G)) ∧ (∀ a b : T ⟶ G, padd G a b = a * b) ∧
+      (∀ (n : ℕ) (a : T ⟶ G), LamF.pnsmulPt n a = a ^ n) ∧
+      ∀ (n : ℕ) (f : Fin n → (T ⟶ G)), LamF.psumPt f = (List.ofFn f).prod := by
+    intro G T _
+    refine ⟨rfl, fun _ _ => rfl, fun n a => ?_, fun n f => ?_⟩
+    · induction n with
+      | zero => rw [pow_zero]; rfl
+      | succ n ih => rw [pow_succ, ← ih]; rfl
+    · rw [List.prod_eq_foldr]; rfl
+  have mon_of_points : ∀ {S : Scheme.{0}} {G H : Over S} [GrpObj G] [GrpObj H] (f : G ⟶ H),
+      (∀ (T : Over S) (a b : T ⟶ G), (a * b) ≫ f = a ≫ f * b ≫ f) → IsMonHom f := by
+    intro S G H _ _ f h
+    refine ⟨?_, ?_⟩
+    · have h1 := h (𝟙_ _) 1 1
+      rw [_root_.mul_one] at h1
+      have h2 : (1 : 𝟙_ _ ⟶ G) ≫ f = 1 := by simpa using h1
+      simpa [Hom.one_def] using h2
+    · have h1 := h (G ⊗ G) (fst G G) (snd G G)
+      have e : lift (fst G G ≫ f) (snd G G ≫ f) = f ⊗ₘ f := by ext1 <;> simp
+      rw [Hom.mul_def, Hom.mul_def, lift_fst_snd, Category.id_comp, e] at h1
+      exact h1
   simp only [fun G T [GrpObj G] => (S G T).2.1, fun G T [GrpObj G] => (S G T).2.2.1,
     fun G T [GrpObj G] => (S G T).2.2.2, List.prod_ofFn] at h1 h2
   have hm : ∀ (T : Over (Sp (𝓞 K))) (x y : T ⟶ X.B.pol.A),
@@ -252,8 +336,8 @@ theorem exists_inverse : ∃ (N : ℕ) (ψ : Fin p → (X.B.pol.A ⟶ (X.A true)
     exact congrArg₂ (· * ·) (Finset.prod_congr rfl fun k _ => MonObj.mul_comp _ _ _)
       (Finset.prod_congr rfl fun k _ => MonObj.mul_comp _ _ _)
   refine ⟨N * N, fun i => ψ i ^ N, fun i => ψ' i ^ N, Nat.mul_pos hN hN,
-    fun i => LamF.IsogSum.isMonHom_of_points _ fun T x y => ?_,
-    fun i => LamF.IsogSum.isMonHom_of_points _ fun T x y => ?_, fun T x => ?_, fun T a a' => ⟨fun i => ?_, fun i => ?_⟩⟩
+    fun i => mon_of_points _ fun T x y => ?_,
+    fun i => mon_of_points _ fun T x y => ?_, fun T x => ?_, fun T a a' => ⟨fun i => ?_, fun i => ?_⟩⟩
   · simp only [MonObj.comp_pow]
     rw [← mul_pow, ← (h2 T (fun k => x ≫ ψ k * y ≫ ψ k) fun k => x ≫ ψ' k * y ≫ ψ' k).1 i, hm,
       (h2 T (fun k => (x * y) ≫ ψ k) fun k => (x * y) ≫ ψ' k).1 i]

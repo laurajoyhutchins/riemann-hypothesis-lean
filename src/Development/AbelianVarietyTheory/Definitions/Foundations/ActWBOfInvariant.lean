@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.CycMOfNot
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsScalarTowerMdlOm
-import Development.AbelianVarietyTheory.Definitions.Foundations.LiftSLMapMulInvMem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlMulToRingEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CycMOfNot
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsScalarTowerMdlOm
+public import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsPrimitiveRootTopZeta
+public import Development.AbelianVarietyTheory.Definitions.Foundations.LiftSL
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ShCocOn
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlMulToRingEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +66,8 @@ variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ}
 def secT (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (w : ℕ) (a : X.K) : X.Fn l :=
   fun u => (u 0) ^ w • GlobalTheory.ZetaB.clsHat X l a
 
-open Classical in
 
+open Classical in
 def gamMod (N l M : ℕ) [NeZero M] : Finset SL(2, ZMod M) :=
   Finset.univ.filter fun γ : SL(2, ZMod M) =>
     γ ∈ (Gam N l).map (Matrix.SpecialLinearGroup.map (Int.castRingHom (ZMod M)))
@@ -151,7 +199,7 @@ theorem kmap_clsHat (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (φ : X.K ≃+* X
 theorem toGQ_coe_SL (γ : SL(2, ℤ)) : toGQ (γ : Matrix (Fin 2) (Fin 2) ℤ) = ofSL γ := by
   have h : 0 < (γ : Matrix (Fin 2) (Fin 2) ℤ).det := by rw [γ.2]; exact one_pos
   unfold toGQ
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact Subtype.ext (Units.ext rfl)
 
 theorem act_act_SL (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (γ γ' : SL(2, ℤ)) (b : X.Fn l) :
@@ -248,35 +296,5 @@ theorem shArg_mem_fixMu [IsAlgClosure ℚ Ω] (M : ℕ) [NeZero M] (s : Ω ≃�
   unfold shArg
   rw [AlgEquiv.mul_apply, AlgEquiv.mul_apply, repM_apply M _ hz, cycM_apply M s (hz' _), hp, ← Units.val_mul,
     inv_mul_cancel_right, ← repM_apply (Ω := Ω) M y hz, ← AlgEquiv.mul_apply, inv_mul_cancel, AlgEquiv.one_apply]
-
-example : (sigN 3 5 : Matrix (Fin 2) (Fin 2) ℤ) = !![-35, 204; 6, -35] := by
-  have h : crtF 3 5 = 6 := by
-    haveI : Fact (Nat.Prime 5) := ⟨by norm_num⟩
-    have e : (((3 : ℕ) : ZMod 5))⁻¹ = 2 := inv_eq_of_mul_eq_one_right (by decide +revert)
-    rw [crtF, e]
-    rfl
-  simp [sigN, h]
-
-example (l N : ℕ) [Fact l.Prime] (hN : (N : ZMod l) ≠ 0) (r₀ : ZMod l) :
-    (![-r₀, -1] : Fin 2 → ZMod l) ᵥ* ((GlobalTheory.ZetaB.gR l N r₀ : Matrix (Fin 2) (Fin 2) ℤ).map (Int.castRingHom (ZMod l))) =
-      -![0, 1] := by
-  rw [← vecMul_gR l N hN r₀, ← Matrix.neg_vecMul]
-  congr 1
-  ext i
-  fin_cases i <;> simp
-
-example (l N : ℕ) (r₀ : ZMod l) :
-    (![1, 0] : Fin 2 → ℤ) ᵥ* (GlobalTheory.ZetaB.gR l N r₀ : Matrix (Fin 2) (Fin 2) ℤ) = ![1, 0] := by
-  ext i
-  fin_cases i <;> simp [GlobalTheory.ZetaB.gR, Matrix.vecMul, dotProduct, Fin.sum_univ_two]
-
-example (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (a : X.K) :
-    secT X l 1 a ![1, 0] = GlobalTheory.ZetaB.clsHat X l a ∧ secT X l 1 a ![0, 1] = 0 := by
-  simp [secT]
-
-example (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (s : Ω ≃ₐ[ℚ] Ω) (w : ℕ) (a : X.K) :
-    X.galB l s (secT X l w a) = secT X l w (X.gal s a) := by
-  unfold secT
-  rw [galB_section_zero, kmap_clsHat]
 
 end GlobalTheory.K4

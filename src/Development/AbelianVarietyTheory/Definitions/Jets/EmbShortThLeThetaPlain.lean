@@ -1,9 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ExampleSatisfiesConditionsAtFive
-import Formalism.LocalToGlobal.ProjectiveLattices.RecPJThAllNeBot
-import Formalism.LocalToGlobal.ProjectiveLattices.LiftLaSpec
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPins
-import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+module
+
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ExampleSatisfiesConditionsAtFive
+public import Formalism.LocalToGlobal.ProjectiveLattices.LiftLaSpec
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPins
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+public import Formalism.LocalToGlobal.ProjectiveLattices.HasDataCondition
+public import Formalism.LocalToGlobal.ProjectiveLattices.XcLat
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -98,7 +140,7 @@ theorem spanK_fg_of_fg [Module (𝓞 F) C] [IsScalarTower (𝓞 F) F C] {N : Sub
     induction hf using Submodule.span_induction with
     | mem x hx => exact mem_spanK z hx
     | zero => simp
-    | add x y _ _ hx hy => rw [TensorProduct.tmul_add, map_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [TensorProduct.tmul_add, map_add (f := _)]; exact add_mem hx hy
     | smul r x _ hx =>
       have e : (1 : K) ⊗ₜ[F] (r • x) = (algebraMap F K (r : F)) • ((1 : K) ⊗ₜ[F] x) := by
         have h1 : r • x = (r : F) • x := (algebraMap_smul F r x).symm
@@ -107,10 +149,6 @@ theorem spanK_fg_of_fg [Module (𝓞 F) C] [IsScalarTower (𝓞 F) F C] {N : Sub
       exact (spanK z (t : Set C)).smul_mem (algebraMap (𝓞 F) (𝓞 K) r) hx
   rw [key]
   exact Submodule.fg_span (t.finite_toSet.image _)
-
-example : spanK z (∅ : Set C) = ⊥ := by simp [spanK]
-
-example : spanK z ({0} : Set C) = ⊥ := by simp [spanK]
 
 end Span
 
@@ -231,9 +269,5 @@ theorem OneCover.eq_withCoeff {T : Top D} {j : ℕ} (h : OneCover T j) (n n' : �
   obtain ⟨φ', e'⟩ := h n'
   rw [e, e']
   exact ⟨φ', rfl⟩
-
-def topOfCover (T : Top D) {m : ℕ → ℕ} (d : ∀ j, DeltaDat (T.Q.Xo j) T.Q.c (m j))
-    (φ : ∀ j n, (Fin n → LevQ (T.Q.Dw j) (d j).l₂) → T.Q.c.F) : Top D :=
-  { T with dδ := fun j n => withCoeff (d j) (φ j n) }
 
 end GlobalTheory.FormTies

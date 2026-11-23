@@ -1,28 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CInfGood
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BcMapBcVec
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.FlatChernWeightEqOfIndependence
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OnbMat
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.RegularFormsIsBundleProjectiveCover
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TwistedDualRegularFormsFiniteCover
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CuspOnto
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.AdelicGLLastRowAndDetModuleUnderLeftMultiplicati
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.LamLevel
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ThmFlatA
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.MetricStatements.SmallOnTower
-import Development.AutomorphicSpectrum.Statements.MetricStatements.RankBound
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.HSClaim
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.ShareLow
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.LineDegreeClosedFormula
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.SpecFirstDetFormNeZero
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjEmbRtOfNe
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsNotIntegralLie
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsTriangularReframeExistsAndUnique
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AmplePointsLocalizedModel
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjEmbRtOfNe
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.GlobalBasisAlgebra
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsNotIntegralLie
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsTriangularReframeExistsAndUnique
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AmplePointsLocalizedModel
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PolyGrowthStatementPfB
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,8 +76,6 @@ def pushHom (v : tEpsG x₁ ⟶ t₁.G) : tEpsG x₂ ⟶ t₂.G :=
     rw [Category.assoc, w, ← Category.assoc, e, ← h]
     simp)
 
-@[simp] theorem pushHom_left (v : tEpsG x₁ ⟶ t₁.G) : (pushHom m h v).left = v.left ≫ m.φ := rfl
-
 theorem pushHom_mul (u v : tEpsG x₁ ⟶ t₁.G) : pushHom m h (u * v) = pushHom m h u * pushHom m h v := by
   let T : Over X₁ := tEpsG x₁
   let a : (T ⟶ t₁.G) → (Over.mk (T.hom ≫ f) ⟶ t₂.G) := fun w => Over.homMk (w.left ≫ m.φ) (by
@@ -64,7 +89,7 @@ theorem pushHom_mul (u v : tEpsG x₁ ⟶ t₁.G) : pushHom m h (u * v) = pushHo
   have h1 := m.cart.2 T u v (a u) (a v) rfl rfl
   have h2 : ∀ w, pushHom m h w = e ≫ a w := fun w => by
     apply Over.OverMorphism.ext
-    simp [e, a]
+    simp [e, a, pushHom]
   rw [h2, h2, h2, ← MonObj.comp_mul]
   apply Over.OverMorphism.ext
   simp only [Over.comp_left]
@@ -92,8 +117,6 @@ def push : TanM x₁ t₁.G →ₗ[R] TanM x₂ t₂.G where
   toFun v := mkT (pushHom m h (tv v)) (by rw [← pushHom_smT, tv_zero', pushHom_one])
   map_add' u v := tv_injective (pushHom_mul m h _ _)
   map_smul' a v := tv_injective (pushHom_smT m h a (tv v))
-
-@[simp] theorem push_left (v : TanM x₁ t₁.G) : (tv (push m h v)).left = (tv v).left ≫ m.φ := rfl
 
 theorem push_injective : Function.Injective (push (x₁ := x₁) m h) := fun u v e =>
   tv_injective (pushHom_injective m h (congrArg tv e))
@@ -130,8 +153,6 @@ def lieT : Li →ₗ[Ω] TanM ξ t.G where
   toFun e := mkT (M.pt e) (lie_smT M e)
   map_add' e e' := tv_injective (M.add e e')
   map_smul' c e := tv_injective (Over.OverMorphism.ext (M.smul c e))
-
-@[simp] theorem tv_lieT (e : Li) : tv (lieT M e) = M.pt e := rfl
 
 theorem lieT_injective : Function.Injective (lieT M) := fun _ _ h => M.inj (congrArg tv h)
 
@@ -326,8 +347,8 @@ variable {Y₁ : Model Xo c (algebraMap (𝓞 c.F) c.F)}
   {RM : Top.RootModel (CMType H) (D.p + D.q)}
   {Sys : PB.AnSys (Top.dimFl (CMType H) (D.p + D.q)) (Option (RootIx D))} {Fx : FixedData Y₁ Sys}
 
-omit [Field Ω] [Algebra c.F Ω] in
 
+omit [Field Ω] [Algebra c.F Ω] in
 theorem exists_genFrame (Or : RootOrigin Y₁ S RM Fx) : Nonempty (GenFrame Or) := by
   letI := cstAlg Or
   obtain ⟨z, hz, hzs⟩ := exists_pt Or.𝔐

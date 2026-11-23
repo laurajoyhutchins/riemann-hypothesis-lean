@@ -1,7 +1,59 @@
-import Formalism.GradedWeylDivisibility.FinalD
-import Formalism.GradedWeylDivisibility.StatementE
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQHW
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQWordAdj
+module
+
+public import Formalism.GradedWeylDivisibility.StatementE
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalB
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQHW
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQWordAdj
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowdivLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Nat.Prime.Int
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -78,9 +130,6 @@ theorem mem_one_iff (l : ℕ) (x : ℚ) : x ∈ (1 : Submodule (Zl l) ℚ) ↔ x
     exact y.2
   · intro hx
     exact ⟨⟨x, hx⟩, rfl⟩
-
-example (l : ℕ) (V : Type) [AddCommGroup V] [Module ℚ V] : IsScalarTower (Zl l) ℚ V := inferInstance
-example (l : ℕ) : Algebra (Zl l) ℚ := inferInstance
 
 theorem lrc_smul_def (l : ℕ) {V : Type*} [AddCommGroup V] [Module ℚ V] (c : Zl l) (v : V) :
     c • v = (c : ℚ) • v := rfl
@@ -187,7 +236,7 @@ theorem fock_int (r : ℕ) (ν : Fin r → ℕ) (hν : Antitone ν) (x : MvPolyn
     obtain ⟨z, hz⟩ := ih
     obtain ⟨z', hz'⟩ := ih'
     refine ⟨z + z', ?_⟩
-    rw [map_add, lrc_fock_add_right, hz, hz']
+    rw [map_add (f := _), lrc_fock_add_right, hz, hz']
     push_cast
     ring
   | smul c y _ ih =>
@@ -211,28 +260,28 @@ theorem dual_int_loc (hC : CoeffWord) (hL : LowerTriIntegral) (l : ℕ) (hl : l.
     ∃ m : ℤ, ¬ (l : ℤ) ∣ m ∧ ∃ g' ∈ dualWeyl ℤ r r ν, (m : ℚ) • g = intQ r r g' := by
   classical
   have hhom : IsWeightedHomogeneous (colW r r) g ν := hg.1
-  have h1 : ∀ e : Fin r × Fin r →₀ ℕ, LowerTri e → coeff e g ∈ Zl l := by
+  have h1 : ∀ e : Fin r × Fin r →₀ ℕ, LowerTri e → AddMonoidAlgebra.coeff g e ∈ Zl l := by
     intro e he
     by_cases hs : ∀ s : Fin r, ∑ a : Fin r, e (a, s) = ν s
     · rw [hC ℚ r r ν g e hhom he hs]
       exact h _
-    · have : coeff e g = 0 := by
+    · have : AddMonoidAlgebra.coeff g e = 0 := by
         by_contra hne
         apply hs
         intro s
         rw [← lccomp_weight_colW_apply, hhom hne]
       rw [this]
       exact (Zl l).zero_mem
-  set M : ℕ := ∏ e ∈ g.support.filter (fun e => LowerTri e), (coeff e g).den with hM
+  set M : ℕ := ∏ e ∈ g.support.filter (fun e => LowerTri e), (AddMonoidAlgebra.coeff g e).den with hM
   have hMc : M.Coprime l := by
     rw [hM]
     refine Nat.Coprime.prod_left fun e he => ?_
     exact h1 e (Finset.mem_filter.1 he).2
-  have h2 : ∀ e : Fin r × Fin r →₀ ℕ, LowerTri e → ∃ z : ℤ, coeff e ((M : ℚ) • g) = z := by
+  have h2 : ∀ e : Fin r × Fin r →₀ ℕ, LowerTri e → ∃ z : ℤ, AddMonoidAlgebra.coeff ((M : ℚ) • g) e = z := by
     intro e he
-    rw [coeff_smul, smul_eq_mul]
+    rw [MvPolynomial.coeff_smul, smul_eq_mul]
     by_cases hes : e ∈ g.support
-    · exact lrc_den_dvd_mul _ _ (Finset.dvd_prod_of_mem (fun e => (coeff e g).den) (Finset.mem_filter.2 ⟨hes, he⟩))
+    · exact lrc_den_dvd_mul _ _ (Finset.dvd_prod_of_mem (fun e => (AddMonoidAlgebra.coeff g e).den) (Finset.mem_filter.2 ⟨hes, he⟩))
     · rw [notMem_support_iff.1 hes]
       exact ⟨0, by simp⟩
   have hMg : (M : ℚ) • g ∈ dualWeyl ℚ r r ν := (dualWeyl ℚ r r ν).smul_mem _ hg

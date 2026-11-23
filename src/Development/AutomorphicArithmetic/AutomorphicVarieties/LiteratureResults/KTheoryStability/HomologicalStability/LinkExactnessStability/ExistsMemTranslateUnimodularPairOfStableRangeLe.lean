@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LinkExactAff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LinkExactAff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.SeqCx Matrix UpperTheory.V.KL
 
@@ -10,6 +59,7 @@ theorem finsupp_coord_ideal_eq_top {R : Type} [CommRing R] (u : ℕ →₀ R) (g
     (hg : g u = 1) (K : Ideal R) (hK : ∀ i, u i ∈ K) : K = ⊤ := by
   rw [Ideal.eq_top_iff_one, ← hg]
   rw [show g u = g (u.sum Finsupp.single) by rw [Finsupp.sum_single]]
+
   rw [Finsupp.sum, map_sum]
   refine Ideal.sum_mem _ fun i _ => ?_
   rw [← Finsupp.smul_single_one, map_smul, smul_eq_mul]
@@ -29,6 +79,7 @@ private theorem linearMap_apply_mem_span_range_coeffs {R : Type} [CommRing R] (w
     (g : (ℕ →₀ R) →ₗ[R] R) : g w ∈ Ideal.span (Set.range fun i => w i) := by
   have e : g w = ∑ i ∈ w.support, w i * g (Finsupp.single i 1) := by
     conv_lhs => rw [← Finsupp.sum_single w]
+
     rw [Finsupp.sum, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [← Finsupp.smul_single_one, map_smul, smul_eq_mul]
@@ -81,13 +132,13 @@ theorem unimodular_partner_aff : ∀ (R : Type) [CommRing R] (s : ℕ), StableRa
   let y : ℕ →₀ R := ∑ i : Fin n, Finsupp.single (i : ℕ) (-(t i * a j))
   have hy0 : ∀ m, n ≤ m → y m = 0 := by
     intro m hm
-    simp only [y, Finsupp.finset_sum_apply]
+    simp only [y, Finsupp.finsetSum_apply]
     exact Finset.sum_eq_zero fun i _ => by
       have := i.isLt
       simp [Finsupp.single_apply, show (i : ℕ) ≠ m by omega]
   have hyi : ∀ i : Fin n, y i = -(t i * a j) := by
     intro i
-    simp only [y, Finsupp.finset_sum_apply]
+    simp only [y, Finsupp.finsetSum_apply]
     rw [Finset.sum_eq_single i]
     · simp
     · intro b _ hb
@@ -101,7 +152,8 @@ theorem unimodular_partner_aff : ∀ (R : Type) [CommRing R] (s : ℕ), StableRa
     intro m hm
     simp [x, hy0 m hm]
   have hφx : φ x = 0 := by
-    simp only [x, map_add, hφj, zero_add, y, map_sum]
+
+    simp only [x, map_add (f := _), hφj, zero_add, y, map_sum]
     exact Finset.sum_eq_zero fun i _ => hφs _ _ i.isLt
   let v' : ℕ →₀ R := v - v j • x
   have hv'i : ∀ i : Fin n, v' i = v i + v j * (t i * a j) := by
@@ -126,7 +178,7 @@ theorem unimodular_partner_aff : ∀ (R : Type) [CommRing R] (s : ℕ), StableRa
   have hvdec : v = v' + v j • x := by simp [v']
   have hhv : h v = 1 + v j * h x := by
     conv_lhs => rw [hvdec]
-    rw [map_add, map_smul, hh, smul_eq_mul]
+    rw [map_add (f := _), map_smul, hh, smul_eq_mul]
   have hf1x : f1 x = 0 := by
     simp only [f1, LinearMap.sub_apply, LinearMap.smul_apply, Finsupp.lapply_apply, smul_eq_mul, hxj]
     ring

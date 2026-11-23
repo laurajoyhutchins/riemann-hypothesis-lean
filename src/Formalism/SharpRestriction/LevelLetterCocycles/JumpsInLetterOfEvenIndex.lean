@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UniformizerUnitAndQFactor
-import Formalism.SharpRestriction.LevelLetterCocycles.GCoordProp
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.GCoordProp
+import Formalism.SharpRestriction.LevelLetterCocycles.LemmaDN0OfAdmits
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkDcrisLSumZero
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMulVBFilCris
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVNonneg
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVOfNotJump
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -171,7 +218,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
 theorem detAlg_of (hE : Formalism.MainNotions.RamifiedCoefficientChains.DcrisExactStrict PD LL) (hC : Formalism.MainNotions.RamifiedCoefficientChains.CrysSubQuot PD LL)
     (hQ : Formalism.MainNotions.RamifiedCoefficientChains.DdREqDcris PD LL) (h5 : Formalism.MainNotions.DeltaInvariantLattices.P5W W) (h9 : Formalism.MainNotions.DeltaInvariantLattices.P9W W)
     (hB : Formalism.MainNotions.RamifiedCoefficientChains.Sh.BasTool W) (hDT : 11 ≤ PD.p → Formalism.MainNotions.RamifiedCoefficientChains.Sh.DetTool W)
-    (hGC : Formalism.MainNotions.RamifiedCoefficientChains.S9.GCoord.GCoordProp W) : DetAlg W := by
+    (hGC : Formalism.MainNotions.RamifiedCoefficientChains.S9.GCoord.GCoordProp W) : DetS.DetAlg W := by
   intro d T₁ T₂ F b S η m hS i hi e' m' u had σ Z hσ hZ0 hgN
   classical
   obtain ⟨hdom, hdvr, hfrac⟩ := hS.2.2.2.1
@@ -264,15 +311,16 @@ theorem detAlg_of (hE : Formalism.MainNotions.RamifiedCoefficientChains.DcrisExa
     rw [← hsumκ, ← Finset.prod_pow_eq_pow_sum]
     refine Finset.prod_congr rfl fun k _ => ?_
     by_cases hk : (k : ℕ) < m'
-    · simp only [dd, κ, dif_pos hk, map_pow, map_add, PowerSeries.constantCoeff_X,
-        PowerSeries.constantCoeff_C, zero_add]
+    · simp only [dd, κ, dif_pos hk, map_pow, (PowerSeries.constantCoeff (R := O)).map_add,
+        PowerSeries.constantCoeff_X, PowerSeries.constantCoeff_C, zero_add]
     · simp [dd, κ, dif_neg hk]
   have hzz : ∏ k, zz k = ((PD.p : ℕ) : O) ^ (σ * m') := by
     rw [← hsumσ, ← Finset.prod_pow_eq_pow_sum]
     refine Finset.prod_congr rfl fun k _ => ?_
     by_cases hk : (k : ℕ) < m' <;> simp [zz, hk]
   have hPd : PowerSeries.constantCoeff P.det = PowerSeries.constantCoeff u0 * ((PD.p : ℕ) : O) ^ w0 := by
-    rw [hdetP, map_mul, map_pow, map_add, PowerSeries.constantCoeff_X, zero_add, map_natCast]
+    simp only [hdetP, map_mul, map_pow, (PowerSeries.constantCoeff (R := O)).map_add,
+      PowerSeries.constantCoeff_X, zero_add, map_natCast]
   have hM0 : (Matrix.of fun l k => red (cols k) l) = QQc.map PowerSeries.constantCoeff := by
     ext l k
     simp only [Matrix.of_apply, hredc (cols k) (QQc' k) (hQQc k)]

@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.HermitianCurvature.MemParahoricTimesPrincipalCongruenceIff
+module
+
+public import Formalism.HermitianCurvature.MemParahoricTimesPrincipalCongruenceIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
@@ -97,23 +144,26 @@ structure GP (P : Matrix (Fin k) (Fin k) A → Prop) : Prop where
   inv : ∀ {h}, P h → P h⁻¹
   unit : ∀ {h}, P h → IsUnit h.det
 
-theorem gpUnit : GP (fun h : Matrix (Fin k) (Fin k) A => IsUnit h.det) where
-  one := by simp
-  mul := by intro h h' a b; rw [Matrix.det_mul]; exact a.mul b
-  inv := by intro h a; exact Matrix.isUnit_nonsing_inv_det h a
-  unit := fun a => a
+theorem gpUnit : GP (fun h : Matrix (Fin k) (Fin k) A => IsUnit h.det) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · simp
+  · intro h h' a b
+    rw [Matrix.det_mul]
+    exact a.mul b
+  · intro h a
+    exact Matrix.isUnit_nonsing_inv_det h a
+  · exact fun a => a
 
-theorem gpUni : GP (IsUpUni : Matrix (Fin k) (Fin k) A → Prop) where
-  one := isUpUni_one A
-  mul := fun a b => isUpUni_mul A a b
-  inv := fun a => isUpUni_inv A a
-  unit := by intro h a; rw [isUpUni_det A a]; exact isUnit_one
+theorem gpUni : GP (IsUpUni : Matrix (Fin k) (Fin k) A → Prop) := by
+  refine ⟨isUpUni_one A, ?_, ?_, ?_⟩
+  · exact fun a b => isUpUni_mul A a b
+  · exact fun a => isUpUni_inv A a
+  · intro h a
+    rw [isUpUni_det A a]
+    exact isUnit_one
 
 def Par (P : Matrix (Fin k) (Fin k) A → Prop) (x : Matrix (Idx r k) (Idx r k) A) : Prop :=
   IsUpUni (b11 x) ∧ IsUpUni (b33 x) ∧ b21 x = 0 ∧ b31 x = 0 ∧ b32 x = 0 ∧ ∃ h, P h ∧ b22 x = midEmb h
-
-def Emb (P : Matrix (Fin k) (Fin k) A → Prop) (x : Matrix (Idx r k) (Idx r k) A) : Prop :=
-  ∃ h, P h ∧ x = hEmb r h
 
 variable {P : Matrix (Fin k) (Fin k) A → Prop}
 
@@ -196,19 +246,6 @@ def parG (hP : GP P) : Subgroup (GL (Idx r k) A) where
     intro a ha
     refine par_rinv hP ha ?_
     rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
-
-def embG (hP : GP P) : Subgroup (GL (Idx r k) A) where
-  carrier := {g | Emb P (g : Matrix (Idx r k) (Idx r k) A)}
-  one_mem' := ⟨1, hP.one, by simp [hEmb_one]⟩
-  mul_mem' := by
-    rintro a b ⟨h, hh, ea⟩ ⟨g, hg, eb⟩
-    exact ⟨h * g, hP.mul hh hg, by rw [Units.val_mul, ea, eb, hEmb_mul]⟩
-  inv_mem' := by
-    rintro a ⟨h, hh, ea⟩
-    refine ⟨h⁻¹, hP.inv hh, ?_⟩
-    rw [Matrix.coe_units_inv, ea]
-    refine Matrix.inv_eq_right_inv ?_
-    rw [hEmb_mul, Matrix.mul_nonsing_inv h (hP.unit hh), hEmb_one]
 
 end Blocks
 

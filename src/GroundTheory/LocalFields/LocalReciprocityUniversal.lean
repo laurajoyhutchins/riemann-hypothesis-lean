@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalReciprocityFinite
+module
+
+public import GroundTheory.LocalFields.LocalReciprocityFinite
+public import GroundTheory.LocalFields.LocalReciprocityLimitAbstract
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GroundTheory.LocalField
 
@@ -22,16 +66,16 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchi
 
 section Top
 
-variable (K Ω) in
 
+variable (K Ω) in
 def topSubtype : ((⊤ : OpenSubgroup (Ω ≃ₐ[K] Ω)) : Subgroup (Ω ≃ₐ[K] Ω)) →* (Ω ≃ₐ[K] Ω) :=
   Subgroup.subtype _
 
 theorem continuous_topSubtype : Continuous (topSubtype K Ω) :=
   continuous_subtype_val
 
-variable (K Ω) in
 
+variable (K Ω) in
 def topSubtypeInv : (Ω ≃ₐ[K] Ω) →* ((⊤ : OpenSubgroup (Ω ≃ₐ[K] Ω)) : Subgroup (Ω ≃ₐ[K] Ω)) where
   toFun g := ⟨g, Subgroup.mem_top g⟩
   map_one' := rfl
@@ -40,8 +84,8 @@ def topSubtypeInv : (Ω ≃ₐ[K] Ω) →* ((⊤ : OpenSubgroup (Ω ≃ₐ[K] Ω
 theorem continuous_topSubtypeInv : Continuous (topSubtypeInv K Ω) :=
   continuous_id.subtype_mk _
 
-variable (K Ω) in
 
+variable (K Ω) in
 noncomputable def topAbelianizationEquiv :
     TopologicalAbelianization ((⊤ : OpenSubgroup (Ω ≃ₐ[K] Ω)) : Subgroup (Ω ≃ₐ[K] Ω)) ≃*
       TopologicalAbelianization (Ω ≃ₐ[K] Ω) where
@@ -123,8 +167,8 @@ end Restrict
 
 section Universal
 
-variable (K Ω) in
 
+variable (K Ω) in
 noncomputable def localReciprocityLimit : Kˣ →* TopologicalAbelianization (Ω ≃ₐ[K] Ω) :=
   haveI := isDiscreteModule_units (K := K) (Ω := Ω)
   (topAbelianizationEquiv K Ω).toMonoidHom.comp
@@ -141,7 +185,7 @@ theorem localReciprocityLimit_baseUnitsEquiv
 
 theorem of_abelianRestrict_localReciprocityLimit (L : IntermediateField K Ω) [FiniteDimensional K L]
     [IsGalois K L] [IsMulCommutative (L ≃ₐ[K] L)] (x : Kˣ) :
-    Abelianization.of (abelianRestrict L (localReciprocityLimit K Ω x)) =
+    Group.Abelianization.of (abelianRestrict L (localReciprocityLimit K Ω x)) =
       (localReciprocity L).symm (x : Kˣ ⧸ (normUnits K L).range) := by
   haveI := isDiscreteModule_units (K := K) (Ω := Ω)
   obtain ⟨a, rfl⟩ := (baseUnitsEquiv (K := K) (Ω := Ω)).surjective x
@@ -152,7 +196,7 @@ theorem of_abelianRestrict_localReciprocityLimit (L : IntermediateField K Ω) [F
   set q := ((localClassFieldData K Ω).reciprocityAbelianEquiv (classFieldAxiom_units K Ω) hM).symm
     (a : tateZero Ωˣ _ _) with hq
   have e : ((localClassFieldData K Ω).reciprocityAbEquiv (le_top : fixingOpenSubgroup L ≤ ⊤)
-      (classFieldAxiom_units K Ω)).symm (a : tateZero Ωˣ _ _) = Abelianization.of q := by
+      (classFieldAxiom_units K Ω)).symm (a : tateZero Ωˣ _ _) = Group.Abelianization.of q := by
     rw [MulEquiv.symm_apply_eq, ClassFieldData.reciprocityAbEquiv_of, hq,
       ← (localClassFieldData K Ω).reciprocityAbelianEquiv_apply (classFieldAxiom_units K Ω) hM,
       MulEquiv.apply_symm_apply]
@@ -218,8 +262,8 @@ section Degree
 
 open ProfiniteInteger
 
-variable (K Ω) in
 
+variable (K Ω) in
 noncomputable def unramifiedOpenSubgroup (n : ℕ+) : OpenSubgroup (Ω ≃ₐ[K] Ω) where
   toSubgroup := (AddSubgroup.toSubgroup (multiples n)).comap (unramifiedDegree K Ω)
   isOpen' := (isOpen_multiples n).preimage (continuous_toAdd.comp continuous_unramifiedDegree)
@@ -296,9 +340,9 @@ variable (L : IntermediateField K Ω) [FiniteDimensional K L] [IsGalois K L]
 omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] [IsSepClosure K Ω]
   [FiniteDimensional K L] [IsGalois K L] in
 theorem bijective_abelianizationOf :
-    Function.Bijective (Abelianization.of : (L ≃ₐ[K] L) →* Abelianization (L ≃ₐ[K] L)) := by
+    Function.Bijective (Group.Abelianization.of : (L ≃ₐ[K] L) →* Group.Abelianization (L ≃ₐ[K] L)) := by
   refine ⟨(injective_iff_map_eq_one _).2 fun σ hσ => ?_, QuotientGroup.mk_surjective⟩
-  rw [← MonoidHom.mem_ker, Abelianization.ker_of, commutator,
+  rw [← MonoidHom.mem_ker, Group.Abelianization.ker_of, commutator,
     Subgroup.commutator_eq_bot_iff_le_centralizer.2 (fun x _ y _ => mul_comm' y x)] at hσ
   exact hσ
 
@@ -306,7 +350,7 @@ noncomputable def localReciprocityAbelian : (L ≃ₐ[K] L) ≃* Kˣ ⧸ (normUn
   (MulEquiv.ofBijective _ (bijective_abelianizationOf L)).trans (localReciprocity L)
 
 theorem of_localReciprocityAbelian_symm (x : Kˣ ⧸ (normUnits K L).range) :
-    Abelianization.of ((localReciprocityAbelian L).symm x) = (localReciprocity L).symm x := by
+    Group.Abelianization.of ((localReciprocityAbelian L).symm x) = (localReciprocity L).symm x := by
   rw [MulEquiv.eq_symm_apply]
   exact (localReciprocityAbelian L).apply_symm_apply x
 
@@ -319,10 +363,6 @@ theorem abelianRestrict_localReciprocityLimit (x : Kˣ) :
 end Abelian
 
 section Absolute
-
-noncomputable def localReciprocityAbsolute [CharZero K] :
-    Kˣ →* Field.absoluteGaloisGroupAbelianization K :=
-  localReciprocityLimit K (AlgebraicClosure K)
 
 end Absolute
 

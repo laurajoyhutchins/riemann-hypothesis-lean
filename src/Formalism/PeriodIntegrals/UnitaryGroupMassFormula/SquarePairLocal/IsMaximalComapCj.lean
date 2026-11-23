@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairLocal.SqPairLocalOfSteps
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairLocal.SqPairLocalOfSteps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 open NumberField Matrix
@@ -43,14 +94,12 @@ theorem pres_mul {e f : Matrix (Fin N) (Fin N) E} (he : Pres L e) (hf : Pres L f
 private lemma integers_smul_eq_coe_smul (r : 𝓞 E) (v : Fin N → E) : r • v = (r : E) • v := by
   first
     | exact (algebraMap_smul E r v).symm
-    | rfl
     | (ext i; simp [Algebra.smul_def])
 
 private lemma smul_mulVec_eq_smul (a : E) (A : Matrix (Fin N) (Fin N) E) (b : Fin N → E) :
     (a • A) *ᵥ b = a • (A *ᵥ b) := by
   first
     | exact Matrix.smul_mulVec a A b
-    | exact Matrix.smul_mulVec_assoc a A b
     | (ext i; simp [Matrix.mulVec, dotProduct, Finset.mul_sum, mul_assoc])
 
 theorem pres_smul (r : 𝓞 E) {e : Matrix (Fin N) (Fin N) E} (he : Pres L e) :
@@ -91,8 +140,6 @@ theorem cj_cj (x : 𝓞 E) : cj E (cj E x) = x := by
   have h : ((cj E (cj E x) : 𝓞 E) : E) = (x : E) := by rw [coe_cj, coe_cj, star_star]
   first
     | exact_mod_cast h
-    | exact RingOfIntegers.ext h
-    | exact Subtype.ext h
 
 theorem cj_surj : Function.Surjective (cj E) := fun x => ⟨cj E x, cj_cj x⟩
 
@@ -109,12 +156,10 @@ theorem cj_mem_pow {I : Ideal (𝓞 E)} {K : ℕ} {x : 𝓞 E} (h : x ∈ (I.com
   have h' := Ideal.le_comap_pow (cj E) K h
   first
     | exact Ideal.mem_comap.mp h'
-    | exact h'
 
 theorem ne_bot_of_max {Q : Ideal (𝓞 E)} (hQ : Q.IsMaximal) : Q ≠ ⊥ := by
   first
     | exact Ring.ne_bot_of_isMaximal_of_not_isField hQ (RingOfIntegers.not_isField E)
-    | exact Ring.ne_bot_of_isMaximal_of_not_isField hQ (NumberField.RingOfIntegers.not_isField E)
 
 end Cj
 
@@ -138,7 +183,6 @@ theorem smallAt_smul {ρ : 𝓞 E} {X : Matrix (Fin N) (Fin N) E} (hρ : Dv Q c 
   have hw' : (s : E) * (ρ : E) = (c : E) * (w : E) := by
     first
       | exact_mod_cast congrArg (fun t : 𝓞 E => (t : E)) hw
-      | simpa using congrArg (fun t : 𝓞 E => (t : E)) hw
   simp only [integers_smul_eq_coe_smul]
   rw [smul_mulVec_eq_smul, smul_smul, smul_smul, hw']
 
@@ -216,17 +260,14 @@ theorem glue_two (hP : PowLoc) {L' L'' : Submodule (𝓞 E) (Fin N → E)} (h' :
   have memA : ∀ P ∈ A, a ∈ P ^ K := fun P h => by
     first
       | exact Ideal.le_of_dvd (Finset.dvd_prod_of_mem (fun Q => Q ^ K) h) ha
-      | exact Ideal.prod_le_inf.trans (Finset.inf_le h) ha
   have memB : ∀ P ∈ B \ A, b ∈ P ^ K := fun P h => by
     first
       | exact Ideal.le_of_dvd (Finset.dvd_prod_of_mem (fun Q => Q ^ K) h) hb
-      | exact Ideal.prod_le_inf.trans (Finset.inf_le h) hb
   have hab' : (a : E) + (b : E) = 1 := by exact_mod_cast hab
   have hnb : ((-b : 𝓞 E) : E) = -(b : E) := by
     first
       | rfl
       | push_cast; ring
-      | simp
   have heq : e₁ + (a : E) • (e₂ - e₁) = e₂ + ((-b : 𝓞 E) : E) • (e₂ - e₁) := by
     rw [hnb, eq_sub_of_add_eq hab', sub_smul, one_smul, neg_smul]
     abel

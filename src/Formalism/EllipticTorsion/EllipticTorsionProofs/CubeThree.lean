@@ -1,8 +1,59 @@
-import Formalism.EllipticTorsion.CoeffRing
-import Formalism.EllipticTorsion.EllipticTorsionProofs.WChord
-import Formalism.EllipticTorsion.EllipticTorsionProofs.ExistsUnitFactor
-import Formalism.EllipticTorsion.EllipticTorsionProofs.WSubst
-import Formalism.EllipticTorsion.EllipticTorsionProofs.WSeries
+module
+
+public import Formalism.EllipticTorsion.CoeffRing
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.WChord
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.ExistsUnitFactor
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.WSeries
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.WSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open PowerSeries
 
@@ -195,9 +246,6 @@ lemma weq_iff' (W : WeierstrassCurve K) (s v : MvPowerSeries σ K) :
   simp only [MvPowerSeries.smul_eq_C_mul]
   constructor <;> intro h <;> linear_combination -h
 
-lemma a_mem (i : Fin 5) : ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆] i ∈ Sadj W := by
-  fin_cases i <;> exact Algebra.subset_adjoin (by simp)
-
 lemma Ca_mem : (MvPowerSeries.C W.a₁ : MvPowerSeries σ K) ∈ TT W σ ∧
     (MvPowerSeries.C W.a₂ : MvPowerSeries σ K) ∈ TT W σ ∧
     (MvPowerSeries.C W.a₃ : MvPowerSeries σ K) ∈ TT W σ ∧
@@ -314,13 +362,13 @@ lemma pair [Finite σ] (hw : WFixed W w) (a b : MvPowerSeries σ K) (ha : cc a =
   · simp [Formalism.ELL.WeierstrassChordSeries.nu, hW, hX0]
   · have h := congrArg φ hAi
     rw [map_mul, map_one] at h
-    simpa only [chordCoeffCubicAt, Formalism.ELL.WeierstrassChordSeries.C3, Formalism.ELL.WeierstrassChordSeries.c3, Formalism.ELL.WeierstrassChordSeries.ca, map_add, map_mul, map_pow,
+    simpa only [chordCoeffCubicAt, Formalism.ELL.WeierstrassChordSeries.C3, Formalism.ELL.WeierstrassChordSeries.c3, Formalism.ELL.WeierstrassChordSeries.ca, map_add (f := _), map_mul, map_pow,
       map_one, hC] using h
   · simp only [Formalism.ELL.WeierstrassChordSeries.z3, chordCoeffQuadraticAt, Formalism.ELL.WeierstrassChordSeries.C2, Formalism.ELL.WeierstrassChordSeries.c2, Formalism.ELL.WeierstrassChordSeries.ca, map_sub,
       map_neg, map_add, map_mul, map_pow, map_ofNat, hC, hX0, hX1]
   · have h := congrArg φ hDi
     rw [map_mul, map_one] at h
-    simpa only [DDs, Formalism.ELL.WeierstrassChordSeries.dd, Formalism.ELL.WeierstrassChordSeries.w3, Formalism.ELL.WeierstrassChordSeries.ca, map_add, map_mul, map_neg, map_one,
+    simpa only [DDs, Formalism.ELL.WeierstrassChordSeries.dd, Formalism.ELL.WeierstrassChordSeries.w3, Formalism.ELL.WeierstrassChordSeries.ca, map_add (f := _), map_mul, map_neg, map_one,
       hC] using h
   · rw [← hφ, Formalism.ELL.WeierstrassChordSeries.F2, map_mul]
   · rw [hφ, constantCoeff_subst_of_zero_lemma_2 hab0, Formalism.ELL.WeierstrassChordSeries.lam_cc hw]
@@ -381,7 +429,7 @@ namespace Formalism.ELL
 
 open CubeThreeAlt WeierstrassChordSeries
 
-set_option maxHeartbeats 4000000 in
+
 theorem chordDeterminantFactor_holds : CubeThree.{u} := by
   intro K _ W w F hw hF0 hch
   have hU := wSeriesSubstUnique_holds.{u}

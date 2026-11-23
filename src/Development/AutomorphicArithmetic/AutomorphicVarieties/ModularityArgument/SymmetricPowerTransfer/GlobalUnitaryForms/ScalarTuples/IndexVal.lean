@@ -1,7 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.FormsFin
-import GroundTheory.LocalFields.NormCorrespondence
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.SymbolEx
+public import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
 import GroundTheory.GlobalFields.LocalFieldAtPlace
+public import GroundTheory.LocalFields.NormCorrespondence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Algebra.QuadraticAlgebra.NormDeterminant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open UpperTheory.V.Z.Sym.Loc
 
@@ -49,7 +101,7 @@ private theorem index_val {K : Type} [Field K] [CharZero K] [ValuativeRel K] [To
   have hint : IsIntegral K α := Algebra.IsIntegral.isIntegral α
   set L : IntermediateField K (AlgebraicClosure K) := IntermediateField.adjoin K {α} with hL
   have hrank : Module.finrank K L = 2 := by
-    rw [hL, IntermediateField.adjoin.finrank hint, ← hmin, Polynomial.natDegree_X_pow_sub_C]
+    rw [hL, IntermediateField.adjoin.finrank hint, ← hmin, Polynomial.natDegree_X_pow_sub_C _]
   haveI : FiniteDimensional K L := Module.finite_of_finrank_eq_succ hrank
   haveI : Algebra.IsQuadraticExtension K L := ⟨hrank⟩
   haveI : IsAbelianGalois K L := IsAbelianGalois.of_isCyclic K L
@@ -70,17 +122,17 @@ private theorem index_val {K : Type} [Field K] [CharZero K] [ValuativeRel K] [To
         simp
       map_mul' := by
         intro z w
-        simp only [QuadraticAlgebra.re_mul, QuadraticAlgebra.im_mul, map_add, map_mul,
+        simp only [QuadraticAlgebra.re_mul, QuadraticAlgebra.im_mul, map_add (f := _), map_mul,
           map_zero, zero_mul, add_zero]
         linear_combination (-(algebraMap K L z.im * algebraMap K L w.im)) * hβ
       map_zero' := by simp
       map_add' := by
         intro z w
-        simp only [QuadraticAlgebra.re_add, QuadraticAlgebra.im_add, map_add]
+        simp only [QuadraticAlgebra.re_add, QuadraticAlgebra.im_add, map_add (f := _)]
         ring
       commutes' := by intro r; simp }
   have hφ : Function.Injective φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro z hz
     have hz' : algebraMap K L z.re + algebraMap K L z.im * β = 0 := hz
     have him : z.im = 0 := by

@@ -1,5 +1,60 @@
-import Mathlib
-import Formalism.TameInertiaTowers.StatementGroup
+module
+
+import Formalism.TameInertiaTowers.CentralOrderTwo.OrderOfThreeUnitsTwoPow
+public import Formalism.TameInertiaTowers.StatementGroup
+public import Mathlib.NumberTheory.LegendreSymbol.ZModChar
+public import Mathlib.RingTheory.IntegralDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Subgroup
 
@@ -113,29 +168,7 @@ private lemma exists_five_pow_two_pow_eq_one_add (m : ℕ) : ∃ t : ℕ, 5 ^ (2
     ring
 
 lemma orderOf_five_units_two_pow (k : ℕ) : orderOf (u5 (k + 2)) = 2 ^ k := by
-  have hpow : ∀ N j : ℕ, u5 N ^ j = 1 ↔ 5 ^ j ≡ 1 [MOD 2 ^ N] := by
-    intro N j
-    rw [← ZMod.natCast_eq_natCast_iff, Units.ext_iff]
-    simp [u5]
-  cases k with
-  | zero =>
-    rw [pow_zero, orderOf_eq_one_iff, ← pow_one (u5 (0 + 2)), hpow]
-    decide
-  | succ m =>
-    apply orderOf_eq_prime_pow
-    · rw [hpow]
-      obtain ⟨t, ht⟩ := exists_five_pow_two_pow_eq_one_add m
-      rw [ht]
-      intro h
-      have h2 := (Nat.modEq_iff_dvd' (by omega)).1 h.symm
-      rw [Nat.add_sub_cancel_left, show m + 1 + 2 = (m + 2) + 1 by ring, pow_succ] at h2
-      have h3 := Nat.dvd_of_mul_dvd_mul_left (by positivity) h2
-      omega
-    · rw [hpow]
-      obtain ⟨t, ht⟩ := exists_five_pow_two_pow_eq_one_add (m + 1)
-      rw [ht]
-      exact ((Nat.modEq_iff_dvd' (by omega)).2
-        (by rw [Nat.add_sub_cancel_left]; exact dvd_mul_right _ _)).symm
+  apply Formalism.TwoAdicCyclotomicDecomposition.AdmissibleUnits.orderOf_five_units_two_pow <;> assumption
 
 lemma unitsMap_five_mod_four (n : ℕ) (h : 4 ∣ 2 ^ n) : ZMod.unitsMap h (u5 n) = 1 := by
   apply Units.ext

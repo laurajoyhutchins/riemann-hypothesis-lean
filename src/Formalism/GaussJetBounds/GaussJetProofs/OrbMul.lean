@@ -1,7 +1,49 @@
-import Formalism.GaussJetBounds.GenLogInverse
-import Formalism.GaussJetBounds.StatementW
-import Formalism.GaussJetBounds.ThmAGauss
-import Formalism.GaussJetBounds.GaussJetProofs.OneGauss
+module
+
+public import Formalism.GaussJetBounds.StatementP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -18,7 +60,7 @@ variable {K : Type} [Field K] {σ ι : Type}
 
 lemma jetPairPoly_eq_sum (P : MvPolynomial ι (MvPolynomial σ K)) (Th : MvPowerSeries ι K)
     (S : Finset (ι →₀ ℕ)) (hS : P.support ⊆ S) :
-    jetPairPoly P Th = ∑ κ ∈ S, MvPolynomial.coeff κ P *
+    jetPairPoly P Th = ∑ κ ∈ S, AddMonoidAlgebra.coeff P κ *
       MvPolynomial.C (((mfact κ : ℕ) : K) * MvPowerSeries.coeff κ Th) := by
   unfold jetPairPoly
   refine Finset.sum_subset hS fun κ _ hκ => ?_
@@ -47,9 +89,6 @@ section Exps
 
 variable {ι₁ ι₂ : Type}
 
-def jn (a : ι₁ →₀ ℕ) (b : ι₂ →₀ ℕ) : ι₁ ⊕ ι₂ →₀ ℕ :=
-  a.mapDomain Sum.inl + b.mapDomain Sum.inr
-
 end Exps
 
 section Along
@@ -69,8 +108,8 @@ section Norm
 variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ₁ σ₂ : Type}
 
 lemma norm_coeff_rename_le {σ τ : Type} (e : σ → τ) (he : Function.Injective e)
-    (A : MvPolynomial σ K) {B : ℝ} (hA : ∀ n, ‖MvPolynomial.coeff n A‖ ≤ B) (n : τ →₀ ℕ) :
-    ‖MvPolynomial.coeff n (MvPolynomial.rename e A)‖ ≤ B := by
+    (A : MvPolynomial σ K) {B : ℝ} (hA : ∀ n, ‖AddMonoidAlgebra.coeff A n‖ ≤ B) (n : τ →₀ ℕ) :
+    ‖AddMonoidAlgebra.coeff (MvPolynomial.rename e A) n‖ ≤ B := by
   by_cases hn : ∃ u : σ →₀ ℕ, u.mapDomain e = n
   · obtain ⟨u, rfl⟩ := hn
     rw [MvPolynomial.coeff_rename_mapDomain e he]

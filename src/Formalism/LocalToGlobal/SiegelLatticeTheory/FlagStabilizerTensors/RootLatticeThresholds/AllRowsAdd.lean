@@ -1,10 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsEtAlg
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.RhoSurjPf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsTr
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.RowsGoodRed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsRedKer
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.RowsGoodRed
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsES
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsEtAlg
 import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsRMul
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsRedKer
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.RhoSurjPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsTr
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +66,8 @@ variable {D : D7}
 
 instance instFactG' (k : Fin 2) : Fact (D.host.g k).Prime := ⟨D.host.g_prime k⟩
 
-open Classical in
 
+open Classical in
 theorem ES_inter (S S' : Set (Tup2 D)) : ES S * ES S' = ES (S ∩ S') := by
   rw [ES_eq, ES_eq, ES_eq, Finset.sum_mul_sum]
   simp only [Ea_mul]
@@ -46,8 +91,8 @@ theorem Ea_zero (a : CV D) (h : tupOf a ∉ labT (D := D)) : Ea a = 0 := by
   rw [Ea_coeff, Finset.prod_eq_zero (Finset.mem_univ kv) (by rw [h0]; rfl)]
   rfl
 
-open Classical in
 
+open Classical in
 theorem ES_split (S : Set (Tup2 D)) : ES S = ∑ t ∈ (labT (D := D)).filter (· ∈ S), ES {t} := by
   simp only [ES_eq]
   have e1 : ∑ a ∈ Finset.univ.filter (fun a : CV D => tupOf a ∈ S), Ea a =
@@ -101,8 +146,8 @@ theorem hat_sum {ι : Type} (F : Finset ι) (f : ι → X.B.I.Gf → ℂ) (γ : 
     hat hS (fun x => ∑ i ∈ F, f i x) γ = ∑ i ∈ F, hat hS (f i) γ := by
   unfold hat; rw [Finset.mul_sum]
 
-open Classical in
 
+open Classical in
 theorem eT_split (S : Set (Tup2 D)) :
     eT X S = fun x => ∑ t ∈ (labT (D := D)).filter (· ∈ S), eT X {t} x := by
   refine hat_inj hS (biInv_eT X S) (biInv_sum _ _ fun t => biInv_eT X {t}) fun γ => ?_
@@ -162,8 +207,8 @@ theorem isRConvF_sum {ι : Type} (F : Finset ι) (f : ι → X.B.I.Gf → ℂ)
     (Filter.Eventually.of_forall fun c => Formalism.L2.SG.Pf.AllRowsRMul.phi_bound X x y c)]
   exact Finset.sum_congr rfl fun i _ => (h i).2 x y
 
-open Classical in
 
+open Classical in
 theorem reT_split (S : Set (Tup2 D)) : ReT X S = ∑ t ∈ (labT (D := D)).filter (· ∈ S), ReT X {t} := by
   have h := isRConvF_sum X ((labT (D := D)).filter (· ∈ S)) (fun t => eT X {t}) (fun t => ReT X {t})
     (fun t => reT_spec X (etInt_holds X) {t})
@@ -208,6 +253,7 @@ theorem finrank_map_sum {ι : Type} [DecidableEq ι] (Q : ι → V →ₗ[ℂ] V
       have := congrArg (fun L : V →ₗ[ℂ] V => L x) (hQ t (Finset.mem_insert_self t F) t (Finset.mem_insert_self t F))
       simpa using this
     have htF : ∀ x, Q t (QF x) = 0 := fun x => by
+
       rw [hQF, LinearMap.sum_apply, map_sum]
       refine Finset.sum_eq_zero fun i hi => ?_
       have := congrArg (fun L : V →ₗ[ℂ] V => L x)
@@ -225,6 +271,7 @@ theorem finrank_map_sum {ι : Type} [DecidableEq ι] (Q : ι → V →ₗ[ℂ] V
       rfl
     have hFF : ∀ x, QF (QF x) = QF x := fun x => by
       rw [hQF]
+
       simp only [LinearMap.sum_apply, map_sum]
       refine Finset.sum_congr rfl fun i hi => ?_
       rw [Finset.sum_eq_single i]
@@ -284,8 +331,8 @@ theorem reT_univ' : ReT X Set.univ = X.B.Re :=
   reT_univ X (etUniv_of X (redKer_of X (redKerOne_of X (Formalism.L2.SG.Pf.AllRowsRedKer.redKerP_holds X 0)
     (Formalism.L2.SG.Pf.AllRowsRedKer.redKerP_holds X 1)))) (etInt_holds X)
 
-open Classical in
 
+open Classical in
 theorem rowsAdd_of (hFD : FiniteDimensional ℂ (X.B.I.eHom X.B.σs X.B.μf X.B.fund X.B.R X.B.Re)) : RowsAdd X := by
   intro S
   set W := X.B.I.HomS X.B.σs X.B.μf X.B.fund X.B.R

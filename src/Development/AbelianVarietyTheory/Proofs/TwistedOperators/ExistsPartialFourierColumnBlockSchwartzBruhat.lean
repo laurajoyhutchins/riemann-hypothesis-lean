@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingPiCurry
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PartialColumnFourierMemSchwartzBruhatStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PartialColumnFourierInversionSchwartzBruhatStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PartialColumnFourierEqFiniteFourierSumDepthStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingPiCurry
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PartialColumnFourierEqFiniteFourierSumDepth
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PartialColumnFourierInversionSchwartzBruhatStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PartialColumnFourierMemSchwartzBruhatStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.ColFourier
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.SplitFlip
@@ -114,7 +156,7 @@ theorem GlobalTheory.ColFourier.exists_blockFourier : ∀ (k : Type) [Field k] [
     intro Ξ hΞ T R
     have hc : Continuous fun S : Matrix A C k => pairM S R := by unfold pairM; fun_prop
     refine ⟨((hψ.isLocallyConstant.comp_continuous hc).comp (fun z : Circle => (z : ℂ))).mul
-      (hΞ.1.comp_continuous (continuous_add_right T)), ?_⟩
+      (hΞ.1.comp_continuous (continuous_add_const T)), ?_⟩
     exact (hΞ.2.comp_homeomorph (Homeomorph.addRight T)).mul_left
   refine ⟨F, ⟨fun Ξ h => ?_, fun Ξ₁ h₁ Ξ₂ h₂ he => ?_, fun Ψ hΨ => ?_⟩, fun Ξ hΞ T R hT hR => ?_,
     fun Ξ hΞ T R hT hR => ?_, fun Ξ hΞ n hn => ?_⟩
@@ -150,5 +192,5 @@ theorem GlobalTheory.ColFourier.exists_blockFourier : ∀ (k : Type) [Field k] [
   · rw [hFe _ (hmod Ξ hΞ T R), hFe _ hΞ]
     exact GlobalTheory.ColFourier.fourierInt_shift ψ m hm P Ξ T R hT hR
   · rw [hFe _ hΞ] at hn ⊢
-    rw [← GlobalTheory.T.partialColumnFourier_eq_finiteFourierSum_depth k A C ψ⁻¹ m ϖ hϖ hψ' hm P n _ hn]
+    rw [← GlobalTheory.ColFourier.fourierInt_eq_fourierSum k A C ψ⁻¹ m ϖ hϖ hψ' hm P n _ hn]
     exact hInv ψ hψ Ξ hΞ

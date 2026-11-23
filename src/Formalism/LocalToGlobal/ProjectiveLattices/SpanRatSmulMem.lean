@@ -1,5 +1,59 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.IntegrableOnIntegrand
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.LocalSituation
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntegrableOnIntegrand
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.LocalSituation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,11 +68,11 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r ρ : ℕ}
 def trBE (n : ℕ) : LinearMap.BilinForm ℚ (Fin n → E) :=
   LinearMap.mk₂ ℚ (fun l x => Algebra.trace ℚ E (∑ i, l i * x i))
     (fun l₁ l₂ x => by
-      rw [← map_add]; congr 1; simp [add_mul, Finset.sum_add_distrib])
+      rw [← map_add (f := _)]; congr 1; simp [add_mul, Finset.sum_add_distrib])
     (fun c l x => by
       rw [← map_smul]; congr 1; simp [Finset.smul_sum])
     (fun l x₁ x₂ => by
-      rw [← map_add]; congr 1; simp [mul_add, Finset.sum_add_distrib])
+      rw [← map_add (f := _)]; congr 1; simp [mul_add, Finset.sum_add_distrib])
     (fun c l x => by
       rw [← map_smul]; congr 1; simp [Finset.smul_sum])
 
@@ -55,7 +109,7 @@ def dualZSubE {n : ℕ} (Xs : Submodule (𝓞 E) (Fin n → E)) : Submodule (�
     obtain ⟨v, hv⟩ := hb x hx
     have h : ∑ i, (a + b) i * x i = ∑ i, a i * x i + ∑ i, b i * x i := by
       simp [add_mul, Finset.sum_add_distrib]
-    exact ⟨u + v, by rw [h, map_add, ← hu, ← hv, Int.cast_add]⟩
+    exact ⟨u + v, by rw [h, map_add (f := _), ← hu, ← hv, Int.cast_add]⟩
   smul_mem' := by
     intro c a ha x hx
     obtain ⟨u, hu⟩ := ha (c • x) (Xs.smul_mem c hx)
@@ -175,18 +229,23 @@ theorem crdI_span (𝔄 : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (h𝔄 :
 
 theorem crdI_lat (𝔄 : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (h𝔄 : 𝔄 ≠ 0) {X : Data E r}
     (cu : CuspFD X ρ) : Submodule.IsLattice ℚ ((crdI 𝔄 cu).restrictScalars ℤ) :=
-  ⟨(crdI_fg 𝔄 cu).restrictScalars, by rw [Submodule.coe_restrictScalars]; exact crdI_span 𝔄 h𝔄 cu⟩
+  Submodule.IsLattice.of_fg ℚ ((crdI_fg 𝔄 cu).restrictScalars)
 
 theorem exists_basis (𝔄 : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (h𝔄 : 𝔄 ≠ 0) {X : Data E r}
     (cu : CuspFD X ρ) : ∃ (ι : Type) (_ : Fintype ι) (b : Module.Basis ι ℚ (Fin ρ → E)),
       Submodule.span ℤ (Set.range b) = (crdI 𝔄 cu).restrictScalars ℤ := by
-  have := crdI_lat 𝔄 h𝔄 cu
+  classical
   set X0 := (crdI 𝔄 cu).restrictScalars ℤ
+  letI : Submodule.IsFullLattice ℚ X0 := {
+    toIsLattice := crdI_lat 𝔄 h𝔄 cu
+    span_eq_top := by rw [Submodule.coe_restrictScalars]; exact crdI_span 𝔄 h𝔄 cu }
+  letI : Module.Finite ℤ X0 := Submodule.IsLattice.finite ℚ X0
+  letI : Module.Free ℤ X0 := Submodule.IsLattice.free ℚ X0
   let b := Module.Free.chooseBasis ℤ X0
-  refine ⟨_, inferInstance, b.extendOfIsLattice ℚ, ?_⟩
-  have hr : Set.range (b.extendOfIsLattice ℚ) = X0.subtype '' Set.range b := by
+  refine ⟨_, inferInstance, b.extendOfIsFullLattice ℚ, ?_⟩
+  have hr : Set.range (b.extendOfIsFullLattice ℚ) = X0.subtype '' Set.range b := by
     ext v
-    simp [Module.Basis.extendOfIsLattice_apply]
+    simp [Module.Basis.extendOfIsFullLattice_apply]
   rw [hr, Submodule.span_image, b.span_eq, Submodule.map_subtype_top]
 
 theorem xcFD_restrict (𝔄 : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) {X : Data E r} (cu : CuspFD X ρ) :
@@ -204,21 +263,8 @@ theorem xcFD_lat (𝔄 : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (h𝔄 : 
   refine ⟨?_, ?_⟩
   · rw [← Submodule.FG.restrictScalars_iff (R := ℤ), hX]
     exact Submodule.fg_span (Set.finite_range _)
-  · rw [eq_top_iff]
-    have h1 : Submodule.span ℚ (Set.range ((trBE ρ).dualBasis (trBE_nondeg ρ) b)) = ⊤ :=
-      Module.Basis.span_eq _
-    have h2 : Set.range ((trBE ρ).dualBasis (trBE_nondeg ρ) b) ⊆ (XcFD 𝔄 cu : Set (Fin ρ → E)) := by
-      have h3 : Set.range ((trBE ρ).dualBasis (trBE_nondeg ρ) b) ⊆
-          ((XcFD 𝔄 cu).restrictScalars ℤ : Set (Fin ρ → E)) := by
-        rw [hX]; exact Submodule.subset_span
-      rwa [Submodule.coe_restrictScalars] at h3
-    intro v _
-    have hv : v ∈ Submodule.span ℚ (XcFD 𝔄 cu : Set (Fin ρ → E)) := by
-      have h4 := Submodule.span_mono (R := ℚ) h2
-      rw [h1] at h4
-      exact h4 Submodule.mem_top
-    exact Submodule.span_le_restrictScalars ℚ E _ hv
-
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
 theorem xcLatF {Comp : Type} (X : Comp → Data E r) (𝔄 : FractionalIdeal (nonZeroDivisors (𝓞 E)) E)
     (h𝔄 : 𝔄 ≠ 0) : XcLatF X 𝔄 ρ :=
   fun cu => xcFD_lat 𝔄 h𝔄 cu.2

@@ -1,8 +1,50 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJFERat
-import GroundTheory.AutomorphicForms.GL2.GJMatrixLocal
-import GroundTheory.AutomorphicForms.GL2.GJInducedZeta
-import GroundTheory.AutomorphicForms.LeviStagesProduct
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJFERat
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixLocal
+public import GroundTheory.AutomorphicForms.GL2.GJLeviZeta
+public import GroundTheory.AutomorphicForms.GL2.GJParabolicFubini
+public import GroundTheory.AutomorphicForms.InductionParabolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +57,8 @@ open scoped NNReal
 
 variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F]
 
-variable (F) in
 
+variable (F) in
 def centralUnif (m : ℕ) : GL (Fin m) F := Cartan.diagPow F m fun _ => 1
 
 section Block
@@ -60,8 +102,8 @@ def leviIntegrandB (σ : Representation ℂ (levi F n β) W) (κ : levi F n β �
   Ψ ((m : GL (Fin n) F) : Matrix (Fin n) (Fin n) F) * (((κ m)⁻¹ * leviModulus β m : ℝ≥0) : ℂ) *
     detPow (m : GL (Fin n) F) (-s) * ℓ (σ m⁻¹ w)
 
-variable (F) in
 
+variable (F) in
 def LeviFE (σ : Representation ℂ (levi F n β) W) (κ : levi F n β →* ℝ≥0)
     (μM : Measure (levi F n β)) (ψ : AddChar F Circle) (γ : RatFunc ℂ) : Prop :=
   ∀ φ : LeviIndex n β → F → ℂ, (∀ ij, φ ij ∈ LocalField.schwartzBruhat F) → ∀ w : W,
@@ -79,8 +121,8 @@ section Induced
 variable {n : ℕ} {α : Type*} [LinearOrder α] {β : Fin n → α}
   {W : Type*} [AddCommGroup W] [Module ℂ W] [MeasurableSpace F] [BorelSpace F]
 
-variable (F) in
 
+variable (F) in
 def InducedFE [MeasurableSpace (GL (Fin n) F)] (σ : Representation ℂ (levi F n β) W)
     (μG : Measure (GL (Fin n) F)) (ψ : AddChar F Circle) (γ : RatFunc ℂ) : Prop :=
   ∀ Φ : Matrix (Fin n) (Fin n) F → ℂ, IsSchwartzBruhat Φ → ∀ φ ∈ parabolicIndSpace F n β σ,

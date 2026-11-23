@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemmaFiltration
-import GroundTheory.AutomorphicForms.GeometricLemmaOrbit
-import GroundTheory.AutomorphicForms.AdmissibleInduction
+module
+
+public import GroundTheory.AutomorphicForms.GeometricLemmaFiltration
+public import GroundTheory.AutomorphicForms.AdmissibleInduction
+import GroundTheory.AutomorphicForms.GLnLattice
+public import GroundTheory.AutomorphicForms.GeometricLemmaOrbit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -18,14 +67,13 @@ variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchi
 section Bounds
 
 variable (F) in
-
 abbrev EntryBound (e : ℕ) (A : Matrix (Fin n) (Fin n) F) : Prop :=
   ∀ i j, (uniformizer F : F) ^ e * A i j ∈ 𝒪[F]
 
 theorem EntryBound.mul {a b : ℕ} {A B : Matrix (Fin n) (Fin n) F} (hA : EntryBound F a A)
     (hB : EntryBound F b B) : EntryBound F (a + b) (A * B) := by
   intro i j
-  rw [mul_apply, Finset.mul_sum]
+  rw [Matrix.mul_apply, Finset.mul_sum]
   refine sum_mem fun k _ => ?_
   have := mul_mem (hA i k) (hB k j)
   convert this using 1
@@ -52,12 +100,10 @@ end Bounds
 
 section UnipotentCompact
 
-variable (γ : Fin n → ℕ)
+def unipotentCompactG (γ : Fin n → ℕ) (e : ℕ) : Subgroup (GL (Fin n) F) :=
+  (unipotentCompact (F := F) (n := n) (β := γ) e).map (unipotentRadical F n γ).subtype
 
-def unipotentCompactG (e : ℕ) : Subgroup (GL (Fin n) F) :=
-  (unipotentCompact F n γ e).map (unipotentRadical F n γ).subtype
-
-variable {γ}
+variable {γ : Fin n → ℕ}
 
 theorem unipotentCompactG_le (e : ℕ) :
     unipotentCompactG (F := F) γ e ≤ unipotentRadical F n γ := by
@@ -67,16 +113,14 @@ theorem unipotentCompactG_le (e : ℕ) :
 theorem mem_unipotentCompactG {e : ℕ} {u : GL (Fin n) F} :
     u ∈ unipotentCompactG γ e ↔ u ∈ unipotentRadical F n γ ∧
       rankTorus F n γ e * u * (rankTorus F n γ e)⁻¹ ∈ integralGL F n := by
+  have hmem (v : unipotentRadical F n γ) :
+      v ∈ unipotentCompact (F := F) (n := n) (β := γ) e ↔
+        rankTorus F n γ e * v * (rankTorus F n γ e)⁻¹ ∈ integralGL F n := Iff.rfl
   constructor
   · rintro ⟨v, hv, rfl⟩
-    exact ⟨v.2, mem_unipotentCompact.1 hv⟩
+    exact ⟨v.2, (hmem v).1 hv⟩
   · rintro ⟨hu, h⟩
-    exact ⟨⟨u, hu⟩, mem_unipotentCompact.2 h, rfl⟩
-
-theorem isCompact_unipotentCompactG (e : ℕ) :
-    IsCompact (unipotentCompactG (F := F) γ e : Set (GL (Fin n) F)) := by
-  rw [unipotentCompactG, Subgroup.coe_map]
-  exact (isCompact_unipotentCompact e).image continuous_subtype_val
+    exact ⟨⟨u, hu⟩, (hmem ⟨u, hu⟩).2 h, rfl⟩
 
 theorem unipotentCompactG_eq (e : ℕ) :
     unipotentCompactG (F := F) γ e = unipotentRadical F n γ ⊓
@@ -84,6 +128,14 @@ theorem unipotentCompactG_eq (e : ℕ) :
   ext u
   rw [mem_unipotentCompactG, Subgroup.mem_inf, Subgroup.mem_comap]
   rfl
+
+theorem isCompact_unipotentCompactG (e : ℕ) :
+    IsCompact (unipotentCompactG (F := F) γ e : Set (GL (Fin n) F)) := by
+  rw [unipotentCompactG_eq, Subgroup.coe_inf]
+  change IsCompact ((unipotentRadical F n γ : Set (GL (Fin n) F)) ∩
+    (conjHomeomorph (rankTorus F n γ e)) ⁻¹' (integralGL F n : Set (GL (Fin n) F)))
+  exact ((conjHomeomorph _).isCompact_preimage.2 (isCompact_integralGL F n)).inter_left
+    isClosed_unipotentRadical
 
 theorem isOpen_conj_integralGL (t : GL (Fin n) F) :
     IsOpen (((integralGL F n).comap (MulAut.conj t).toMonoidHom : Subgroup (GL (Fin n) F)) :
@@ -94,8 +146,13 @@ theorem mem_unipotentCompactG_of_bound {e : ℕ} {u : GL (Fin n) F}
     (hu : u ∈ unipotentRadical F n γ)
     (hb : EntryBound F e (u : Matrix (Fin n) (Fin n) F))
     (hb' : EntryBound F e ((u⁻¹ : GL (Fin n) F) : Matrix (Fin n) (Fin n) F)) :
-    u ∈ unipotentCompactG γ e :=
-  ⟨⟨u, hu⟩, mem_unipotentCompact_of_bound (u := ⟨u, hu⟩) hb hb', rfl⟩
+    u ∈ unipotentCompactG γ e := by
+  rw [mem_unipotentCompactG, mem_integralGL_iff]
+  refine ⟨hu, rankTorus_conj_apply_mem hu hb, fun i j => ?_⟩
+  have hinv : (rankTorus F n γ e * u * (rankTorus F n γ e)⁻¹)⁻¹ =
+      rankTorus F n γ e * u⁻¹ * (rankTorus F n γ e)⁻¹ := by group
+  rw [hinv]
+  exact rankTorus_conj_apply_mem ((unipotentRadical F n γ).inv_mem hu) hb' i j
 
 theorem unipotentCompactG_mono {e e' : ℕ} (h : e ≤ e') :
     unipotentCompactG (F := F) γ e ≤ unipotentCompactG γ e' := by

@@ -1,5 +1,79 @@
+module
+
+public import Mathlib.Algebra.DualNumber
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.Length
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsTjCorrDiagModel
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.Pullback1MemHodgeFiltration
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDeRhamSheafIffAlt
 import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RadicalStalks.IsConst
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+public import Mathlib.Algebra.CharP.Algebra
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+public import Mathlib.RingTheory.Artinian.Ring
+public import Mathlib.RingTheory.Nakayama
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Cris GlobalTheory.DeRham GlobalTheory.ConjSeq GlobalTheory.UPel.HT GlobalTheory.UPel.HT.ES UpperTheory.Gal.Ord
@@ -49,7 +123,7 @@ private lemma art_tangent (p : ℕ) [Fact p.Prime] (k : Type) [Field k] [CharP k
       map_one' := by simp [hq0]
       map_zero' := by simp [hq0]
       map_add' := fun z w => by
-        simp only [TrivSqZeroExt.fst_add, TrivSqZeroExt.snd_add, hq, add_pow_char_pow, map_add]
+        simp only [TrivSqZeroExt.fst_add, TrivSqZeroExt.snd_add, hq, add_pow_char_pow, map_add (f := _)]
         ring
       map_mul' := fun z w => by
         simp only [TrivSqZeroExt.fst_mul, TrivSqZeroExt.snd_mul, smul_eq_mul, MulOpposite.smul_eq_mul_unop,
@@ -62,7 +136,7 @@ private lemma art_tangent (p : ℕ) [Fact p.Prime] (k : Type) [Field k] [CharP k
     have h1 : z.fst = 0 := by
       have h0 : τ (j z) = algebraMap k (DualNumber k) (z.fst ^ q) := by
         have e : τ (r ^ q) = 0 := by rw [map_pow, hτr, heq q hq2]
-        rw [hj, map_add, map_mul, e, mul_zero, add_zero]
+        rw [hj, map_add (f := _), map_mul, e, mul_zero, add_zero]
         exact τ.commutes _
       rw [hz, map_zero] at h0
       have h0' := congrArg TrivSqZeroExt.fst h0
@@ -134,7 +208,7 @@ private lemma art_der (π : B →ₐ[k] k) (hπ : ∀ b, b - algebraMap k B (π 
     have e : (a - algebraMap k B (π a)) * (b - algebraMap k B (π b)) =
         a * b - algebraMap k B (π a) * b - algebraMap k B (π b) * a + algebraMap k B (π a * π b) := by
       rw [map_mul]; ring
-    rw [e, map_add, map_sub, map_sub, halg, halg, halg1] at h
+    rw [e, map_add (f := _), map_sub, map_sub, halg, halg, halg1] at h
     linear_combination h
   let L : B →ₗ[k] DualNumber k :=
     { toFun := fun b => TrivSqZeroExt.inl (π b) + TrivSqZeroExt.inr (φ b)
@@ -307,7 +381,7 @@ private lemma art_map [Module.Finite k B] (π : B →ₐ[k] k)
         by_contra hu
         have hmem : aeval x Q ∈ maximalIdeal B := (mem_maximalIdeal _).2 hu
         have hdiv := congrArg (aeval x) (divX_mul_X_add Q)
-        rw [map_add, map_mul, aeval_X, aeval_C] at hdiv
+        rw [map_add (f := _), map_mul, aeval_X, aeval_C] at hdiv
         have : algebraMap k B (Q.coeff 0) ∈ maximalIdeal B := by
           have h3 := Ideal.sub_mem _ hmem (Ideal.mul_mem_left _ (aeval x (divX Q)) hxm)
           rwa [← hdiv, add_sub_cancel_left] at h3

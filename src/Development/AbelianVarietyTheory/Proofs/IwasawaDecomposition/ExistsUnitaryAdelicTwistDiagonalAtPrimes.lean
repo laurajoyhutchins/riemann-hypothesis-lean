@@ -1,6 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReferenceCharactersFactorTame
+public import Formalism.LocalToGlobal.Columns.Adelic
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPtOfIffUnitaryDecoration
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedLtOfMem
+import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemPrinCongOfSm
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NeZeroTop
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPtOfIffUnitaryDecoration
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC GlobalTheory.Mem.Col2.TopCh GlobalTheory.Mem.ColAd Matrix
 open scoped TensorProduct
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
@@ -13,8 +62,8 @@ section Diag
 
 variable {E : Type} [Field E]
 
-open Classical in
 
+open Classical in
 def dEnt (n : ℕ) (π : E) (i : Fin n) : E := if i.1 + 1 = n then (if π = 0 then 1 else π) else 1
 
 theorem dEnt_ne (n : ℕ) (π : E) (i : Fin n) : dEnt n π i ≠ 0 := by
@@ -56,18 +105,22 @@ theorem exists_tw : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Number
     ⟨fun h => (hQ P h).1 hP, fun h => (hQ _ h).2.2.1 (by rw [CharValCompare.conjP_conjP]; exact hP)⟩
   have hSG : ∀ P ∈ SG, P ∉ Q ∧ conjPrime₂ P ∉ Q := fun P hP =>
     ⟨fun h => (hQ P h).2.1 hP, fun h => (hQ _ h).2.2.2.1 (by rw [CharValCompare.conjP_conjP]; exact hP)⟩
-  have hb := isPtOf_base (F := F) hc (n := n) (ST := ST) (SG := SG) (Q := (∅ : Finset (HeightOneSpectrum (𝓞 E))))
-  have hpt : IsPtOf hc g (DecoF.base E n ST SG (∅ : Finset (HeightOneSpectrum (𝓞 E)))) := by
+  let p : DecoF E n ST SG ∅ :=
+    ⟨(⟨decoRaw ST SG (1 : GL (Fin n) (AfE F E)),
+      decorated_lattice_exists hc n ST SG 1 (one_mem _)⟩, fun P => Finset.notMem_empty _ P.2 |>.elim),
+      fun P => Finset.notMem_empty _ P.2 |>.elim⟩
+  have hb : IsPtOf hc 1 p := by
+    apply (PtDeco.isPtOf_iff_decoRaw F E hc n ST SG ∅ 1 p rfl).2
+    exact ⟨one_mem _, rfl⟩
+  have hpt : IsPtOf hc g p := by
     refine ⟨hg, ?_, fun P x hx i hi => ?_, fun w x hx i => ?_, fun P => absurd P.2 (Finset.notMem_empty _)⟩
-    · have h := c1
-      rw [globLat_one_std] at h
-      exact h
+    · exact c1
     · rw [c3 P.1 (hST P.1 P.2).1 (hST P.1 P.2).2 x i]
       exact hb.f P x hx i hi
     · rw [c3 w.1 (hSG w.1 w.2).1 (hSG w.1 w.2).2 x i]
       exact hb.be w x hx i
-  have hd := (PtDeco.isPtOf_iff_decoRaw F E hc n ST SG ∅ g (DecoF.base E n ST SG ∅) rfl).1 hpt
-  have hK := mem_principal_of_same_decoration hc n ST SG (one_mem _) hg (by rw [decoRaw_one, ← hd.2]; rfl)
+  have hd := (PtDeco.isPtOf_iff_decoRaw F E hc n ST SG ∅ g p rfl).1 hpt
+  have hK := mem_principal_of_same_decoration hc n ST SG (one_mem _) hg hd.2
   rw [inv_one, one_mul] at hK
   refine ⟨g, hK, fun P i j => ?_, fun w hw hw' i j => ?_⟩
   · rw [c2 P.1 P.2 i j]

@@ -1,9 +1,77 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DltEqZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIntegralClosureOfSeparableInvolutionAlgebrStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInjectiveTorusClassesOfIdempotentDecomposiStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsUnitBasePointAdjoinTwistedSigma
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DltEqZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInjectiveTorusClassesOfIdempotentDecomposiStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIntegralClosureOfSeparableInvolutionAlgebrStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Quotient.Index
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Algebra.DualNumber
+import Mathlib.AlgebraicGeometry.Geometrically.Connected
+import Mathlib.AlgebraicGeometry.Geometrically.Integral
+import Mathlib.AlgebraicGeometry.Group.Affine
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
+import Mathlib.AlgebraicGeometry.ValuativeCriterion
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.CategoryTheory.MorphismProperty.Descent
+import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.GroupTheory.IndexNSmul
+import Mathlib.LinearAlgebra.BilinearForm.TensorProduct
+import Mathlib.LinearAlgebra.Eigenspace.Charpoly
+import Mathlib.NumberTheory.NumberField.CMField
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.MonoidAlgebra
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.ENatToNat
+
+@[expose] public section
+
 open GlobalTheory.UnitLemma GlobalTheory.UnitLemma.Desc Polynomial Filter Topology
 
 noncomputable section
@@ -43,25 +111,7 @@ theorem finite_between (O A : Type) [CommRing O] [IsDomain O] [IsDiscreteValuati
   exact Subtype.ext h3
 
 theorem isIntegral_sigma (K : UQ) (B : InvAlg K) (y : B.A) (hy : IsIntegral K.O y) : IsIntegral K.O (B.σ y) := by
-  obtain ⟨p, hpm, hp⟩ := hy
-  choose cO hcO using K.c_int
-  have hinj : Function.Injective (algebraMap K.O K.E) := IsFractionRing.injective K.O K.E
-  let ψ : K.O →+* K.O :=
-    { toFun := cO
-      map_one' := hinj (by rw [← hcO, map_one, map_one])
-      map_mul' := fun x y => hinj (by rw [← hcO, map_mul, map_mul, map_mul, hcO, hcO])
-      map_zero' := hinj (by rw [← hcO, map_zero, map_zero])
-      map_add' := fun x y => hinj (by rw [← hcO, map_add, map_add, map_add, hcO, hcO]) }
-  have hcomp : (algebraMap K.O B.A).comp ψ = (B.σ : B.A →+* B.A).comp (algebraMap K.O B.A) := by
-    ext x
-    simp only [RingHom.coe_comp, Function.comp_apply, RingHom.coe_coe]
-    rw [IsScalarTower.algebraMap_apply K.O K.E B.A, IsScalarTower.algebraMap_apply K.O K.E B.A, B.σ_alg]
-    show _ = algebraMap K.E B.A (K.c (algebraMap K.O K.E x))
-    rw [hcO]; rfl
-  refine ⟨p.map ψ, hpm.map ψ, ?_⟩
-  rw [Polynomial.eval₂_map, hcomp]
-  have := Polynomial.hom_eval₂ p (algebraMap K.O B.A) (B.σ : B.A →+* B.A) y
-  exact this.symm.trans (by rw [hp, map_zero])
+  apply GlobalTheory.UnitLemma.UnitBase.isIntegral_σ <;> assumption
 
 theorem finite_rhoSet (K : UQ) (B : InvAlg K) (hsep : B.P.Separable) (a : K.O) (ha : K.Small a) (k : ℕ) :
     Finite {c : B.T ⧸ (intUnits K.O B.A).subgroupOf B.T //

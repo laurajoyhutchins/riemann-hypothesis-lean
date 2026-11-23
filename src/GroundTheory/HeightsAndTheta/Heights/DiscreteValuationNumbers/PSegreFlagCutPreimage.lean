@@ -1,9 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreFlagCutPreimage
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreFlagCutLiesOver
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSegreFlagCutChartSectionTools
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PGenericProjClosureDivisor
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwistedDualGensExpress
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreFlagCutPreimage
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PGenericProjClosureDivisor
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSegreFlagCutChartSectionTools
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwistedDualGensExpress
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreFlagCutChartSection
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppAA
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -23,11 +75,12 @@ theorem alg_eq_of_support {σ R A : Type*} [CommSemiring R] [CommSemiring A] [Al
     (h : ∀ m ∈ G.support, ∀ p ∈ m.support, α (X p) = β (X p)) : α G = β G := by
   conv_lhs => rw [G.as_sum]
   conv_rhs => rw [G.as_sum]
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [monomial_eq, Finsupp.prod, map_mul, map_mul, map_prod, map_prod]
   congr 1
-  · show α (algebraMap R _ (coeff m G)) = β (algebraMap R _ (coeff m G))
+  · show α (algebraMap R _ (AddMonoidAlgebra.coeff G m)) = β (algebraMap R _ (AddMonoidAlgebra.coeff G m))
     rw [α.commutes, β.commutes]
   · refine Finset.prod_congr rfl fun p hp => ?_
     rw [map_pow, map_pow, h m hm p hp]
@@ -287,8 +340,8 @@ end Subst
 
 end SegreFlagCutPreimage
 
-open SegreFlagCutPreimage in
 
+open SegreFlagCutPreimage in
 theorem SegreFlagCutPreimage.proof : SegreFlagCutPreimage.Statement := by
   intro O _ _ _ ϖ hϖ Ω _ _ K _ _ ι _ y d hV N E _ _ B B' hB w w' x x' f₀ g₀ hfl M M' a₀ a₀' φ φ' hφ hφ'
     Φ _ _ _ _ e t ht k hk W hW hWr hPW hϖW
@@ -344,6 +397,7 @@ theorem SegreFlagCutPreimage.proof : SegreFlagCutPreimage.Statement := by
   have hLval : ∀ (s : Fin N → Φ) i, aeval (pairProjCoord y w φ φ' s) (L i) =
       aeval (pairProjCoord y w φ φ' s) (C (ϖ ^ n) * chartMonoZ O M M' c bH) * genVal w s (φ i) := by
     intro s i
+
     rw [hval s i, hLdef, map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [map_mul, aeval_X, mul_comm]
@@ -380,6 +434,7 @@ theorem SegreFlagCutPreimage.proof : SegreFlagCutPreimage.Statement := by
         intro i
         rw [map_mul, hLval]
         ring
+
       rw [map_sum, Finset.sum_congr rfl fun i _ => hterm i, ← Finset.mul_sum, ← hval']
       simp only [map_mul, aeval_X]
       change _ = genVal w (flagCoord w e t (k + 1)) (φ' l₀) * (_ * _) * (_ * _)

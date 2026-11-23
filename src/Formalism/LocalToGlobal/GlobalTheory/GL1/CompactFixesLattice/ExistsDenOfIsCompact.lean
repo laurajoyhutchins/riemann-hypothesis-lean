@@ -1,5 +1,55 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.MemClosureOfMemSS
-import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.Imports
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.CompactFixesLattice
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.ExistsDenOfIsCompactAdele
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.MemClosureOfMemSS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.CoordMulTmul
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,14 +69,6 @@ private theorem exists_basis_mem_intOE :
   rw [Module.Basis.isUnitSMul_apply, Int.cast_smul_eq_zsmul F]
   exact ⟨⟨_, (mem_integralClosure_iff ℤ E).mpr (hy _ (Finset.mem_image_of_mem c (Finset.mem_univ i)))⟩, rfl⟩
 
-theorem exists_sub_mem (x : AE F E) : ∃ e : E, x - inclE (F := F) (AF F) e ∈ SS F E := by
-  obtain ⟨n, b, hb⟩ := exists_basis_mem_intOE (F := F) (E := E)
-  choose u hu using fun i => exists_sub_mem_intAd (F := F) (coord b i x)
-  refine ⟨∑ i, u i • b i, mem_SS_of_coord b hb _ fun i => ?_⟩
-  have h1 : inclE (F := F) (AF F) (∑ j, u j • b j) = (∑ j, u j • b j) ⊗ₜ[F] (1 : AF F) := rfl
-  rw [map_sub, h1, coord_tmul, b.repr_sum_self, ← Algebra.algebraMap_eq_smul_one]
-  exact hu i
-
 private theorem exists_int_ne_zero_mul_repr_mem_range {n : ℕ} (b : Module.Basis (Fin n) F E) :
     ∃ y : ℤ, y ≠ 0 ∧ ∀ e ∈ intOE E, ∀ i, (y : F) * b.repr e i ∈ (algebraMap (𝓞 F) F).range := by
   classical
@@ -38,10 +80,12 @@ private theorem exists_int_ne_zero_mul_repr_mem_range {n : ℕ} (b : Module.Basi
   rintro _ ⟨z, rfl⟩ i
   have hz : algebraMap (𝓞 E) E z = ∑ j, g.repr z j • algebraMap (𝓞 E) E (g j) := by
     conv_lhs => rw [← g.sum_repr z]
+
     simp only [map_sum, map_zsmul]
   have key : (y : F) * b.repr (algebraMap (𝓞 E) E z) i
       = ∑ j, g.repr z j • ((y : F) * b.repr (algebraMap (𝓞 E) E (g j)) i) := by
-    rw [hz, map_sum, Finsupp.finset_sum_apply, Finset.mul_sum]
+
+    rw [hz, map_sum, Finsupp.finsetSum_apply, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_zsmul, Finsupp.smul_apply, mul_smul_comm]
   rw [key]

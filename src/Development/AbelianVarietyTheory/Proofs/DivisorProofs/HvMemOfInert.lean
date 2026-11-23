@@ -1,9 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgebraicHeckeCharValuesInNumberField
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeTie
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HasProdQuadExtLocalEulerFactorInvInv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilGramSignature
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadingsExistRow
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HasProdQuadExtLocalEulerFactorInvInv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgebraicHeckeCharValuesInNumberField
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,8 +72,8 @@ theorem valTw_eq (χ : HChar L) (v : HeightOneSpectrum (𝓞 L)) : χ.valTw (1 /
   rw [Real.sqrt_eq_rpow, ← Real.rpow_neg (Nat.cast_nonneg _), Complex.ofReal_cpow (Nat.cast_nonneg _),
     Complex.ofReal_natCast, Complex.ofReal_neg]
 
-open Classical in
 
+open Classical in
 def cnt (a : 𝓞 L) (v : HeightOneSpectrum (𝓞 L)) : ℕ :=
   (Associates.mk v.asIdeal).count (Associates.mk (Ideal.span {a} : Ideal (𝓞 L))).factors
 
@@ -193,27 +235,13 @@ theorem hv_mem_host (D : D7) (χ : Formalism.L2.Host.HChar D.host.E) (hχ : Form
     · exact hv_mem_of_inert χ hχ.res (hχ.unr v) (ho v) h1 (h2 _ hm).2 _
     · exact absurd hc (h2 _ hm).1
   · exact hT v ⟨hc, fun h => hv' (Finset.mem_union_left _ h), fun w hw h => hv' (Finset.mem_union_right _ (Finset.mem_image.2
-      ⟨w, hw, by rw [show w = conjPrime₂ v from HeightOneSpectrum.ext (h.trans (conjIdeal_asIdeal v)),
-        GlobalTheory.RationalValues.conjP_conjP]⟩))⟩
+      ⟨w, hw, by
+        rw [show w = conjPrime₂ v from HeightOneSpectrum.ext (h.trans (conjIdeal_asIdeal v))]
+        exact HeightOneSpectrum.ext (Ideal.ext fun a => by rw [mem_conjP, mem_conjP, cO_cO])⟩))⟩
 
 theorem splitOff_mono {D : D7} {v : Pl D.host.E} {S S' : Set (Pl D.host.E)} (h : Bridge.SplitOff v S) (hS : S' ⊆ S) :
     Bridge.SplitOff v S' :=
   ⟨h.1, fun h' => h.2.1 (hS h'), fun w hw => h.2.2 w (hS hw)⟩
-
-theorem etaVals : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T0 : Type} {A : FamIn D.what₂.LL G Pl0 T0 D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), R.Char F → ∀ (i : Fin D.R.m), EtaVals R := by
-  classical
-  intro D G _ _ Pl0 T0 A Ks _ _ _ R F hR _ P e he x hx
-  have htie := hR.fam.tie
-  obtain ⟨_, _, _, hT⟩ := htie
-  have hok := hT.ok A.μ0
-  have h := hv_mem_host D R.C.eta R.C.isEta (R.Sb ∪ R.Q A.μ0) (fun v hs => by
-    rw [Finset.coe_union] at hs
-    obtain ⟨Q, rfl⟩ := hR.fam.pl_onto v (splitOff_mono hs Set.subset_union_left)
-    exact ⟨_, (hR.fam.etaVal Q ((hok Q).2 hs)).trans (valTw_eq _ _)⟩) P
-  obtain ⟨y, hy⟩ := h
-  refine ⟨y, hy.trans ?_⟩
-  rw [hR.lev.eta.2 P e he _ x hx]
-  rfl
 
 end GlobalTheory.EtaValues
 

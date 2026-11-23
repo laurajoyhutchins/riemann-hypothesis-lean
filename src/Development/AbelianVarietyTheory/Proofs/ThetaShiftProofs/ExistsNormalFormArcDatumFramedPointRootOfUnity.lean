@@ -1,20 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Formalism.LocalToGlobal.ProjectiveLattices.ArcTheta
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsSmulPtSmulPt
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTangentOfIsLieImage
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeExistsUniqueOfSamePoint
+module
+
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsArcFr
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsIntegralElemOfIsAlgebraicInt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTangentOfIsLieImage
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsSmulPtSmulPt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArcStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FrameChangeComposeInvertBaseChangeTriangularStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FrameChangeExistsUniqueInvertible
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsOpenImmersionJKPowerSeries
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LieImgIffIsLieCombStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ThetaGeneratorEqRootOfUnityMulStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsTangentModuleUniversalGroupStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsOpenImmersionJKPowerSeries
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsIntegralElemOfIsAlgebraicInt
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FrameChangeExistsUniqueInvertible
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FrameChangeComposeInvertBaseChangeTriangularStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArcStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LieImgIffIsLieCombStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ThetaGeneratorEqRootOfUnityMulStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeExistsUniqueOfSamePoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.ArcSPin
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,42 +91,13 @@ theorem one_eq : η[t'.G].left ≫ m.φ = (1 : Over.mk x ⟶ Xo.univ.t.G).left :
   exact this
 
 theorem tan_iff (w : epsR S ⟶ t'.G) : IsTanAt x (w.left ≫ m.φ) ↔ IsTangent w := by
-  have hw : w.left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w w
-  constructor
-  · intro h
-    apply m.cart.1.hom_ext
-    · rw [Category.assoc]; exact h.2.trans (one_eq m).symm
-    · have a : η[t'.G].left ≫ t'.G.hom = 𝟙 _ := Over.w η[t'.G]
-      rw [Category.assoc, hw, a, ← spMap_comp]
-      have : (TrivSqZeroExt.fstHom S S S).toRingHom.comp (algebraMap S (DualNumber S)) = RingHom.id S := by
-        ext r; simp [TrivSqZeroExt.algebraMap_eq_inl]
-      rw [this]
-      exact Spec.map_id _
-  · intro h
-    refine ⟨by rw [Category.assoc, m.cart.1.w, ← Category.assoc, hw], ?_⟩
-    rw [← Category.assoc]
-    exact (congrArg (· ≫ m.φ) h).trans (one_eq m)
+  apply GlobalTheory.ArcQ.ExFr.tan_iff <;> assumption
 
 theorem scale_over (s : S) : spMap (epsScaleR s) ≫ spMap (algebraMap S (DualNumber S)) =
     spMap (algebraMap S (DualNumber S)) := by
   rw [← spMap_comp]
   congr 1
   ext r <;> simp [epsScaleR, TrivSqZeroExt.algebraMap_eq_inl]
-
-theorem eig_iff (w : epsR S ⟶ t'.G) (a : 𝓞 E) (s : S) :
-    (w.left ≫ m.φ) ≫ (Xo.univ.t.act.act a).left = spMap (epsMul s) ≫ w.left ≫ m.φ ↔
-      (w ≫ t'.act.act a).left = spMap (epsScaleR s) ≫ w.left := by
-  have hw : w.left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w w
-  have e : (w.left ≫ m.φ) ≫ (Xo.univ.t.act.act a).left = (w ≫ t'.act.act a).left ≫ m.φ := by
-    rw [Over.comp_left, Category.assoc, Category.assoc, m.act]
-  rw [e]
-  constructor
-  · intro h
-    apply m.cart.1.hom_ext
-    · rw [Category.assoc]; exact h
-    · rw [Over.w, Category.assoc, hw, scale_over]; rfl
-  · intro h
-    rw [h, Category.assoc]; rfl
 
 theorem exists_lift {T : Over (Sp S)} (v : T.left ⟶ Xo.univ.t.G.left) (hv : v ≫ Xo.univ.t.G.hom = T.hom ≫ x) :
     ∃ w : T ⟶ t'.G, w.left ≫ m.φ = v :=
@@ -91,23 +111,7 @@ theorem push_prod {n : ℕ} (u : Fin n → (epsR S ⟶ t'.G)) :
 
 theorem comb_iff {n : ℕ} (v : Fin n → (epsR S ⟶ t'.G)) (cf : Fin n → S) (w : epsR S ⟶ t'.G) :
     IsCombAt x (fun i => (v i).left ≫ m.φ) cf (w.left ≫ m.φ) ↔ IsLieComb cf v w := by
-  constructor
-  · rintro ⟨u, hu, hw⟩
-    choose u' hu' using fun i => exists_lift m (T := epsR S) (u i).left (Over.w (u i))
-    have e : u = fun i => pushHom m.cart (epsR S) (u' i) := funext fun i => Over.OverMorphism.ext (hu' i).symm
-    refine ⟨u', fun i => ?_, Over.OverMorphism.ext ?_⟩
-    · apply m.cart.1.hom_ext
-      · rw [Category.assoc]; exact (hu' i).trans (hu i)
-      · have hv : (v i).left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w (v i)
-        rw [Over.w, Category.assoc, hv, scale_over]; rfl
-    · apply m.cart.1.hom_ext
-      · rw [e] at hw
-        exact hw.symm.trans (push_prod m u').symm
-      · rw [Over.w, Over.w]
-  · rintro ⟨u, hu, rfl⟩
-    refine ⟨fun i => pushHom m.cart (epsR S) (u i), fun i => ?_, (push_prod m u).symm⟩
-    show (u i).left ≫ m.φ = _
-    rw [hu, Category.assoc]; rfl
+  apply GlobalTheory.ArcQ.ExFr.comb_iff <;> assumption
 
 end ExFr
 
@@ -494,8 +498,8 @@ theorem algZ_of_pow {S : Type} [CommRing S] {ζ : S} {N : ℕ} (hN : 0 < N) (h :
 
 end GlobalTheory.ArcQ.NormalForm
 
-open GlobalTheory.ArcQ.NormalForm in
 
+open GlobalTheory.ArcQ.NormalForm in
 theorem GlobalTheory.ArcQ.exists_normalForm : Out.Laws → Out.Laws2 → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (K₁ : Type) [Field K₁] [Algebra c.F K₁] [Algebra c.F (ArcS Dw K₁)] (d : ArcDatum Xo c K₁), ∃ (ζ : K₁) (N : ℕ), 0 < N ∧ ζ ^ N = 1 ∧ ((∀ τ k, GtTanR (d.e τ k)) → d.Normal ζ) ∧ ∃ (e₀ : ∀ τ : E →+* ℂ, Fin (Dw.mult τ) → Out.GtPt (d.a.restrict (c.V d.Wp).subtype).D₀ (epsR K₁)) (y₀ : FrPt Xo c (ArcS Dw K₁)), (∀ τ k, GtComb (Pi.single k (1 : K₁)) (d.e τ) (e₀ τ k)) ∧ IsArcFr d.W e₀ d.th (arcι Dw K₁) y₀ ∧ FrChg (letM Dw K₁) (GlobalTheory.ArcQ.cst Dw ζ) y₀ d.yF := by
   intro hL hL2 E _ _ _ H Dw l Xo c K₁ _ _ _ d
   obtain ⟨-, ⟨z, hz, hzx⟩, v, hv, hvS⟩ := d.arcDatum_isArc_point_basis
@@ -503,7 +507,11 @@ theorem GlobalTheory.ArcQ.exists_normalForm : Out.Laws → Out.Laws2 → ∀ (E 
   have : CharZero K₁ := charZero_of_injective_ringHom (algebraMap c.F K₁).injective
   have : IsDomain (ArcS Dw K₁) := GlobalTheory.ArcConst.isDomain Dw K₁
   obtain ⟨ξ, N, y₀, hN, hξ, hchg, h1, e₀, h2, h3⟩ := exists_frame hL hL2 (GlobalTheory.ThetaShiftProofs.mono_j d.Y (mono_spMap_subtype _))
-    d.W d.e d.th (arcι Dw K₁) (letM Dw K₁) (isUnit_det_letM Dw K₁) d.yF z hz hzx v hv hvS θ
+    d.W d.e d.th (arcι Dw K₁) (letM Dw K₁) (isUnit_det_letM Dw K₁) d.yF z hz hzx v hv (by
+      intro τ i
+      have hrow : letM Dw K₁ τ i = fun k => arcX Dw K₁ τ i k :=
+        funext fun k => Matrix.of_apply (fun j k => arcX Dw K₁ τ j k) i k
+      simpa only [hrow] using hvS τ i) θ
     ⟨σ, fam, θ', a1, a2, a3, a4⟩ t m1 m2 w1 w2 σ' s1 θ2 r1 r2 i1 i2 ps hg
   obtain ⟨ζ, hζ⟩ := GlobalTheory.ArcConst.exists_const Dw K₁ ξ (algZ_of_pow hN hξ)
   have hζN : ζ ^ N = 1 := GlobalTheory.ArcConst.arcι_C_injective Dw K₁

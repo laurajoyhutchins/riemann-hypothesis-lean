@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ImageStableDegreeBounds
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MonodromyReductionModuloHighDegreeStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ImageStableDegreeBounds
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MonodromyReductionModuloHighDegreeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open PowerSeries GlobalTheory.BK
 
 namespace GlobalTheory.DegreeRaise
@@ -35,12 +85,22 @@ theorem card_degrees_le {e : ℕ} (Sig : Finset (ZMod e)) (c : ZMod e) (m m' : �
   Finset.card_image_le.trans (by simp [Finset.card_product])
 
 theorem degreeBounds {e : ℕ} [NeZero e] (Sig : Finset (ZMod e)) (c : ZMod e) (A' : ℕ) :
-    DegreeBounds Sig c A' where
-  lt_of_mem₁ i hi := by have := bounds_of_mem hi; nlinarith
-  mem_Ico₂ j hj := by have := bounds_of_mem hj; constructor <;> nlinarith
-  monic₁ := rootPoly_monic _
-  monic₂ := rootPoly_monic _
-  disjoint_roots := by
+    DegreeBounds Sig c A' := by
+  refine
+    { lt_of_mem₁ := ?_
+      mem_Ico₂ := ?_
+      monic₁ := rootPoly_monic _
+      monic₂ := rootPoly_monic _
+      disjoint_roots := ?_
+      card₁ := ?_
+      card₂ := ?_ }
+  · intro i hi
+    have := bounds_of_mem hi
+    nlinarith
+  · intro j hj
+    have := bounds_of_mem hj
+    constructor <;> nlinarith
+  ·
     rw [Multiset.disjoint_left]
     intro x h1 h2
     obtain ⟨i, hi, rfl⟩ := mem_roots_rootPoly h1
@@ -49,8 +109,8 @@ theorem degreeBounds {e : ℕ} [NeZero e] (Sig : Finset (ZMod e)) (c : ZMod e) (
     have := bounds_of_mem hj
     have : i = j := by exact_mod_cast hij
     omega
-  card₁ := (card_degrees_le _ _ _ _).trans (by simp)
-  card₂ := (card_degrees_le _ _ _ _).trans (by rw [show 2 * A' - A' = A' by omega])
+  · exact (card_degrees_le _ _ _ _).trans (by simp)
+  · exact (card_degrees_le _ _ _ _).trans (by rw [show 2 * A' - A' = A' by omega])
 
 theorem climb {R S V : Type} [Ring R] [Ring S] [AddCommGroup V] [Module R V] [Module S V]
     (f : Module.End S V) (W : ℕ → Submodule R V) (m : ℕ) :
@@ -175,7 +235,7 @@ theorem step {P : PhiMod O K l e a ι} {W : Submodule K (Vec K a ι)} (hM : ModH
   have h2 : P.conn z - i • z ∈ part W (MMHigh P) :=
     sub_mem (hM.conn_high z hz) (Submodule.smul_of_tower_mem _ i hz)
   have : P.conn (y + z) - i • (y + z) = (P.conn y - i • y) + (P.conn z - i • z) := by
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     abel
   rw [this]
   exact add_mem h1 (Submodule.mem_sup_right h2)

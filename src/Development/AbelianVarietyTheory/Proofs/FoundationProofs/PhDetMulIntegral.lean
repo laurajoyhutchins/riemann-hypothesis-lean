@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPosHermFormV
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IntMIffInt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralGaussianUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeisenbergReproducingKernelSumSpecStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryFiniteGaussSumPhaseRootOfUnityStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralUnfoldFundamentalDomainStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPosHermFormV
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IntMIffInt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeisenbergReproducingKernelSumSpecStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralGaussianUnitaryStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralUnfoldFundamentalDomainStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryFiniteGaussSumPhaseRootOfUnityStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Complex MeasureTheory GlobalTheory.UnitaryTheta
 open scoped BigOperators ComplexConjugate Real Classical
 
@@ -26,7 +70,7 @@ theorem term_eq (H : Sesq V) (a : V ≃ₗ[ℂ] V) (ha : ∀ z w, H (a z) (a w) 
   have h1 : H z (a.symm x) = H (a z) x := by rw [← ha, LinearEquiv.apply_symm_apply]
   rw [term, kerTerm, hy, mul_assoc, mul_assoc, ← Complex.exp_add, ← Complex.exp_add]
   congr 2
-  simp only [map_add, map_sub, map_neg, LinearMap.add_apply, LinearMap.sub_apply, h1]
+  simp only [map_add (f := _), map_sub, map_neg, LinearMap.add_apply, LinearMap.sub_apply, h1]
   ring
 
 theorem value_eq (H : Sesq V) (hH : IsPosHerm H) (a : V ≃ₗ[ℂ] V) (ha : ∀ z w, H (a z) (a w) = H z w) (x y : V)
@@ -79,7 +123,7 @@ theorem term_shift (H : Sesq V) (hH : IsPosHerm H) (a : V ≃ₗ[ℂ] V) (ha : �
   push_cast
   rw [← hm']
   simp only [Complex.im_eq_sub_conj, ← hH.1]
-  simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply, ha]
+  simp only [map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply, ha]
   have := Complex.I_ne_zero
   field_simp
   ring
@@ -133,7 +177,7 @@ theorem ph_det_mul_integral : ∀ (V : Type) [NormedAddCommGroup V] [NormedSpace
     exact term_shift H hH a ha Λ α hα (s m) y z (hs m) (hle y.2) (haΛ _ y.2) (hαa _ y.2)
   have hu := fun m => GlobalTheory.T.setIntegral_tsum_translate_eq_integral V μ Λ' Fd hFd _ (hint (s m))
   simp only [hsum]
-  rw [integral_finset_sum _ (fun m _ => (hu m).1)]
+  rw [integral_finsetSum _ (fun m _ => (hu m).1)]
   simp only [fun m => (hu m).2, hval]
   rw [← Finset.mul_sum, ← mul_assoc, mul_div_cancel₀ _ hdet]
   exact (ph_real κ).mul hph

@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ApplyLayers
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LayersOfExists
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ApplyLayers
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LayersOfExists
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgHomExtOfConstantCoeffZero
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrysLatOfTrivial
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddXMulDerivativeBinomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,8 +67,8 @@ variable {l : ℕ} [Fact l.Prime] {O L : Type} [CommRing O] [Field L] [CharZero 
 def levOne (W : LocWach PD L O v n) (i : ZMod n) (ζ : L) : O⟦X⟧ →ₐ[O] L⟦X⟧ :=
   (W.lev i ζ).comp (Pi.constAlgHom O (ZMod n) O⟦X⟧)
 
-omit [CharZero L] [Algebra ℚ L] in
 
+omit [CharZero L] [Algebra ℚ L] in
 theorem lev_eq_levOne (W : LocWach PD L O v n) (i : ZMod n) (ζ : L) (f : LetA O n) :
     W.lev i ζ f = levOne W i ζ (f i) := by
   have h := W.lev_letter i ζ (f - Pi.constAlgHom O (ZMod n) O⟦X⟧ (f i)) (sub_self (f i))
@@ -36,8 +78,7 @@ theorem lev_eq_levOne (W : LocWach PD L O v n) (i : ZMod n) (ζ : L) (f : LetA O
 theorem levOne_X (W : LocWach PD L O v n) (i : ZMod n) {ζ : L} (h : ∃ j : ℕ, IsPrimitiveRoot ζ (PD.p ^ j)) :
     levOne W i ζ X = C ζ * exp L - 1 := by
   obtain ⟨E, h0, h1, h2⟩ := W.lev_π i ζ h
-  have hE : E = exp L := Ser.ode_unique 1 (by rw [map_one, one_mul]; exact h1)
-    (by rw [map_one, one_mul]; exact derivative_exp L) (by rw [h0, constantCoeff_exp])
+  have hE : E = exp L := PowerSeries.exp_unique_of_derivative_eq_self h1 h0
   rw [← hE, ← h2, add_sub_cancel_left]
   rfl
 
@@ -87,16 +128,14 @@ theorem levLaws : LevLaws (H.W K s LL h) := by
   convert Ser.evLaw_integers P LL using 1
   exact Algebra.algebra_ext _ _ fun r => PowerSeries.algebraMap_apply
 
-theorem ioLaws_tie : IoLaws (F.E K s LL h).tie :=
-  ⟨GlobalTheory.HWL.Back.ioE_φ (O := ↥(OL LL)) Subtype.val_injective _,
+theorem ioLaws_tie : IoLaws (F.E K s LL h).tie := by
+  set_option synthInstance.maxHeartbeats 100000 in
+    exact ⟨GlobalTheory.HWL.Back.ioE_φ (O := ↥(OL LL)) Subtype.val_injective _,
     GlobalTheory.HWL.Back.ioE_γ (O := ↥(OL LL)) Subtype.val_injective _⟩
 
 theorem one_crys : IsCrys (P.PD K) (H.W K s LL h).one.ρ :=
   haveI : FiniteDimensional ℚ_[l] ↥LL.1 := LL.2
   GlobalTheory.TrivCrys.isCrys_lat_of_trivial _ (H.W K s LL h).one_triv
-
-theorem laws_of_cmp (C : LocCmpT l P AI H F) : Laws H F h :=
-  ⟨⟨(C.C K s LL h).tie.lev_Γ, (C.C K s LL h).tie.lev_φ⟩, ioLaws_tie H F h, one_crys H h⟩
 
 end Concrete
 

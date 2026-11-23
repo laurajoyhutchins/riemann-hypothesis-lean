@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStructure
-import GroundTheory.AutomorphicForms.HarishChandraRegularity.CartanBasis
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Archimedean
+public import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
+public import GroundTheory.AutomorphicForms.HarishChandraRegularity.CartanBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace Matrix
 open scoped NumberField.AdeleRing
@@ -19,8 +72,8 @@ variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
 open scoped Classical
 
-variable (K) in
 
+variable (K) in
 def mixedTraceL : mixedSpace K →ₗ[ℝ] ℝ where
   toFun x := (∑ v, x.1 v) + ∑ v, (x.2 v).re
   map_add' x y := by
@@ -72,7 +125,8 @@ theorem mixedTraceL_star_mul_self_pos {x : mixedSpace K} (hx : x ≠ 0) :
 theorem mixedTraceL_trace_conjTranspose_mul_self_pos {A : Matrix (Fin n) (Fin n) (mixedSpace K)}
     (hA : A ≠ 0) : 0 < mixedTraceL K (trace (Aᴴ * A)) := by
   have e : mixedTraceL K (trace (Aᴴ * A)) = ∑ i, ∑ j, mixedTraceL K (star (A j i) * A j i) := by
-    simp only [trace, diag_apply, mul_apply, conjTranspose_apply, map_sum]
+
+    simp only [trace, diag_apply, Matrix.mul_apply, conjTranspose_apply, map_sum]
   rw [e]
   obtain ⟨j, i, hji⟩ : ∃ j i, A j i ≠ 0 := by
     by_contra hc
@@ -91,11 +145,6 @@ theorem mixedTraceL_trace_conjTranspose_mul_self_pos {A : Matrix (Fin n) (Fin n)
 
 def mat (X : ArchMatrix K n) : Matrix (Fin n) (Fin n) (mixedSpace K) := X
 
-@[simp] theorem mat_add (X Y : ArchMatrix K n) : mat (X + Y) = mat X + mat Y := rfl
-@[simp] theorem mat_sub (X Y : ArchMatrix K n) : mat (X - Y) = mat X - mat Y := rfl
-@[simp] theorem mat_neg (X : ArchMatrix K n) : mat (-X) = -mat X := rfl
-@[simp] theorem mat_mul (X Y : ArchMatrix K n) : mat (X * Y) = mat X * mat Y := rfl
-@[simp] theorem mat_smul (r : ℝ) (X : ArchMatrix K n) : mat (r • X) = r • mat X := rfl
 @[simp] theorem mat_zero : mat (0 : ArchMatrix K n) = 0 := rfl
 @[simp] theorem mat_one : mat (1 : ArchMatrix K n) = 1 := rfl
 
@@ -107,8 +156,6 @@ variable (X Y : (isExpLieAlgebra K n).lieSubalgebra) (r : ℝ)
     mat (X : ArchMatrix K n) - mat (Y : ArchMatrix K n) := rfl
 @[simp] theorem mat_coe_smul : mat ((r • X : (isExpLieAlgebra K n).lieSubalgebra) : ArchMatrix K n) =
     r • mat (X : ArchMatrix K n) := rfl
-@[simp] theorem mat_coe_zero :
-    mat ((0 : (isExpLieAlgebra K n).lieSubalgebra) : ArchMatrix K n) = 0 := rfl
 end Coe
 
 theorem mat_injective : Function.Injective (mat : ArchMatrix K n → _) := fun _ _ h => h
@@ -116,15 +163,15 @@ theorem mat_injective : Function.Injective (mat : ArchMatrix K n → _) := fun _
 theorem mem_lie (X : ArchMatrix K n) : X ∈ (isExpLieAlgebra K n).lieSubalgebra :=
   (isExpLieAlgebra K n).mem_lieSubalgebra.2 Submodule.mem_top
 
-variable (K n) in
 
+variable (K n) in
 def archTraceForm : LinearMap.BilinForm ℝ (isExpLieAlgebra K n).lieSubalgebra :=
   LinearMap.mk₂ ℝ
     (fun X Y => mixedTraceL K (trace (mat (X : ArchMatrix K n) * mat (Y : ArchMatrix K n))))
-    (fun X₁ X₂ Y => by simp [Matrix.add_mul, trace_add])
-    (fun r X Y => by simp [trace_smul])
-    (fun X Y₁ Y₂ => by simp [Matrix.mul_add, trace_add])
-    (fun r X Y => by simp [trace_smul])
+    (fun X₁ X₂ Y => by simp only [mat_coe_add, Matrix.add_mul, trace_add, map_add])
+    (fun r X Y => by simp only [mat_coe_smul, Matrix.smul_mul, trace_smul, map_smul])
+    (fun X Y₁ Y₂ => by simp only [mat_coe_add, Matrix.mul_add, trace_add, map_add])
+    (fun r X Y => by simp only [mat_coe_smul, Matrix.mul_smul, trace_smul, map_smul])
 
 theorem archTraceForm_apply (X Y : (isExpLieAlgebra K n).lieSubalgebra) :
     archTraceForm K n X Y =
@@ -153,8 +200,8 @@ theorem archTraceForm_lie (X Y Z : (isExpLieAlgebra K n).lieSubalgebra) :
     map_sub, map_sub]
   ring
 
-variable (K n) in
 
+variable (K n) in
 def archSkew : Submodule ℝ (isExpLieAlgebra K n).lieSubalgebra where
   carrier := {X | (mat (X : ArchMatrix K n))ᴴ = -mat (X : ArchMatrix K n)}
   add_mem' {X Y} hX hY := by
@@ -165,8 +212,8 @@ def archSkew : Submodule ℝ (isExpLieAlgebra K n).lieSubalgebra where
     simp only [Set.mem_ofPred_eq, mat_coe_smul] at hX ⊢
     rw [conjTranspose_smul, star_trivial, hX, smul_neg]
 
-variable (K n) in
 
+variable (K n) in
 def archHerm : Submodule ℝ (isExpLieAlgebra K n).lieSubalgebra where
   carrier := {X | (mat (X : ArchMatrix K n))ᴴ = mat (X : ArchMatrix K n)}
   add_mem' {X Y} hX hY := by
@@ -294,9 +341,9 @@ theorem exists_archCartanBasis :
       change archTraceForm K n _ _ = _ at this
       simp only [f, ε0, Sum.elim_inl, Sum.inl.injEq]
       exact this
-    · simp only [f, ε0, Sum.elim_inl, Sum.elim_inr, reduceCtorEq, if_false]
+    · simp only [f, ε0, Sum.elim_inl, Sum.elim_inr, reduceCtorEq, ite_false]
       exact archTraceForm_eq_zero_of_skew_herm (bk i).2 (bp j).2
-    · simp only [f, ε0, Sum.elim_inl, Sum.elim_inr, reduceCtorEq, if_false]
+    · simp only [f, ε0, Sum.elim_inl, Sum.elim_inr, reduceCtorEq, ite_false]
       rw [archTraceForm_symm]
       exact archTraceForm_eq_zero_of_skew_herm (bk j).2 (bp i).2
     · have := hbp i j
@@ -324,8 +371,6 @@ def matHom : ArchMatrix K n →+* Matrix (Fin n) (Fin n) (mixedSpace K) where
   map_mul' _ _ := rfl
   map_zero' := rfl
   map_add' _ _ := rfl
-
-@[simp] theorem matHom_apply (X : ArchMatrix K n) : matHom X = mat X := rfl
 
 theorem continuous_matHom : Continuous (matHom : ArchMatrix K n →+* _) := continuous_id
 
@@ -444,8 +489,8 @@ theorem extensionEmbedding_symm (z : mixedSpace K) {w : InfinitePlace K} (hw : I
   rw [RingEquiv.apply_symm_apply] at this
   exact (congrArg (fun p : mixedSpace K => p.2 ⟨w, hw⟩) this).symm
 
-open Reduction in
 
+open Reduction in
 theorem expG_mem_archCompact_of_skew (Z : archLie K n)
     (hZ : (mat (Z : ArchMatrix K n))ᴴ = -mat (Z : ArchMatrix K n)) :
     (isExpLieAlgebra K n).expG Z ∈ archCompact K n := by
@@ -467,8 +512,9 @@ theorem expG_mem_archCompact_of_skew (Z : archLie K n)
           Matrix (Fin n) (Fin n) w.Completion)) i)) =
           (fun i => ψ (y i)) ᵥ* realCompM ⟨w, hw⟩ ((x : (ArchMatrix K n)ˣ) : ArchMatrix K n) := by
         ext j
+
         simp only [vecMul, dotProduct, map_sum, map_mul, realCompM_apply, Matrix.map_apply,
-          realComp_apply]
+        realComp_apply]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [infAt_infEmb_apply, extensionEmbeddingOfIsReal_symm]
       rw [e, euclidNorm_vecMul_unitary hU]
@@ -484,8 +530,9 @@ theorem expG_mem_archCompact_of_skew (Z : archLie K n)
           Matrix (Fin n) (Fin n) w.Completion)) i)) =
           (fun i => ψ (y i)) ᵥ* complexCompM ⟨w, hc⟩ ((x : (ArchMatrix K n)ˣ) : ArchMatrix K n) := by
         ext j
+
         simp only [vecMul, dotProduct, map_sum, map_mul, complexCompM_apply, Matrix.map_apply,
-          complexComp_apply]
+        complexComp_apply]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [infAt_infEmb_apply, extensionEmbedding_symm _ hc]
       rw [e, euclidNorm_vecMul_unitary hU]
@@ -496,8 +543,8 @@ theorem expG_mem_archCompact_of_skew (Z : archLie K n)
     rw [this]
     exact one_mem _
 
-variable (K n) in
 
+variable (K n) in
 theorem exists_archCartanData :
     ∃ (d : ℕ) (b : Module.Basis (Fin d) ℝ (isExpLieAlgebra K n).lieSubalgebra) (ε : Fin d → ℝ)
       (B : LinearMap.BilinForm ℝ (isExpLieAlgebra K n).lieSubalgebra),

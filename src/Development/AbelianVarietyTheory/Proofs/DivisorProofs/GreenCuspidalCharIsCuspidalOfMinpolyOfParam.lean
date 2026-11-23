@@ -1,11 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabelsCharOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspidalCharacterFormula
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLabel
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CuspidalCharExistsOfGreen
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.FinsumUnipotentRadicalEqZeroStatement
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.ExponentRegularOfNatDegreeMinpolyGeneratorPowStatement
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyOfIrreduciStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabelsCharOne
+public import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.InvariantSubspaceMobiusInverseRecEqOfFinrankLt
+public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemRootsBarXSubC
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.ExponentRegularOfNatDegreeMinpolyGeneratorPowStatement
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.FinsumUnipotentRadicalEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.GeneralLinearFunctionExtendZeroEndPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyLinearEquiStatement
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyOfIrreduciStatement
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsCharacterCuspidalRootSumRegularStatement
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsPrimitiveEndClassFunctionInvariantSubspaceMobiStatement
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.RootPowerSumCharacterAdditiveAndXSubOnePowStatement
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.StarVirtualCharacterEqApplyInvStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspidalCharacterFormula
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLabel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CuspidalCharExistsOfGreen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.FinGroupCharZero
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.CuspValueComparison
+public import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.AbByPOfComm
+
+@[expose] public section
 
 noncomputable section
 
@@ -108,8 +165,44 @@ theorem isCuspOf_cuspOn (L : LabelDatum p) {ι : Type} [Fintype ι] [DecidableEq
     L.gen_order _ hd ▸ IsPrimitiveRoot.orderOf _
   haveI : NeZero (p ^ Fintype.card ι - 1) := ⟨(g_pow_sub_pos hd).ne'⟩
   obtain ⟨k, -, rfl⟩ := hp.eq_pow_of_pow_eq_one hx1
-  obtain ⟨ω, hω, he⟩ := exists_ext (ι := Units.map L.teich) fun a b e =>
+  have hι : Function.Injective (Units.map L.teich) := fun a b e =>
     Units.ext (L.teich_inj _ _ a.ne_zero b.ne_zero (congrArg Units.val e))
+  let f : Fbar p → ℂ := fun x => if h : x = 0 then 0 else ((Units.map L.teich (Units.mk0 x h) : ℂˣ) : ℂ)
+  have hf0 : ∀ x (hx : x ≠ 0), f x = ((Units.map L.teich (Units.mk0 x hx) : ℂˣ) : ℂ) := fun x hx => dif_neg hx
+  have hfz : f 0 = 0 := dif_pos rfl
+  let ω : Fbar p →*₀ ℂ :=
+    { toFun := f
+      map_zero' := hfz
+      map_one' := by
+        show f 1 = 1
+        rw [hf0 1 one_ne_zero, Units.mk0_one, map_one, Units.val_one]
+      map_mul' := by
+        intro a b
+        show f (a * b) = f a * f b
+        by_cases ha : a = 0
+        · rw [ha, zero_mul, hfz, zero_mul]
+        by_cases hb : b = 0
+        · rw [hb, mul_zero, hfz, mul_zero]
+        rw [hf0 a ha, hf0 b hb, hf0 (a * b) (mul_ne_zero ha hb), Units.mk0_mul, map_mul,
+          Units.val_mul] }
+  have hω : Function.Injective ω := by
+    intro a b hab
+    change f a = f b at hab
+    by_cases ha : a = 0 <;> by_cases hb : b = 0
+    · rw [ha, hb]
+    · exfalso
+      rw [ha, hfz, hf0 b hb] at hab
+      exact Units.ne_zero _ hab.symm
+    · exfalso
+      rw [hb, hfz, hf0 a ha] at hab
+      exact Units.ne_zero _ hab
+    · rw [hf0 a ha, hf0 b hb] at hab
+      have h := hι (Units.ext hab)
+      simpa using congrArg Units.val h
+  have he : ∀ u : (Fbar p)ˣ, ((Units.map L.teich u : ℂˣ) : ℂ) = ω u := by
+    intro u
+    show _ = f u
+    rw [hf0 u u.ne_zero, Units.mk0_val]
   have he' : ∀ z : Fbar p, z ^ (p ^ Fintype.card ι - 1) = 1 → L.teich z = ω z := by
     intro z hz
     have hz0 : z ≠ 0 := by

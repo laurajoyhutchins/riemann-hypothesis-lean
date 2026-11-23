@@ -1,27 +1,46 @@
-import Formalism.LocalRingCardinality.HeightBoundGeFourthPowerRank
+module
+
+public import Formalism.LocalRingCardinality.DataParamsT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.BasicNotions
-
-def Ranks.NF (R : Ranks) : ℕ := R.k + R.m * (R.t + (R.r + 6) + 1)
-
-theorem Ranks.NF_le (R : Ranks) : R.NF ≤ 2 * R.N R.m := by
-  have h := R.rank_add_five_le
-  have h1 : R.t + (R.r + 6) + 1 ≤ 2 * (R.t + 1) := by unfold Ranks.r; omega
-  have h2 : R.m * (R.t + (R.r + 6) + 1) ≤ R.m * (2 * (R.t + 1)) := Nat.mul_le_mul_left _ h1
-  have h3 : R.m * (2 * (R.t + 1)) = 2 * (R.m * (R.t + 1)) := by ring
-  unfold Ranks.NF Ranks.N
-  omega
-
-theorem Ranks.N_le_t_sq (R : Ranks) : R.N R.m ≤ R.t ^ 2 := by
-  have h1 := R.rank_add_five_le
-  have h2 := R.three_m_lt_t
-  have h3 := R.two_le_m
-  have hk : R.k ≤ R.t := by omega
-  unfold Ranks.N
-  nlinarith
-
-theorem Ranks.NF_le_two_mul_t_sq (R : Ranks) : R.NF ≤ 2 * R.t ^ 2 :=
-  le_trans R.NF_le (Nat.mul_le_mul_left _ R.N_le_t_sq)
 
 theorem ParamsT.nV_eq {D : D7} {L : SizeData₂ D} {P : ParameterChoice' D L} (T : ParamsT D L P) :
     D.R.nV = T.TO * T.nWn + (8 * D.R.f * D.R.r + 4) := by

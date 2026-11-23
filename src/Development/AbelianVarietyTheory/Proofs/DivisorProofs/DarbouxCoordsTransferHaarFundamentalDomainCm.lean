@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTransportF
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemRatPairIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLintegralSqEqMulSetLIntegralThetaTransformStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemRatPairIff
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes MeasureTheory
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -39,7 +83,7 @@ theorem card_eq (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E]
     ring
   rw [← hb, ← h, ha]
 
-set_option maxHeartbeats 1000000 in
+
 theorem onto (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     (nS nT : ℕ) (κ : Type) [Fintype κ]
     (e : Matrix (Fin nT) (Fin nS) (AF F ⊗[F] E) ≃ₗ[AF F] (κ → AF F) × (κ → AF F))
@@ -92,7 +136,7 @@ theorem onto (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [A
 
 open scoped Pointwise
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem haar_fundDomain_transfer : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (B : Base F E),
     B.IsGood σ → IsStdCharF (fun w : InfinitePlace F => (B.emb w).1) B.ψ (-1) →
@@ -146,7 +190,7 @@ theorem haar_fundDomain_transfer : ∀ (F E : Type) [Field F] [NumberField F] [F
       filter_upwards [h𝓕.ae_covers] with x ⟨g, hg⟩
       refine ⟨⟨co.e g, into g g.2⟩, g +ᵥ x, hg, ?_⟩
       show co.e ((g : WOF F E nS nT) + x) = co.e g + co.e x
-      rw [map_add]
+      rw [map_add (f := _)]
     · intro p q hpq
       let g : ratLF F E nS nT := ⟨co.e.symm p, onto' p p.2⟩
       let h : ratLF F E nS nT := ⟨co.e.symm q, onto' q q.2⟩
@@ -162,7 +206,7 @@ theorem haar_fundDomain_transfer : ∀ (F E : Type) [Field F] [NumberField F] [F
         rw [← Set.image_vadd, ← Set.image_vadd, Set.image_image, Set.image_image]
         refine Set.image_congr fun w _ => ?_
         show (r : (κ → AF F) × (κ → AF F)) + co.e w = co.e ((k : WOF F E nS nT) + w)
-        rw [map_add, hk, LinearEquiv.apply_symm_apply]
+        rw [map_add (f := _), hk, LinearEquiv.apply_symm_apply]
       show MeasureTheory.AEDisjoint (ν.map me) (p +ᵥ me '' 𝓕) (q +ᵥ me '' 𝓕)
       rw [himg p g rfl, himg q h rfl, MeasureTheory.AEDisjoint, ← Set.image_inter me.injective, me.map_apply,
         me.preimage_image]

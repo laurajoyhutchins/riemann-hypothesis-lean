@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsThetaCompact
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SysExOfPol
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ToroidalChartsForFan
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsIvDOfDefinite
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,28 +66,6 @@ def UValOn (Xo : Moduli D l) (c : Coeff l) {S : Scheme.{0}} (j : Xo.XF c ⟶ S) 
 def GenOf (Xo : Moduli D l) (c : Coeff l) {R : Type} [CommRing R] [IsDomain R] (y : Sp (FractionRing R) ⟶ Xo.XF c)
     (t : SAB H (Sp R)) : Prop :=
   ∃ tK : SAB H (Sp (FractionRing R)), Nonempty (SABMap tK t (jK R)) ∧ Nonempty (SABMap tK Xo.univ.t (y ≫ pullback.fst _ _))
-
-def UPoinOn (Xo : Moduli D l) (c : Coeff l) (φ : InvFun (𝓞 E)) {Z : Scheme.{0}} (zs : Z ⟶ Sp c.F) (i : Xo.XF c ⟶ Z)
-    (OZ : LB Z) (N d : ℕ) (J : Z.IdealSheafData) {S : Scheme.{0}} (π : S ⟶ Z) (j : Xo.XF c ⟶ S) (BD : EffCartierData S) :
-    Prop :=
-  (IsProjOver zs ∧ IsNormalScheme Z ∧ IsOpenImmersion i ∧ Dense (Set.range i) ∧ i ≫ zs = pullback.snd _ _ ∧
-    OZ.IsLB ∧ IsAmpleLB OZ) ∧
-  (1 ≤ N ∧ ∀ (Y : Model Xo c (RingHom.id c.F)) (f : Y.X ⟶ Z), Y.j ≫ f = i → (GlobalTheory.FlagMod.detOm Y).IsLB →
-    LBIso (OZ.pull f) (lbPow (GlobalTheory.FlagMod.detOm Y) N)) ∧
-  (∀ (R : Type) [CommRing R] [IsDomain R] [IsLocalRing R], GlobalTheory.Mum.Base R → ∀ (t : SAB H (Sp R)),
-    Nonempty (PELUnif (maximalIdeal R) t) → ∀ y : Sp (FractionRing R) ⟶ Xo.XF c, GenOf Xo c y t →
-      ∀ σ : Sp R ⟶ Sp c.F, jK R ≫ σ = y ≫ pullback.snd _ _ → ∃ ξ : Sp R ⟶ Z, jK R ≫ ξ = y ≫ i ∧ ξ ≫ zs = σ) ∧
-  (1 ≤ d ∧ (∀ x ∈ J.support, x ∉ Set.range i) ∧ UValOn Xo c i φ J d) ∧
-  (GlobalTheory.Poinc.IsNormBl π J ∧ IsProjOver (π ≫ zs) ∧ IsOpenImmersion j ∧ Dense (Set.range j) ∧ j ≫ π = i ∧
-    π ⁻¹' Set.range i = Set.range j ∧ BD.idealSheaf = J.comap π ∧ UValOn Xo c j φ BD.idealSheaf d) ∧
-  ∃ k₀ : ℕ, ∀ k, k₀ ≤ k → IsAmpleLB (CechPic.tens (lbPow (OZ.pull π) k) (CechPic.dual BD.lb))
-
-def UPoinSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H), 1 ≤ Dw.p + Dw.q →
-    ∀ φ : InvFun (𝓞 E), IsPolFan H.bar (min Dw.p Dw.q) φ → NoSelfInt H.bar (min Dw.p Dw.q) φ →
-      ∀ (l : Geo.Tor.Level H) (Xo : Moduli Dw l) (c : Coeff l),
-        ∃ (Z : Scheme.{0}) (zs : Z ⟶ Sp c.F) (i : Xo.XF c ⟶ Z) (OZ : LB Z) (N d : ℕ) (J : Z.IdealSheafData)
-          (S : Scheme.{0}) (π : S ⟶ Z) (j : Xo.XF c ⟶ S) (BD : EffCartierData S), UPoinOn Xo c φ zs i OZ N d J π j BD
 
 variable {Xo : Moduli D l} {c : Coeff l}
 
@@ -92,30 +107,5 @@ theorem exists_over_iff {R : Type} [CommRing R] [IsDomain R] [IsIntegrallyClosed
     congr 1
     ext a
     exact hf a
-
-theorem UPoinOn.exists_extension {φ : InvFun (𝓞 E)} {Z : Scheme.{0}} {zs : Z ⟶ Sp c.F} {i : Xo.XF c ⟶ Z} {OZ : LB Z}
-    {N d : ℕ} {J : Z.IdealSheafData} {S : Scheme.{0}} {π : S ⟶ Z} {j : Xo.XF c ⟶ S} {BD : EffCartierData S}
-    (h : UPoinOn Xo c φ zs i OZ N d J π j BD) {R : Type} [CommRing R] [IsDomain R] [IsLocalRing R] [Algebra ℚ R]
-    (hR : GlobalTheory.Mum.Base R) {t : SAB H (Sp R)} (P : PELUnif (maximalIdeal R) t) {y : Sp (FractionRing R) ⟶ Xo.XF c}
-    (hy : GenOf Xo c y t) : ∃ ξ : Sp R ⟶ Z, jK R ≫ ξ = y ≫ i := by
-  haveI : IsIntegrallyClosed R := hR.1.2.2.1
-  obtain ⟨σ, hσ⟩ := (exists_over_iff y).2 fun n hn => by
-    rw [← map_natCast (algebraMap ℚ R)]
-    exact (IsUnit.mk0 _ (Nat.cast_ne_zero.2 hn)).map _
-  exact (h.2.2.1 R hR t ⟨P⟩ y hy σ hσ).imp fun _ h => h.1
-
-example {S : Scheme.{0}} (j : Xo.XF c ⟶ S) (φ : InvFun (𝓞 E)) : UValOn Xo c j φ ⊤ 0 :=
-  fun _ _ _ _ _ _ _ χ _ _ _ _ _ _ _ _ _ _ => ⟨0, by simp, (idlAlong_top χ).trans (by simp)⟩
-
-example (hq : D.q = 0) (φ : InvFun (𝓞 E)) : IsPolFan H.bar (min D.p D.q) φ ∧ NoSelfInt H.bar (min D.p D.q) φ := by
-  rw [hq, Nat.min_zero]
-  exact ⟨isPolFan_zero, noSelfInt_zero⟩
-
-example (p : ℕ) [hp : Fact p.Prime] : (GlobalTheory.Mum.Base (PowerSeries ℚ) ∧ ∀ n : ℕ, n ≠ 0 → IsUnit (n : PowerSeries ℚ)) ∧
-    ∀ (y : Sp (FractionRing ℤ_[p]) ⟶ Xo.XF c) (σ : Sp ℤ_[p] ⟶ Sp c.F), jK ℤ_[p] ≫ σ ≠ y ≫ pullback.snd _ _ := by
-  refine ⟨⟨GlobalTheory.Mum.base_powerSeries, fun n hn => ?_⟩, fun y σ h => ?_⟩
-  · rw [← map_natCast (algebraMap ℚ (PowerSeries ℚ))]
-    exact (IsUnit.mk0 _ (Nat.cast_ne_zero.2 hn)).map _
-  · exact PadicInt.irreducible_p.not_isUnit ((exists_over_iff y).1 ⟨σ, h⟩ p hp.out.ne_zero)
 
 end GlobalTheory.UPoinc

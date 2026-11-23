@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.CoeffRenameProdCongrRight
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.CoeffRenameProdCongrRight
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.IsFlagIntegralOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms
@@ -10,9 +61,9 @@ noncomputable section
 
 def flagIntegralReal (f N : ℕ) : MvPolynomial (Fin f × Fin N) ℝ →ₗ[ℝ] ℝ where
   toFun G := ∑ α ∈ (blockVandermonde f N).support,
-    coeff α G * ((coeff α (blockVandermonde f N) : ℚ) : ℝ) * α.prod (fun _ e => (e.factorial : ℝ))
-  map_add' G H := by simp only [coeff_add, add_mul, sum_add_distrib]
-  map_smul' c G := by simp only [coeff_smul, smul_eq_mul, RingHom.id_apply, mul_sum, mul_assoc]
+    AddMonoidAlgebra.coeff G α * ((AddMonoidAlgebra.coeff (blockVandermonde f N) α : ℚ) : ℝ) * α.prod (fun _ e => (e.factorial : ℝ))
+  map_add' G H := by simp only [MvPolynomial.coeff_add, add_mul, sum_add_distrib]
+  map_smul' c G := by simp only [MvPolynomial.coeff_smul, smul_eq_mul, RingHom.id_apply, mul_sum, mul_assoc]
 
 theorem flagIntegralReal_map (f N : ℕ) (Φ : RootRing f N) :
     flagIntegralReal f N (map (algebraMap ℚ ℝ) Φ) = (flagIntegral f N Φ : ℝ) := by
@@ -22,13 +73,13 @@ namespace FlagEq
 
 theorem flagIntegralReal_eq {f N : ℕ} (G : MvPolynomial (Fin f × Fin N) ℝ) :
     flagIntegralReal f N G =
-      stairConst f N * ∑ w, ((permSign f N w : ℤ) : ℝ) * coeff (stairExp f N w) G := by
+      stairConst f N * ∑ w, ((permSign f N w : ℤ) : ℝ) * AddMonoidAlgebra.coeff G (stairExp f N w) := by
   classical
   have hsub : (blockVandermonde f N).support ⊆
       (blockVandermonde f N).support ∪ univ.image (stairExp f N) := subset_union_left
   show ∑ α ∈ _, _ = _
   rw [sum_subset hsub (fun α _ hα => by rw [notMem_support_iff.mp hα]; simp)]
-  have hc : ∀ α : Fin f × Fin N →₀ ℕ, ((coeff α (blockVandermonde f N) : ℚ) : ℝ) =
+  have hc : ∀ α : Fin f × Fin N →₀ ℕ, ((AddMonoidAlgebra.coeff (blockVandermonde f N) α : ℚ) : ℝ) =
       ∑ w, ((permSign f N w : ℤ) : ℝ) * if stairExp f N w = α then 1 else 0 := by
     intro α
     rw [coeff_blockVandermonde, Rat.cast_sum]
@@ -44,19 +95,20 @@ theorem flagIntegralReal_eq {f N : ℕ} (G : MvPolynomial (Fin f × Fin N) ℝ) 
 
 theorem ddConst_apply (f j k : ℕ) (G : IndefiniteRowSideFullHecke.RestTerms.Roots f j k) :
     IndefiniteRowSideFullHecke.RestTerms.ddConst f j k G =
-      coeff (rho f (j + k)) (∑ w : Fin f → Equiv.Perm (Fin (j + k)),
-        ((permSign f (j + k) w : ℤ) : ℝ) • rename (Equiv.prodCongrRight w) G) := by
+      AddMonoidAlgebra.coeff (∑ w : Fin f → Equiv.Perm (Fin (j + k)),
+        ((permSign f (j + k) w : ℤ) : ℝ) • rename (Equiv.prodCongrRight w) G) (rho f (j + k)) := by
   simp [IndefiniteRowSideFullHecke.RestTerms.ddConst, IndefiniteRowSideFullHecke.RestTerms.blockAntisym, permSign, rho,
-    IndefiniteRowSideFullHecke.RestTerms.rhoMon, coeff_sum, coeff_smul, smul_eq_mul]
+    IndefiniteRowSideFullHecke.RestTerms.rhoMon, coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul]
 
 theorem ddConst_eq (f j k : ℕ) (G : IndefiniteRowSideFullHecke.RestTerms.Roots f j k) :
     IndefiniteRowSideFullHecke.RestTerms.ddConst f j k G =
-      ∑ w, ((permSign f (j + k) w : ℤ) : ℝ) * coeff (stairExp f (j + k) w) G := by
+      ∑ w, ((permSign f (j + k) w : ℤ) : ℝ) * AddMonoidAlgebra.coeff G (stairExp f (j + k) w) := by
   rw [ddConst_apply, coeff_rho_antisym]
 
 theorem rename_psumAt (f j k m : ℕ) (τ : Fin f) (w : Fin f → Equiv.Perm (Fin (j + k))) :
     rename (Equiv.prodCongrRight w) (IndefiniteRowSideFullHecke.RestTerms.psumAt f j k m τ) =
       IndefiniteRowSideFullHecke.RestTerms.psumAt f j k m τ := by
+
   simp only [IndefiniteRowSideFullHecke.RestTerms.psumAt, map_sum, map_pow, rename_X, Equiv.prodCongrRight_apply]
   exact Equiv.sum_comp (w τ) (fun i => (X (τ, i) : IndefiniteRowSideFullHecke.RestTerms.Roots f j k) ^ m)
 
@@ -81,6 +133,7 @@ theorem rename_antisym (f j k : ℕ) (u : Fin f → Equiv.Perm (Fin (j + k)))
     congr 1
   have hs : ((permSign f (j + k) u : ℤ) : ℝ) * ((permSign f (j + k) u : ℤ) : ℝ) = 1 := by
     exact_mod_cast permSign_mul_self u
+
   simp only [antisym, map_sum, map_smul, hcomp, smul_sum, smul_smul]
   refine Fintype.sum_equiv (Equiv.mulLeft u) _ _ (fun w => ?_)
   simp only [Equiv.coe_mulLeft, permSign_mul]
@@ -91,7 +144,7 @@ theorem coeff_eq_zero_of_swap {f N : ℕ} (A : MvPolynomial (Fin f × Fin N) ℝ
     (hA : ∀ u : Fin f → Equiv.Perm (Fin N),
       rename (Equiv.prodCongrRight u) A = ((permSign f N u : ℤ) : ℝ) • A)
     (β : Fin f × Fin N →₀ ℕ) (τ : Fin f) (i i' : Fin N) (hii : i ≠ i')
-    (hβ : β (τ, i) = β (τ, i')) : coeff β A = 0 := by
+    (hβ : β (τ, i) = β (τ, i')) : AddMonoidAlgebra.coeff A β = 0 := by
   classical
   let u : Fin f → Equiv.Perm (Fin N) := Pi.mulSingle τ (Equiv.swap i i')
   have hu1 : u τ = Equiv.swap i i' := Pi.mulSingle_eq_same _ _
@@ -112,8 +165,8 @@ theorem coeff_eq_zero_of_swap {f N : ℕ} (A : MvPolynomial (Fin f × Fin N) ℝ
         · rw [Equiv.swap_apply_right, hβ]
         · rw [Equiv.swap_apply_of_ne_of_ne h1 h2]
     · rw [hu2 τ' h]; rfl
-  have h := congrArg (coeff β) (hA u)
-  rw [coeff_rename_prodCongrRight, hfix, hs, coeff_smul, smul_eq_mul] at h
+  have h := congrArg (AddMonoidAlgebra.coeff · β) (hA u)
+  rw [coeff_rename_prodCongrRight, hfix, hs, MvPolynomial.coeff_smul, smul_eq_mul] at h
   push_cast at h
   linarith
 
@@ -145,8 +198,8 @@ theorem ddConst_monomial_rho (f j k : ℕ) :
 
 end FlagEq
 
-open FlagEq in
 
+open FlagEq in
 theorem flagIntegralReal_eq_mul_ddConst (f j k : ℕ) (G : IndefiniteRowSideFullHecke.RestTerms.Roots f j k) :
     flagIntegralReal f (j + k) G = stairConst f (j + k) * IndefiniteRowSideFullHecke.RestTerms.ddConst f j k G := by
   rw [flagIntegralReal_eq, ddConst_eq]

@@ -1,10 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.GammaSemisimpleLocalOfConsequences
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapConstantCoeffEqOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachFreeLatticeEqWachLatticeInvertXStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapConstantCoeffEqOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachFreeLatticeEqWachLatticeInvertXStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
 noncomputable section
@@ -149,6 +192,7 @@ theorem phiinv_matrix {r : ℕ} {S : Submodule (LetA O n) (W.DD T)} (bS : Module
     rw [φspan, Submodule.span_le]
     rintro _ ⟨x, hx, rfl⟩
     obtain ⟨c, rfl⟩ := coords bS hx
+
     rw [map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [φD_smulA]
@@ -193,6 +237,7 @@ theorem le_of_X_pow_smul_le
     refine matrix_eq_of_comb li fun j => ?_
     rw [comb_smul, comb_mul, comb_smul, comb_mul]
     have e1 : ∑ k, Bm.map (W.γA W.gam) k j • ∑ i, Gm i k • b i = W.γ T (W.X ^ a • b₁ j) := by
+
       rw [hB j, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [γ_smulA, ← hG k, Matrix.map_apply]
@@ -214,6 +259,7 @@ theorem le_of_X_pow_smul_le
     refine matrix_eq_of_comb li fun j => ?_
     rw [Matrix.smul_mul, comb_smul, comb_mul, comb_smul, comb_mul]
     have e1 : ∑ k, Bm.map W.φA k j • ∑ i, F i k • b i = W.Q ^ hM • W.φD T (W.X ^ a • b₁ j) := by
+
       rw [hB j, map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [φD_smulA, ← hF k, Matrix.map_apply, smul_comm]
@@ -241,9 +287,9 @@ theorem le_of_X_pow_smul_le
 
 end Key
 
+
 open Formalism.MainNotions.DeltaInvariantLattices in
 set_option maxHeartbeats 800000 in
-
 theorem main : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW), WachCharacterisation D HW F := by
   intro D HW F l _ K s LL h T hT N₁ hfree hbc hγN₁ hγπ hφ hφinv
   obtain ⟨a, h1, h2⟩ := GlobalTheory.T.wachFreeLattice_eq_wachLattice_invert_X D HW F l K s LL h T hT N₁ hfree hbc hφ hφinv
@@ -252,7 +298,8 @@ theorem main : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf 
   haveI : Nontrivial ((HW l).W K s LL h).EE := ((HW l).W K s LL h).EE_inj.nontrivial
   have hr : r₁ = Module.finrank ↥(OL LL) ↥T.L.T := by
     have e := (hbc.basis b₁).indexEquiv ((((HW l).W K s LL h).N_base T hT).basis nb)
-    simpa using Fintype.card_congr e
+    set_option synthInstance.maxHeartbeats 200000 in
+      simpa using Fintype.card_congr e
   subst hr
   have hmat := fun r a m m' B G G₁ Pm P₁ P₁' =>
     GlobalTheory.NL.WachMat.X_pow_dvd_entry D HW l K s LL h r a m m' B G G₁ Pm P₁ P₁'

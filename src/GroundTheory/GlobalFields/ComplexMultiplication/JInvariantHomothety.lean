@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.JInvariant
-import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationEisenstein
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.JInvariant
+public import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationEisenstein
+import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationAddition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.IsomOfJ
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.Connected
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Complex Filter Topology Set
 open scoped PeriodPair
@@ -51,26 +100,38 @@ lemma exists_pos_le_norm (L : PeriodPair) : ∃ ε > 0, ∀ l ∈ L.lattice, l �
 
 lemma weierstrassLaurentCoeff_eq_of_G_eq {L L' : PeriodPair} {t : ℂ}
     (hG : ∀ k, 2 ≤ k → L'.G (2 * k) = t ^ (2 * k) * L.G (2 * k)) (j : ℕ) :
-    weierstrassLaurentCoeff L' j = t ^ (j + 2) * weierstrassLaurentCoeff L j := by
+    weierstrassLaurentCoeff (L := L') j = t ^ (j + 2) * weierstrassLaurentCoeff (L := L) j := by
   rcases Nat.even_or_odd' j with ⟨n, rfl | rfl⟩
   · rcases eq_or_ne n 0 with rfl | hn
     · simp [weierstrassLaurentCoeff]
-    rw [weierstrassLaurentCoeff_two_mul (L := L') hn, weierstrassLaurentCoeff_two_mul (L := L) hn,
-      show 2 * n + 2 = 2 * (n + 1) by ring, hG (n + 1) (by omega)]
+    simp only [weierstrassLaurentCoeff, ite_eq_right (show 2 * n ≠ 0 by omega)]
+    rw [show 2 * n + 2 = 2 * (n + 1) by ring, hG (n + 1) (by omega)]
     ring
-  · rw [weierstrassLaurentCoeff_odd, weierstrassLaurentCoeff_odd, mul_zero]
+  · have hodd : Odd (2 * n + 1 + 2) := ⟨n + 1, by ring⟩
+    simp [weierstrassLaurentCoeff, L'.G_eq_zero_of_odd _ hodd, L.G_eq_zero_of_odd _ hodd]
 
 theorem weierstrassP_eq_of_G_eq {L L' : PeriodPair} {t : ℂ} (ht : t ≠ 0)
     (hG : ∀ k, 2 ≤ k → L'.G (2 * k) = t ^ (2 * k) * L.G (2 * k)) {z : ℂ} (hz0 : z ≠ 0)
     (hz' : ∀ l : L'.lattice, (l : ℂ) ≠ 0 → ‖z‖ < ‖(l : ℂ)‖)
     (hz : ∀ l : L.lattice, (l : ℂ) ≠ 0 → ‖t * z‖ < ‖(l : ℂ)‖) :
     ℘[L'] z = t ^ 2 * ℘[L] (t * z) := by
-  have h1 := hasSum_weierstrassP_laurent (L := L') hz'
-  have h2 := (hasSum_weierstrassP_laurent (L := L) hz).mul_left (t ^ 2)
-  have h3 : HasSum (fun j ↦ weierstrassLaurentCoeff L' j * z ^ j)
+  have hasSum_laurent (P : PeriodPair) (w : ℂ)
+      (hw : ∀ l : P.lattice, (l : ℂ) ≠ 0 → ‖w‖ < ‖(l : ℂ)‖) :
+      HasSum (fun j ↦ weierstrassLaurentCoeff (L := P) j * w ^ j) (℘[P] w - 1 / w ^ 2) := by
+    have h := P.weierstrassPExceptSeries_hasSum 0 w 0 (fun l hl ↦ by simpa using hw l hl)
+    rw [weierstrassP_eq_except_zero w, add_sub_cancel_right]
+    convert h using 2 with j
+    rw [sub_zero, PeriodPair.weierstrassPExceptSeries, FormalMultilinearSeries.coeff_ofScalars,
+      weierstrassLaurentCoeff]
+    rcases eq_or_ne j 0 with rfl | hj
+    · simp
+    · simp [hj, P.lattice.zero_mem, P.sumInvPow_zero]
+  have h1 := hasSum_laurent L' z hz'
+  have h2 := (hasSum_laurent L (t * z) hz).mul_left (t ^ 2)
+  have h3 : HasSum (fun j ↦ weierstrassLaurentCoeff (L := L') j * z ^ j)
       (t ^ 2 * (℘[L] (t * z) - 1 / (t * z) ^ 2)) := by
-    have hfun : (fun j ↦ weierstrassLaurentCoeff L' j * z ^ j) =
-        fun j ↦ t ^ 2 * (weierstrassLaurentCoeff L j * (t * z) ^ j) := by
+    have hfun : (fun j ↦ weierstrassLaurentCoeff (L := L') j * z ^ j) =
+        fun j ↦ t ^ 2 * (weierstrassLaurentCoeff (L := L) j * (t * z) ^ j) := by
       funext j
       rw [weierstrassLaurentCoeff_eq_of_G_eq hG, mul_pow]
       ring

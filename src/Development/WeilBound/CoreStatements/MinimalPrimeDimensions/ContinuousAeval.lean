@@ -1,11 +1,65 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRatPrimeDense
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFiniteSeparatingModel
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsNear
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsBounded
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPolyNonvanishDense
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNoetherProjection
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsLiftToZeros
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsRatPrimeDense
+public import Mathlib.NumberTheory.NumberField.Basic
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFiniteSeparatingModel
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNoetherProjection
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPolyNonvanishDense
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRatPrimeDense
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsBounded
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsLiftToZeros
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Encodable
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Filter Topology NumberField
 
@@ -63,7 +117,7 @@ theorem exists_int_mul {n : ℕ} (g : MvPolynomial (Fin n) ℚ) :
     obtain ⟨N, p', hN, hp⟩ := hp
     obtain ⟨M, q', hM, hq⟩ := hq
     refine ⟨N * M, M * p' + N * q', mul_ne_zero hN hM, ?_⟩
-    rw [map_add, map_mul, map_mul, hp, hq, map_natCast, map_natCast]
+    rw [map_add (f := _), map_mul, map_mul, hp, hq, map_natCast, map_natCast]
     push_cast
     ring
   | mul_X p i hp =>
@@ -75,14 +129,14 @@ theorem aeval_map_int {n : ℕ} {A : Type} [CommRing A] [Algebra ℚ A] (z : Fin
     aeval z (map (Int.castRingHom ℚ) g) = aeval z g := by
   induction g using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, map_X, aeval_X]
 
 theorem hom_aeval {n : ℕ} {A B : Type} [CommRing A] [CommRing B] (φ : A →+* B) (z : Fin n → A)
     (g : MvPolynomial (Fin n) ℤ) : φ (aeval z g) = aeval (fun i => φ (z i)) g := by
   induction g using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, aeval_X]
 
 theorem exists_seq_emb {B Ω : Type} [CommRing B] [IsDomain B] [Algebra.FiniteType ℤ B] [Field Ω] [CharZero Ω]
@@ -117,7 +171,7 @@ theorem exists_seq_emb {B Ω : Type} [CommRing B] [IsDomain B] [Algebra.FiniteTy
       fun g => RingHom.liftOfSurjective_comp_apply _ _ _ g⟩
   choose r hr using hex
   have hinj : ∀ m, Function.Injective (r m) := fun m => by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro b hb
     obtain ⟨g, rfl⟩ := hπ b
     exact (hker m g).1 ((hr m g).symm.trans hb)

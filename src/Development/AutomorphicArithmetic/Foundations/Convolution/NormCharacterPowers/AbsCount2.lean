@@ -1,5 +1,55 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AnalyticSeries.NeZeroOne
-import Development.AutomorphicArithmetic.Foundations.Convolution.NormCharacterPowers.OrderAsym
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.NormCharacterPowers.OrderAsym
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AnalyticSeries.AnalyticAtTsum
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.SubtypeIteSums.CommonOfLandauEuler
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,6 +62,7 @@ open PositivityTheory.RgJS UpperTheory.ConvolutionTheory.Rs
 theorem ps {ι M : Type} [Fintype ι] [AddCommMonoid M] {d : ι → ℕ} {m : ℕ} {g : ∀ i, Fin (d i) → ℂ} {h : Fin m → ℂ}
     (e : ∑ i, Finset.univ.val.map (g i) = Finset.univ.val.map h) (φ : ℂ → M) : ∑ i, ∑ a, φ (g i a) = ∑ a, φ (h a) := by
   have := congrArg (Multiset.sumAddMonoidHom.comp (Multiset.mapAddMonoidHom φ)) e
+
   rw [map_sum] at this
   have e1 : ∀ {n : ℕ} (k : Fin n → ℂ), (Multiset.sumAddMonoidHom.comp (Multiset.mapAddMonoidHom φ)) (Finset.univ.val.map k) =
       ∑ a, φ (k a) := fun k => congrArg Multiset.sum (Multiset.map_map φ k Finset.univ.val)
@@ -131,6 +182,7 @@ theorem absCount2 : BCSum → ZeroExp → LogAsym → AbsCount := by
       (fun w (a : Σ i, Fin (d' (z i).1)) => A' (z a.1).1 w a.2) σ p =
         ∑ r : ι × ι, lterm q' (A' (z r.1).1) (A' (z r.2).1) σ p := fun p => by
     simp only [lterm, Fintype.sum_sigma, Fintype.sum_prod_type]
+
     rw [map_sum, Finset.sum_mul_sum]
     simp only [Finset.sum_mul, Finset.sum_div]
   simp only [eR, eL] at e

@@ -1,8 +1,60 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedCohomology.Lint
-import Development.WeilBound.ThetaLifts.SmallCones.FcCols
-import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.EvFinIdemSelf
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Kcompact
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.EvFinIdemSelf
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Kcompact
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Unimod
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedCohomology.Lint
+public import Development.WeilBound.ThetaLifts.SmallCones.FcCols
+import Development.WeilBound.ThetaLifts.SmallCones.MatCancel
+import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.WeilBound.ThetaLifts.SmallCones.ColsOfMul
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,8 +117,8 @@ namespace US
 
 variable {n : ℕ} {X : Spc F E n}
 
-variable (σ X) in
 
+variable (σ X) in
 def uSub (v : Pl F) : Subgroup (UA σ X.J) where
   carrier := UAt σ X (evFin F v)
   one_mem' := fun u _ => by rw [show mat (1 : UA σ X.J) = 1 from rfl, sub_self, smul_zero]
@@ -129,7 +181,7 @@ theorem part_levi {a : AF F} (ha : a * a = a) {t : (AE F E)ˣ} {g : UA σ Y₁.J
     simp only [partI, add_smul, smul_assoc, one_smul]
   · rw [part_vec, h.2.1]
     change _ = cA σ (a • (t⁻¹).1 + (1 - a) • 1) • _
-    simp only [map_add, map_smul, map_one, add_smul, smul_assoc, one_smul]
+    simp only [map_add (f := _), map_smul, map_one, add_smul, smul_assoc, one_smul]
   · simp only [mat_partU, Matrix.add_mul, Matrix.mul_add, Matrix.smul_mul, Matrix.mul_smul, h.2.2, Matrix.one_mul, Matrix.mul_one]
 
 theorem part_unip {a : AF F} (ha : a * a = a) {u : UA σ Y.J} (h : u ∈ unip σ Y H) : partU ha u ∈ unip σ Y H := by
@@ -249,7 +301,7 @@ theorem part_comm {v : Pl F} {g : UA σ Y.J} (hg : g ∈ UAt σ Y (evFin F v)) (
     noncomm_ring)
   rw [← hc, mul_assoc, c4, hc]; group
 
-set_option maxHeartbeats 800000 in
+
 theorem kInv (hB : B.IsGood σ) (hY : Y.IsHerm σ B r s) (hH : H.IsAdapted σ B Y Y₁ i₀ i₁) {K : Subgroup (UA σ Y.J)}
     (hK : IsStab B K) (hI : Iwa H K) (v : Pl F) (μ : Measure (kAt K (evFin F v))) [μ.IsHaarMeasure] {f : UA σ Y.J → ℂ}
     (hf : ContinuousOn f (UAt σ Y (evFin F v)))
@@ -263,8 +315,9 @@ theorem kInv (hB : B.IsGood σ) (hY : Y.IsHerm σ B r s) (hH : H.IsAdapted σ B 
   have hd₁ : IsUnit Y₁.J.det := hfr.isUnit_det hd.isUnit
   have h₁ : ∀ i j, σ (Y₁.J j i) = (((1 : ℤˣ) : ℤ) : E) * Y₁.J i j := fun i j => by
     rw [← hH.gram]
+
     simp only [Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, map_sum, map_mul, hY.herm,
-      PositivityTheory.ThKG.Tow.Levi.sig_sig hB.cm, Finset.sum_mul, Units.val_one, Int.cast_one, one_mul]
+    PositivityTheory.ThKG.Tow.Levi.sig_sig hB.cm, Finset.sum_mul, Units.val_one, Int.cast_one, one_mul]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
   obtain ⟨-, ⟨ν, -, hν, -⟩, hνr⟩ := PositivityTheory.ThKF.unimodularity_holds F E σ hB.cm n Y.J 1 (fun i j => by simp [hY.herm]) hd

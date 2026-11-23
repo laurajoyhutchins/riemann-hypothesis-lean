@@ -1,14 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.SameObj
-import Development.AbelianVarietyTheory.Statements.ThetaLevelCharacters.MemThetaLevelCharDimZero
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.LevBasis
-import Development.AbelianVarietyTheory.Statements.FundamentalDomains.KeyFormulaPowOfKeyFormula
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.LineBundlePowSectionsEqThetaLevel
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ConstOfNormPeriodic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.SameObj
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.LevBasis
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ConstOfNormPeriodic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.LineBundlePowSectionsEqThetaLevel
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.LevelThreeSeparatesTangentVectors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ThetaQuasiPeriods.Transl
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -112,7 +157,7 @@ variable {X Y : Scheme.{0}}
 
 theorem gs_eq_toStalk (x : Sp ℂ ⟶ X) (U : X.Opens) (h : ⊤ ≤ x ⁻¹ᵁ U) (f : Γ(X, U)) :
     gs x pt U f = toStalk (valAt' x U f) := by
-  rw [gs_eq x pt U (h trivial), valAt', dif_pos h, valAt, toStalk, RingHom.comp_apply]
+  rw [gs_eq x pt U (h trivial), valAt', dite_eq_left h, valAt, toStalk, RingHom.comp_apply]
   erw [(Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom_inv_id_apply]
   exact (TopCat.Presheaf.germ_res_apply (Sp ℂ).presheaf (homOfLE h) pt trivial _).symm
 
@@ -124,10 +169,6 @@ theorem stalkMap_gs {Z : Scheme.{0}} (r : Z ⟶ Y) (q : Y ⟶ X) (z : Z) (W : X.
     (a : Γ(X, W)) : (r.stalkMap z).hom (gs q (r z) W a) = gs (r ≫ q) z W a := by
   rw [gs_eq q (r z) W h, gs_eq (r ≫ q) z W h]
   exact Scheme.Hom.germ_stalkMap_apply r (q ⁻¹ᵁ W) z h _
-
-theorem top_le_of_mem (x : Sp ℂ ⟶ X) {U : X.Opens} (h : x pt ∈ U) : ⊤ ≤ x ⁻¹ᵁ U := fun q _ => by
-  obtain rfl : q = pt := Subsingleton.elim (α := PrimeSpectrum ℂ) _ _
-  exact h
 
 theorem valAt'_ne (x : Sp ℂ ⟶ X) {U : X.Opens} (h : ⊤ ≤ x ⁻¹ᵁ U) (f : Γ(X, U)ˣ) : valAt' x U f.val ≠ 0 := fun h0 => by
   have := gm_eq_toStalk x U h f
@@ -197,7 +238,7 @@ theorem valAt'_app (x : Sp ℂ ⟶ Y) (φ : Y ⟶ X) (U : X.Opens) (f : Γ(X, U)
     rw [← gs_eq_toStalk _ _ h, ← gs_eq_toStalk _ _ h']
     exact gs_pull x φ pt U (h trivial) f
   · have h' : ¬ ⊤ ≤ x ⁻¹ᵁ (φ ⁻¹ᵁ U) := h
-    rw [valAt', valAt', dif_neg h, dif_neg h']
+    rw [valAt', valAt', dite_eq_right h, dite_eq_right h']
 
 end Germs
 
@@ -326,8 +367,8 @@ theorem isDiff_comp {A' : Over (Sp ℂ)} [GrpObj A'] {L' : LB A'.left} (u' : Hol
 
 end Frame
 
-open FrameValue in
 
+open FrameValue in
 theorem normalForm_translate : Out.Laws → ThetaUnifAV → ∀ (x x' : KeyIn ℂ) (g : ℕ) (h : x.P.g = g) (u : HolUnif x.P.A x.P.L g) (τ : Matrix (Fin g) (Fin g) ℂ) (a b a' b' : Fin g → ℂ) (m n : Fin g → ℤ) (ν : ℂˣ), charHalf g a b → charHalf g a' b' → Wit x h u τ a b → (∀ i, ∃ k : ℤ, a' i = a i + n i / 2 + k) → (∀ i, ∃ k : ℤ, b' i = b i + m i / 2 + k) → IsTrl x' x (u.ex (frac τ 2 m n)) ν → ∃ (h' : x'.P.g = g) (u' : HolUnif x'.P.A x'.P.L g) (φ : x'.P.A ≅ x.P.A) (c : ℂ), IsMonHom φ.hom ∧ (∀ z, u'.ex z ≫ φ.hom = u.ex z) ∧ c ^ 8 * (ν : ℂ) ^ 2 = 1 ∧ (∀ z, z ∈ u'.Λ ↔ z ∈ u.Λ) ∧ u'.IsRig x'.rig ∧ u'.IsFn x'.th (fun z => c * thetaChar τ a' b' z) ∧ ∀ i : Fin g, u'.IsDiff (Pi.single i (2 * Real.pi * Complex.I)⁻¹) (x'.v (i.cast h'.symm)) := by
   intro _ _ x x' g h u τ a b a' b' m n ν hab hab' ⟨hs, hp, hΛ, hrig, hth, hv⟩ ha hb hT
   have hL := x.P.isLB

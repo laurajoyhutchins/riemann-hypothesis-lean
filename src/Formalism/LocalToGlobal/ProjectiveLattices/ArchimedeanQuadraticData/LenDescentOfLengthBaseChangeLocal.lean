@@ -1,7 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.QCoreSt
-import Formalism.FilteredPoleLength.LocalDescentLevels.LengthBaseChange
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.TieLDA
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.TieLDB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.QCoreSt
+public import Formalism.FilteredPoleLength.ReducedBasisBounds.LengthBaseChangeLocal
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Formalism.FilteredPoleLength.LocalDescentLevels.LengthBaseChange
+public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.TieLDA
+public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.TieLDB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.L2.Pj.QAt
 
@@ -60,7 +111,6 @@ theorem towerLaK (la : HeightOneSpectrum (𝓞 K)) :
     IsScalarTower (𝓞 K) (Localization.AtPrime la.asIdeal) K := by
   first
     | exact IsLocalization.localization_isScalarTower_of_submonoid_le _ _ _ _ _
-    | exact IsLocalization.localization_isScalarTower_of_submonoid_le (Localization.AtPrime la.asIdeal) K _ _ la.asIdeal.primeCompl_le_nonZeroDivisors
     | (apply IsScalarTower.of_algebraMap_eq; intro x; exact (IsLocalization.map_eq _ x).symm)
 
 attribute [local instance] towerLaK
@@ -69,8 +119,6 @@ theorem fracLaK (la : HeightOneSpectrum (𝓞 K)) :
     IsFractionRing (Localization.AtPrime la.asIdeal) K := by
   first
     | exact IsFractionRing.isFractionRing_of_isLocalization la.asIdeal.primeCompl _ _ la.asIdeal.primeCompl_le_nonZeroDivisors
-    | exact IsLocalization.isFractionRing_of_isDomain_of_isLocalization la.asIdeal.primeCompl _ _
-    | exact IsFractionRing.isFractionRing_of_isDomain_of_isLocalization la.asIdeal.primeCompl _ _
 
 attribute [local instance] fracLaK
 
@@ -103,9 +151,7 @@ theorem mapLaT_coe (la : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (�
     rw [← IsScalarTower.algebraMap_apply (𝓞 K) (Localization.AtPrime la.asIdeal) K]
     first
       | rfl
-      | simp
       | (norm_cast; simp)
-      | exact (trivial : True)
   exact RingHom.congr_fun key r
 
 theorem ramificationIdx_ne_zero' (la : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (𝓞 K₁))
@@ -122,9 +168,6 @@ theorem ramificationIdx_ne_zero' (la : HeightOneSpectrum (𝓞 K)) (w : HeightOn
           | infer_instance
           | exact Ideal.map_le_iff_le_comap.mpr hw.ge
           | exact (Ideal.map_eq_bot_iff_of_injective (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 K₁))).not.mpr la.ne_bot
-          | exact (Ideal.map_eq_bot_iff_of_injective (NoZeroSMulDivisors.algebraMap_injective (𝓞 K) (𝓞 K₁))).not.mpr la.ne_bot
-          | exact Ideal.map_ne_bot_of_ne_bot la.ne_bot
-          | exact (trivial : True)
 
 theorem exists_rel (la : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (𝓞 K₁))
     (hw : LiesOver w la) :

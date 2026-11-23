@@ -1,6 +1,58 @@
-import Mathlib
-import Formalism.DirichletDensity.Statement
-import Formalism.CMTypeGalois.HalfTypesFromGeneral
+module
+
+public import Formalism.DirichletDensity.Statement
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Basic
+public import Formalism.CMTypeGalois.CMTypeFrobenius.MQGalois
+public import Formalism.CMTypeGalois.HalfTypesFromGeneral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Prime
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+
+@[expose] public section
 
 open NumberField IntermediateField NumberField.InfinitePlace Formalism.Q3
 
@@ -35,7 +87,7 @@ theorem not_isSquare_prod {k : ℕ} (q : Fin k → ℕ) (hq : ∀ i, (q i).Prime
     have : (q j : ℤ) * (∏ i ∈ S.erase j, (-(q i : ℤ))) = (q j : ℤ) * ((q j : ℤ) * -c) := by
       linear_combination (-1 : ℤ) * hc
     exact mul_left_cancel₀ hne this
-  obtain ⟨i, hi, hdi⟩ := (Prime.dvd_finset_prod_iff hp _).mp hP
+  obtain ⟨i, hi, hdi⟩ := (Prime.dvd_finsetProd_iff hp _).mp hP
   have hdi' : q j ∣ q i := by
     have := (dvd_neg.mp hdi)
     exact_mod_cast this
@@ -169,13 +221,5 @@ theorem mqDiscr_of (hQ : QuadDiscr) : MQDiscr := by
   have hs : (discr E).sign = (-1) ^ (2 ^ m) := by rw [sign_discr, hc]
   rw [← Int.sign_mul_natAbs (discr E), hs, hnat]
   simp
-
-theorem hostDiscr_of (h : MQDiscr) : HostDiscr := by
-  intro q hq E _ _ α hα
-  unfold Formalism.Q3.Hyp3 at hq
-  obtain ⟨hq1, hinj⟩ := hq
-  rw [h 3 q (by norm_num) hq1 hinj E α hα, Fin.prod_univ_three]
-  push_cast
-  ring
 
 end Formalism.HF

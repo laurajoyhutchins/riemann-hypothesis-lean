@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.JacobiTrudi
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,14 +103,6 @@ def SchurYOff : Prop :=
     (∀ i k, k ≠ i → IsUnit (g k - g i)) →
     ∑ i, sch lam (scaleOff y i g) * ∏ k ∈ univ.erase i, ((g i - y * g k) * Ring.inverse (g i - g k)) =
       sch lam g * ∑ i : Fin n, y ^ (∑ k ∈ univ.erase i, lam k + (i : ℕ))
-
-def SchurYField : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (n : ℕ) (lam : Fin n → ℕ) (g : Fin n → K) (y : K),
-    Function.Injective g →
-    (∑ i, sch lam (scaleAt y i g) * ∏ k ∈ univ.erase i, (g k - y * g i) / (g k - g i) =
-      sch lam g * ∑ i : Fin n, y ^ (lam i + (n - 1 - (i : ℕ)))) ∧
-    (∑ i, sch lam (scaleOff y i g) * ∏ k ∈ univ.erase i, (g i - y * g k) / (g i - g k) =
-      sch lam g * ∑ i : Fin n, y ^ (∑ k ∈ univ.erase i, lam k + (i : ℕ)))
 
 def SchurHomog : Prop :=
   ∀ (R : Type) [CommRing R] [Algebra ℚ R] (n : ℕ) (lam : Fin n → ℕ) (g : Fin n → R) (y : R),

@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
+public import Formalism.HermitianLattices.StatementMass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
 
@@ -38,10 +90,10 @@ private lemma isom_apply_mem_of_smul_eq {h : V →ₗ⋆[K] V →ₗ[K] K} {g : 
   rw [← hg, _root_.GlobalTheory.Mass.StabSplit.smul_eq_map]
   exact Submodule.mem_map_of_mem hx
 
+
 open NumberField Matrix in
 open scoped ENNReal Classical in
 variable {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K V] in
-
 theorem _root_.GlobalTheory.Mass.StabSplit.smul_perp (h : V →ₗ⋆[K] V →ₗ[K] K) (g : _root_.Formalism.HermitianLatticesTheory.isom h)
     (U : Submodule K V) (hg : g • U = U) :
     g • _root_.GlobalTheory.Mass.perp h U = _root_.GlobalTheory.Mass.perp h U := by
@@ -67,9 +119,6 @@ theorem _root_.GlobalTheory.Mass.StabSplit.smul_perp (h : V →ₗ⋆[K] V →�
 noncomputable def res (h : V →ₗ⋆[K] V →ₗ[K] K) (U : Submodule K V) (g : isom h)
     (hg : g • U = U) : isom (hRes h U) :=
   ⟨g.1.ofSubmodules U U hg, fun x y => g.2 x y⟩
-
-@[simp] theorem res_apply (h : V →ₗ⋆[K] V →ₗ[K] K) (U : Submodule K V) (g : isom h)
-    (hg : g • U = U) (x : U) : (((res h U g hg).1 x : U) : V) = g.1 x := rfl
 
 open NumberField Matrix in
 open scoped ENNReal Classical in
@@ -173,12 +222,12 @@ private lemma apply_add_add_of_mem_perp {h : V →ₗ⋆[K] V →ₗ[K] K} (hs :
   have h2 : h w u' = 0 := by
     rw [← hs.eq u' w, (_root_.GlobalTheory.Mass.StabSplit.mem_perp h U w).1 hw u' hu',
       map_zero]
-  simp only [map_add, LinearMap.add_apply, h1, h2]
+  simp only [map_add (f := _), LinearMap.add_apply, h1, h2]
   ring
+
 
 open NumberField Matrix in
 open scoped ENNReal Classical in
-
 theorem _root_.GlobalTheory.Mass.StabSplit.main : ∀ (K V : Type) [Field K] [NumberField K]
     [StarRing K] [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Module (𝓞 K) V]
     [IsScalarTower (𝓞 K) K V] (h : V →ₗ⋆[K] V →ₗ[K] K), _root_.Formalism.HermitianLatticesTheory.IsCMUnram K → h.IsSymm →
@@ -207,7 +256,7 @@ theorem _root_.GlobalTheory.Mass.StabSplit.main : ∀ (K V : Type) [Field K] [Nu
     intro v
     have hv : v ∈ U ⊔ W := by rw [hc.sup_eq_top]; exact Submodule.mem_top
     obtain ⟨u, hu, w, hw, rfl⟩ := Submodule.mem_sup.1 hv
-    rw [map_add, map_add, eU u hu, eW w hw]
+    rw [map_add (f := _), map_add (f := _), eU u hu, eW w hw]
   have hsurj : Function.Surjective (_root_.GlobalTheory.Mass.StabSplit.resHom h U) := by
     rintro ⟨a, c⟩
     let e := Submodule.prodEquivOfIsCompl U W hc
@@ -218,7 +267,7 @@ theorem _root_.GlobalTheory.Mass.StabSplit.main : ∀ (K V : Type) [Field K] [Nu
       simp [g, e, Submodule.prodEquivOfIsCompl_symm_apply_right]
     have gsum : ∀ (u : U) (w : W), g ((u : V) + w) = ((a.1 u : U) : V) + (c.1 w : W) := by
       intro u w
-      rw [map_add, gU, gW]
+      rw [map_add (f := _), gU, gW]
     have hiso : g ∈ _root_.Formalism.HermitianLatticesTheory.isom h := by
       intro x y
       obtain ⟨⟨u, w⟩, rfl⟩ := e.surjective x

@@ -1,13 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.PaddedWittNormSquare
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColumnInclusionRenaming
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableOfUnitCoord
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMulOfApprox
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormLeOfCoord
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualWeylEqSpanColProd
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExtremalRowWeight
-import Formalism.ThetaSupremumBounds.LiftOperatorBoundOfFockJet
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockSubstLe
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.PaddedWittNormSquare
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormLeOfCoord
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockSubstLe
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TaylorCoefficientForms
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableOfUnitCoord
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMulOfApprox
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SubDSharpInDeg
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
+public import Formalism.ThetaSupremumBounds.LiftOperatorBoundOfFockJet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TensorCoordinateForms
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LineDerivListEqIteratedFDeriv
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility Formalism.BasicNotions Formalism.L2.DIV Formalism.L2.Ker
 open Formalism.REAL (fockF)
@@ -28,7 +78,7 @@ theorem norm_fockL_sq_le {σ : Type} (f g : MvPolynomial σ ℂ) :
     { inner := fun x y => fockL x y
       conj_inner_symm := fun x y => (fockL_symm x y).symm
       re_inner_nonneg := fun x => (Complex.le_def.mp (fockL_nonneg x)).1
-      add_left := fun x y z => by simp only [map_add, LinearMap.add_apply]
+      add_left := fun x y z => by simp only [map_add (f := _), LinearMap.add_apply]
       smul_left := fun x y r => by simp only [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul] }
   have h : ‖fockL f g‖ * ‖fockL g f‖ ≤ (fockL f f).re * (fockL g g).re :=
     InnerProductSpace.Core.inner_mul_inner_self_le (c := c) f g
@@ -61,6 +111,7 @@ theorem fock_tensor_le (lam : ι → DomWeight a)
   have h1 := key.dotProduct_mulVec_nonneg c
   rw [Matrix.sub_mulVec, dotProduct_sub, Matrix.smul_mulVec, dotProduct_smul, gram_dot, gram_dot] at h1
   have e3 : T (∑ i, c i • ten (f i)) = ∑ i, c i • ten fun τ => F τ (f i τ) := by
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ => by rw [map_smul, hT]
   rw [e3]
@@ -101,7 +152,7 @@ theorem toNat_eq {lam ν : DomWeight a} {lam' : DomWeight b} {s' s : ℤ} (h : I
   have h5 := h.2.1 i
   unfold lastEntry
   unfold DomWeight.detShift at h1 ⊢
-  rw [dif_pos ha] at h1 ⊢
+  rw [dite_eq_left ha] at h1 ⊢
   omega
 
 theorem natW_eq_rowNu (hab : a ≤ b) {lam ν : DomWeight a} {lam' : DomWeight b} {s' s : ℤ}
@@ -214,6 +265,7 @@ theorem scalar_block (hab : a ≤ b) (lam ν : ι → DomWeight a) (lam' : ι �
     have : Rc.sum (fun e A => g e • A) = Finsupp.linearCombination ℂ g Rc := by
       rw [Finsupp.linearCombination_apply]
       simp only [smul_eq_mul, mul_comm]
+
     rw [this, hRc, GlobalTheory.JetPoint.jetMap_eq_sum, map_sum, map_sum]
     refine Finset.sum_congr rfl fun μ _ => ?_
     rw [Finsupp.linearCombination_single, map_smul, smul_eq_mul, smul_eq_mul, mul_comm]

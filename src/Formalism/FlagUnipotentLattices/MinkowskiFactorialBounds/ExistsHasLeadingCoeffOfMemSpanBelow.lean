@@ -1,4 +1,60 @@
-import Formalism.FlagUnipotentLattices.MemOfOrthogonalAnisotropic
+module
+
+public import Formalism.FlagUnipotentLattices.MemOfOrthogonalAnisotropic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.HermitianLatticeCounting.S6
 open scoped BigOperators
@@ -174,7 +230,7 @@ lemma level_lt_of_mem (F : FlagD H r) {x : V} {a : Fin r} {al : K} (h : F.HasLev
   exact (level_notMem F) h ((Xa_mono F) hlt hx)
 
 private theorem HermSpace_B_add_left (H : Formalism.HermitianLatticeCounting.S6.HermSpace K V) (x y z : V) : H.B (x + y) z = H.B x z + H.B y z := by
-  rw [map_add, LinearMap.add_apply]
+  rw [map_add (f := _), LinearMap.add_apply]
 
 private theorem HermSpace_B_sub_left (H : Formalism.HermitianLatticeCounting.S6.HermSpace K V) (x y z : V) : H.B (x - y) z = H.B x z - H.B y z := by
   rw [map_sub, LinearMap.sub_apply]
@@ -287,10 +343,6 @@ theorem lastVectorNotMemSup : Formalism.HermitianLatticeCounting.S6.LastVectorNo
   have h5 : H.B F.z F.z = -F.T := F.zz
   rw [e1, h4] at h5
   exact F.hT (neg_eq_zero.1 h5.symm)
-
-theorem memOfOrthogonalAnisotropic : Formalism.HermitianLatticeCounting.S6.MemOfOrthogonalAnisotropic := by
-  intro K V _ _ _ _ H r F F' hA y hy hyo
-  exact hA y hyo ((X_iso F') hy hy)
 
 private theorem HermSpace_exists_B_right_eq_linearForm {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K V] [FiniteDimensional K V]
     (H : Formalism.HermitianLatticeCounting.S6.HermSpace K V) (f : V →ₗ[K] K) : ∃ v : V, ∀ u : V, H.B u v = f u := by
@@ -719,6 +771,7 @@ lemma Dl_zeroL (F F' : FlagD H r) {j : ℕ} (hj : j ≤ r) (hD : Dl F F' j (hj.t
     exact Fintype.linearIndependent_iff.1 ((indep_le F) hj) c h0 a
   · intro u hu
     obtain ⟨d, rfl⟩ := ((mem_Xa_iff F') hj).1 hu
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun b _ => by rw [HermSpace_B_smul_right_eq_star_mul, hcb b, mul_zero]
 
@@ -1223,7 +1276,7 @@ lemma negperp_gen (σ : K →+* ℂ) (h : U →ₗ[K] U →ₗ⋆[K] K) (hσ : �
     obtain ⟨b, hb_def⟩ : ∃ b : K, b = -h z z₀ := ⟨_, rfl⟩
     have hp : a • z + b • w ∈ A := A.add_mem (A.smul_mem _ hz) (A.smul_mem _ hw)
     have hpz0 : h (a • z + b • w) z₀ = 0 := by
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
       rw [ha_def, hb_def]
       ring
     have hb : b ≠ 0 := by
@@ -1232,7 +1285,7 @@ lemma negperp_gen (σ : K →+* ℂ) (h : U →ₗ[K] U →ₗ⋆[K] K) (hσ : �
     have hpN : a • z + b • w ∉ N := by
       intro hpN
       have h1 : h (a • z + b • w) z = 0 := hN _ hpN z hz
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hwz, mul_zero,
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hwz, mul_zero,
         add_zero] at h1
       have ha : a = 0 := (mul_eq_zero.1 h1).resolve_right hzz
       apply hwN
@@ -1242,10 +1295,10 @@ lemma negperp_gen (σ : K →+* ℂ) (h : U →ₗ[K] U →ₗ⋆[K] K) (hσ : �
       exact N.smul_mem _ hpN
     have hpos := pos _ hp hpz0 hpN
     have hpp : h (a • z + b • w) (a • z + b • w) = a * star a * h z z + b * star b * h w w := by
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, map_smulₛₗ,
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, map_smulₛₗ,
         starRingEnd_apply, hwz, hwz']
       ring
-    rw [hpp, map_add, Complex.add_re, sig_norm σ hσ, sig_norm σ hσ] at hpos
+    rw [hpp, map_add (f := _), Complex.add_re, sig_norm σ hσ, sig_norm σ hσ] at hpos
     have h1 := Complex.normSq_nonneg (σ a)
     have h2 := Complex.normSq_nonneg (σ b)
     nlinarith [mul_nonneg h1 (neg_nonneg.2 hzn.le), mul_nonneg h2 (neg_nonneg.2 hneg)]
@@ -1425,7 +1478,7 @@ theorem existsNormalForm : Formalism.HermitianLatticeCounting.S6.NormalForm := b
   have hμ : ∃ μ : K, μ + star μ ≠ 0 := by
     refine ⟨F.T, fun h0 => ?_⟩
     have h1 := congrArg (fun t => (σ t).re) h0
-    simp only [map_add, hσ, map_zero, Complex.add_re, Complex.zero_re] at h1
+    simp only [map_add (f := _), hσ, map_zero, Complex.add_re, Complex.zero_re] at h1
     rw [show star (σ F.T) = (starRingEnd ℂ) (σ F.T) from rfl, Complex.conj_re] at h1
     linarith
   by_cases hm : Formalism.HermitianLatticeCounting.S6.II F F' = ⊥
@@ -1459,8 +1512,6 @@ theorem existsNormalForm : Formalism.HermitianLatticeCounting.S6.NormalForm := b
 section DetBlocks
 
 variable {R : Type} [CommRing R] {n : Type} [Fintype n] [DecidableEq n]
-
-def Esing (p : n) (s : R) : Matrix n n R := Matrix.of fun a b => if a = p ∧ b = p then s else 0
 
 end DetBlocks
 
@@ -1667,6 +1718,7 @@ lemma liftTransitive_of (hE : Formalism.HermitianLatticeCounting.S6.EichlerIsom)
   have hφ : ∀ w : W₁, (w : V) - (φ w : V) ∈ W₂ := by
     intro w
     rw [← b1.sum_repr w]
+
     simp only [φ, map_sum, map_smul, Module.Basis.constr_basis, Submodule.coe_sum, Submodule.coe_smul]
     rw [← Finset.sum_sub_distrib]
     exact Submodule.sum_mem _ fun k _ => by
